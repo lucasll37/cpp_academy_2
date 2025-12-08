@@ -1,0 +1,41 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{setspace} % Spacing between the lines.
+\usepackage{mathptmx} % Setting the font family to the Times New Roman.
+\usepackage{geometry} % Margins definition package.
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\geometry{a4paper, left=2cm, right=2cm, bottom=4cm, top=3cm} % Margins definition.
+\setstretch{1.5} % Defining the spacing to 1.5.
+\setlength{\parindent}{0pt}
+\pagestyle{fancy}
+
+\input{commands}
+
+\def\projectname{ASA$^{2}$ - Mecanismos de Integração para Execução de Modelos de Aprendizado de Máquina}
+\def\title{Visão de Produto}
+\def\companyname{Instituto de Estudos Avançados (IEAv)}
+\def\version{1.0}
+\def\datereview{08/12/2025}
+\def\documentid{}
+
+\begin{document}
+
+\input{content/cover}
+
+\newpage
+
+\input{content/revision}
+
+\newpage
+
+\renewcommand{\contentsname}{\centering\huge\textbf{Sumário}}
+\tableofcontents
+
+\newpage
+
+\input{content/vision_doc}
+
+\end{document}
