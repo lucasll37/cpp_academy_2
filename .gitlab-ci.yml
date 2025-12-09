@@ -1,0 +1,13 @@
+stages:
+  - sanity
+
+sanity_check:
+  stage: sanity
+  tags:
+    - ai-model-runtime
+  script:
+    - echo "Pipeline CI/CD inicial funcionando"
+  rules:
+    # Executa em Merge Request cujo target é main
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: always
