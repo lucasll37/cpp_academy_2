@@ -1,0 +1,66 @@
+# ======================
+# Environments
+# ======================
+
+# Virtualenv
+.venv/
+venv/
+env/
+ENV/
+
+# Environment files
+.env
+
+# ======================
+# LaTeX
+# ======================
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.run.xml
+*.xdv
+*.pdfsync
+*.upa
+*.upb
+
+# Arquivos temporários de editores
+*.tmp
+*.bak
+*.sav
+*.swp
+*~
+
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyc
+*.pyo
+*.so
+*.dll
+
+# Diretórios de ferramentas
+.eggs/
+dist/
+build/
+*.egg-info/
+
+# Configs locais IDE
+.vscode/
+.idea/
