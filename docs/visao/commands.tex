@@ -1,0 +1,28 @@
+\newcommand{\projectname}[1]{#1}
+\renewcommand{\title}[1]{#1}
+\newcommand{\companyname}[1]{#1}
+\newcommand{\version}[1]{#1}
+\newcommand{\datereview}[1]{#1}
+\newcommand{\documentid}[1]{#1}
+
+%=============== Header ===============
+\fancyhead{} % clear all header fields.
+\fancyhead[L]{
+	\centering
+	\begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
+		\hline
+		\projectname & Versão: \qquad \version \\ \hline
+		\title & Data: \quad \datereview \\ \hline
+		\multicolumn{2}{|l|}{ \documentid } \\
+		\hline
+	\end{tabular}
+}
+\setlength{\headheight}{2.5cm}
+\renewcommand{\headrulewidth}{0pt}
+
+%=============== Footer ===============
+\fancyfoot{} % clear all footer fields.
+\fancyfoot[L]{Confidencial}
+\fancyfoot[C]{$\copyright$ \companyname, \the\year}
+\fancyfoot[R]{Página \thepage}
+\renewcommand{\footrulewidth}{0pt}
