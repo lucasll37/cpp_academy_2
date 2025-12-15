@@ -4,168 +4,251 @@
 
 \section{Introdução}
 
-\textcolor{blue}{[The purpose of this document is to collect, analyze, and define high-level needs and features of the $<<$System Name$>>$. It focuses on the capabilities needed by the stakeholders and the target users, and \textbf{why} these needs exist. The details of how the $<<$System Name$>>$ fulfills these needs are detailed in the use-case and supplementary specifications.]}
-
-\textcolor{blue}{[The introduction of the \textbf{Vision} document provides an overview of the entire document. It includes the purpose and references of this \textbf{Vision} document.]}
+O propósito deste documento é coletar, analisar e definir as necessidades de alto nível e as principais \emph{features} do ASA$^{2}$/MIIA. O documento foca nas capacidades necessárias aos \emph{stakeholders} e usuários-alvo, bem como nas motivações que justificam essas necessidades. Os detalhes de como o ASA$^{2}$/MIIA atende tais necessidades são especificados em artefatos complementares, incluindo casos de uso, \emph{user stories} e documentação suplementar.
 
 \subsection{Referências}
-\textcolor{blue}{[This subsection provides a complete list of all documents referenced elsewhere in the \textbf{Vision} document. Identify each document by title, report number if applicable, date, and publishing organization. Specify the sources from which the references can be obtained. This information may be provided by reference to an appendix or to another document.]}
+
+\begin{itemize}
+    \item Documento Institucional Preliminar, ``\textbf{Ambiente de Simulação Aeroespacial Avançado -- ASA$^{2}$}'', Instituto de Estudos Avançados (IEAv), 2025.
+\end{itemize}
+
+\newpage
 
 \section{Posicionamento}
 
 \subsection{Declaração do Problema}
 
-\textcolor{blue}{[Provide a statement summarizing the problem being solved by this project. The following format may be used:]}
-
 \begin{table}[h]
     \begin{tabular}{|p{0.3\textwidth}|p{0.65\textwidth}|}
         \hline
-            The problem of & \textcolor{blue}{[describe the problem]} \\
+            \textbf{O problema de} &
+            Integrar e executar, de forma determinística e com baixa latência, agentes de decisão baseados em modelos de inteligência artificial associados a simuladores construtivos e virtuais, garantindo estabilidade, previsibilidade temporal e isolamento operacional. \\
         \hline
-            affects & \textcolor{blue}{[the stakeholders affected by the problem]} \\
+            \textbf{afeta} &
+            Engenheiros de simulação, integradores de sistemas, equipes de P\&D e operadores que dependem de agentes autônomos ou semi-autônomos capazes de atuar em ciclos de simulação de alta frequência. \\
         \hline
-            the impact of which is & \textcolor{blue}{[what is the impact of the problem?]} \\
+            \textbf{cujo impacto é} &
+            A impossibilidade de empregar agentes de IA em simulações de nível operacional; integrações frágeis, não determinísticas ou de difícil depuração; instabilidade do simulador; aumento de retrabalho e dívida técnica; e a incapacidade de validar cenários com rigor metodológico. \\
         \hline
-            a successful solution would be &  \textcolor{blue}{[list some key benefits of a successful solution]} \\
+            \textbf{uma solução bem-sucedida seria} &
+            Um mecanismo padronizado, documentado e tecnicamente validado que permita executar agentes de decisão com desempenho consistente, latência controlada, comportamento reproduzível e um processo de integração simples, rastreável e confiável. \\
         \hline
     \end{tabular}
 \end{table}
 
-\subsection{Declaração de Posicionamento do Produto}
+A solução envolve um conjunto de propriedades complementares:
 
-\textcolor{blue}{[Provide an overall statement summarizing, at the highest level, the unique position the product intends to fill in the marketplace. The following format may be used:]}
+\begin{itemize}
+
+    \item \textbf{Determinismo:} para um mesmo conjunto de observações e estado interno, o agente deve produzir exatamente a mesma ação, de forma consistente entre execuções. Isso elimina variabilidade indesejada e permite a reprodução rigorosa de cenários.
+
+    \item \textbf{Previsibilidade temporal:} o tempo necessário para que o agente processe suas entradas e gere uma ação deve permanecer dentro de limites bem definidos. A simulação depende de ciclos estáveis; qualquer variação temporal pode comprometer a integridade do ambiente virtual.
+
+    \item \textbf{Baixa latência:} a inferência deve ser suficientemente rápida para não atrasar o avanço do simulador. Em simulações de alta frequência, atrasos acumulados inviabilizam a operação.
+
+    \item \textbf{Isolamento operacional:} falhas, exceções ou comportamentos inesperados do agente não podem comprometer o simulador. A solução deve permitir detectar, conter e registrar falhas sem interromper a execução global.
+
+    \item \textbf{Reprodutibilidade:} o comportamento observado de um agente deve poder ser repetido em diferentes execuções, máquinas ou versões do ambiente, desde que os mesmos artefatos (modelo, parâmetros e \emph{seeds}) sejam utilizados.
+
+    \item \textbf{Rastreabilidade e verificação:} cada agente deve possuir metadados claros (versão, origem, parâmetros e dependências). A execução deve permitir inspeção, instrumentação e validação contínua, facilitando a depuração e a avaliação metodológica.
+
+\end{itemize}
+
+Em conjunto, essas propriedades permitem a utilização confiável de agentes de IA em cenários operacionais, experimentais e de validação, preservando a integridade temporal e operacional do ciclo de simulação.
+
+\subsection{Declaração de Posicionamento do Produto}
 
 \begin{table}[h]
     \begin{tabular}{|p{0.2\textwidth}|p{0.75\textwidth}|}
         \hline
-            For of & \textcolor{blue}{[target customer]} \\
+            \textbf{Para} &
+            Engenheiros de simulação, integradores de sistemas e equipes de P\&D que precisam empregar agentes de inteligência artificial em simuladores construtivos e virtuais. \\
         \hline
-            Who & \textcolor{blue}{[statement of the need or opportunity]} \\
+            \textbf{Que} &
+            Enfrentam limitações técnicas ao integrar agentes treinados em ambientes externos ao simulador, como latência imprevisível, falta de determinismo, acoplamento excessivo e dificuldades de validação e manutenção. \\
         \hline
-            The (product name) & \textcolor{blue}{is a [product category]} \\
+            \textbf{O ASA$^{2}$/MIIA} &
+            É um mecanismo especializado para integração e execução de agentes de decisão baseados em IA. \\
         \hline
-            That &  \textcolor{blue}{[statement of key benefit; that is, the compelling reason to buy]} \\
+            \textbf{Que} &
+            Permite que esses agentes sejam implantados e executados de forma eficiente, determinística, com baixa latência e reprodutibilidade garantida dentro do ciclo de simulação. \\
         \hline
-            Unlike &  \textcolor{blue}{[primary competitive alternative]} \\
+            \textbf{Diferentemente de} &
+            Servidores genéricos de inferência, arquiteturas distribuídas ou integrações \emph{ad-hoc} frágeis e não reprodutíveis. \\
         \hline
-            Our product &  \textcolor{blue}{[statement of primary differentiation]} \\
+            \textbf{Nosso produto} &
+            Foca especificamente no domínio de simulação construtiva e virtual, priorizando desempenho temporal, estabilidade operacional, previsibilidade do agente, rastreabilidade do modelo e baixo acoplamento com o simulador. \\
         \hline
     \end{tabular}
 \end{table}
 
-\textcolor{blue}{[A product position statement communicates the intent of the application and the importance of the project to all concerned personnel.]}
+\subsection{Limites e Não-Objetivos do Produto}
 
-\section{Descrição dos Stakeholders e Usuários}
+O ASA\textsuperscript{2}/MIIA tem como objetivo fornecer mecanismos controlados e previsíveis para a integração e execução de agentes de IA em simuladores construtivos e virtuais. No entanto, este produto não se propõe a:
 
-\textcolor{blue}{[To effectively provide products and services that meet your stakeholders' and users' real needs it is necessary to identify and involve all of the stakeholders as part of the Requirements Modeling process. You must also identify the users of the system and ensure that the stakeholder community adequately represents them. This section provides a profile of the stakeholders and users involved in the project, and the key problems that they perceive to be addressed by the proposed solution. It does not describe their specific requests or requirements as these are captured in a separate stakeholder requests artifact. Instead, it provides the background and justification for why the requirements are needed.]}
+\begin{itemize}
+    \item Garantir determinismo absoluto independentemente de variações de hardware, compiladores, bibliotecas numéricas ou configurações de execução fora do ambiente controlado.
+    \item Substituir simuladores, motores físicos ou \emph{pipelines} de treinamento de agentes de inteligência artificial.
+    \item Corrigir deficiências intrínsecas dos modelos de IA, tais como instabilidade de políticas, vieses de treinamento ou comportamentos emergentes indesejados.
+    \item Eliminar a necessidade de validação metodológica, testes experimentais e análise crítica dos resultados produzidos pelos agentes.
+\end{itemize}
 
-\subsection{Resumo dos Stakeholders}
+Esses limites são assumidos explicitamente como parte do escopo do produto.
 
-\textcolor{blue}{[There are a number of stakeholders with an interest in the development and not all of them are end users. Present a summary list of these non-user stakeholders. (The users are summarized in section \ref{sec:user_summary})]}
+
+\section{Descrição dos \emph{Stakeholders} e Usuários}
+
+Esta seção descreve os principais \emph{stakeholders} e usuários envolvidos no projeto, bem como os problemas fundamentais percebidos no contexto atual de integração de agentes de inteligência artificial em simulações construtivas e virtuais. O objetivo é fornecer o pano de fundo e a justificativa para a definição dos requisitos do sistema.
+
+\subsection{Resumo dos \emph{Stakeholders}}
 
 \begin{table}[h]
     \begin{tabular}{| p{0.2\textwidth} | p{0.3\textwidth} | p{0.42\textwidth} |}
-        \hline \textbf{Name} & \textbf{Description} & \textbf{Responsibilities} \\ \hline
-            \textcolor{blue}{ [Name the stakeholder type.] } & \textcolor{blue}{ [Briefly describe the stakeholder.] } &
-                \textcolor{blue}{ [Summarize the stakeholder's key responsibilities with regard to the system being developed; that is, their interest as a stakeholder. For example, this stakeholder: (i) ensures that the system will be maintainable; (ii) ensures that there will be a market demand for the product's features; (iii) monitors the project's progress; (iv) approves funding; and (v) so forth] }\\
-        \hline
+        \hline Nome & Descrição & Responsabilidades \\ \hline
+        
+        \textbf{Product Owner (PO)} &
+        Responsável pela visão, prioridades e valor do produto &
+        Define prioridades, valida entregas e aprova requisitos e escopo \\ \hline
+        
+        \textbf{Pesquisador de Agentes de IA} &
+        Responsável por gerar, treinar e avaliar agentes de decisão &
+        Fornece artefatos treinados, valida comportamento e apoia decisões técnicas relacionadas às políticas \\ \hline
+        
+        \textbf{Engenheiro de Simulação} &
+        Responsável pelo simulador construtivo/virtual e por sua manutenção &
+        Garante compatibilidade, integra o mecanismo ao simulador e assegura estabilidade temporal \\ \hline
+
     \end{tabular}
 \end{table}
 
 \newpage
 
-\subsection{Resumo dos Usuários}\label{sec:user_summary}
-
-\textcolor{blue}{[Present a summary list of all identified users.]}
+\subsection{Resumo dos Usuários}
 
 \begin{table}[h]
-    \begin{tabular}{| p{0.1\textwidth} | p{0.18\textwidth} | p{0.22\textwidth} | p{0.4\textwidth} | }
-        \hline \textbf{Name} & \textbf{Description} & \textbf{Responsibilities} & \textbf{Stakeholder} \\ \hline
-        \textcolor{blue}{ [Name the user type.] } & \textcolor{blue}{ [Briefly describe what they represent with respect to the system.] } &
-            \textcolor{blue}{ [List the user's key responsibilities with regard to the system being developed; for example: (i) captures
-                details; (ii) produces reports; (iii) coordinates work; and (iv) so on] } &
-            \textcolor{blue}{ [If the user is not directly represented, identify which stakeholder is responsible for representing the user's interest.] } \\
-        \hline
+    \begin{tabular}{| p{0.2\textwidth} | p{0.2\textwidth} | p{0.3\textwidth} | p{0.2\textwidth} | }
+        \hline Nome & Descrição & Responsabilidades & \emph{Stakeholder} \\ \hline
+              
+        \textbf{Pesquisador de Agentes de IA} &
+        Treinador e analista das políticas &
+        Gera agentes, interpreta falhas e avalia comportamento e desempenho &
+        Pesquisador de Agentes de IA \\ \hline
+        
+        \textbf{Analista de Simulação} &
+        Usuário final do ambiente de simulação &
+        Executa cenários, observa os efeitos dos agentes e reporta problemas &
+        Product Owner \\ \hline
+
     \end{tabular}
 \end{table}
 
 \subsection{Ambiente de Usuário}
 
-\textcolor{blue}{ [Detail the working environment of the target user. Here are some suggestions:\\
-    Number of people involved in completing the task? Is this changing?\\
-    How long is a task cycle? Amount of time spent in each activity? Is this changing?\\
-    Any unique environmental constraints: mobile, outdoors, in-flight, and so on?\\
-    Which system platforms are in use today? Future platforms?\\
-    What other applications are in use? Does your application need to integrate with them?\\
-    This is where extracts from the Business Model could be included to outline the task and roles involved, and so on.] }
+Os usuários operam predominantemente em estações de trabalho Linux, integradas ao ambiente institucional do ASA\textsuperscript{2}.
 
-\subsection{Resumo das Principais Necessidades dos Stakeholders e Usuários}
+\subsubsection{Pesquisador de Agentes de IA}
 
-\textcolor{blue}{[List the key problems with existing solutions as perceived by the stakeholder or user. Clarify the following issues for each problem:\\
-    \begin{itemize}
-        \item What are the reasons for this problem?
-        \item How is it solved now?
-        \item What solutions does the stakeholder or user want?]
-    \end{itemize}}
+Atua no desenvolvimento e treinamento de agentes utilizando ferramentas baseadas em Python. O processo envolve a criação de ambientes de simulação para treinamento, a instrumentação de experimentos, o ajuste de hiperparâmetros e a geração de artefatos de modelo. Os agentes resultantes são exportados em formatos derivados do ecossistema PyTorch, incluindo metadados adicionais de versão e configuração.
 
-\textcolor{blue}{ [It is important to understand the \textbf{relative} importance the stakeholder or user places on solving each problem.
-    Ranking and cumulative voting techniques indicate problems that \textbf{must} be solved versus issues they would like addressed.\\
-    Fill in the following table --- if using Rational RequisitePro to capture the Needs, this could be an extract or report from that tool.] }
+\subsubsection{Analista de Simulação}
+
+Utiliza interfaces de análise baseadas em Python (como JupyterHub ou Jupyter Notebooks) e APIs fornecidas pelo simulador para inspeção de estados, coleta de métricas e geração de relatórios sobre cenários experimentais.
+
+\newpage
+
+\subsection{Resumo das Principais Necessidades dos \emph{Stakeholders} e Usuários}
+
+As necessidades a seguir refletem dois eixos complementares: (i) propriedades críticas de execução dos agentes no ciclo de simulação e (ii) requisitos de integração, governança técnica e manutenção do produto ao longo do tempo.
 
 \begin{table}[h]
-    \begin{tabular}{| p{0.28\textwidth} | p{0.08\textwidth} | p{0.12\textwidth} | p{0.18\textwidth} | p{0.21\textwidth} |}
-        \hline \textbf{Need} & \textbf{Priority} & \textbf{Concerns} & \textbf{Current Solution} & \textbf{Proposed Solutions} \\ \hline
-            Broadcast messages & & & & \\
+    \begin{tabular}{| p{0.20\textwidth} | p{0.12\textwidth} | p{0.15\textwidth} | p{0.18\textwidth} | p{0.21\textwidth} |}
         \hline
+        \textbf{Necessidade} & \textbf{Prioridade} & \textbf{Preocupações} & \textbf{Solução Atual} & \textbf{Soluções Propostas} \\ \hline
+        
+        Execução determinística dos agentes &
+        Alta &
+        Variabilidade temporal, efeitos estocásticos &
+        Não há &
+        Mecanismo padronizado com controle explícito de estado e temporização \\ \hline
+        
+        Previsibilidade temporal no ciclo de simulação &
+        Alta &
+        Overhead de comunicação, dependência de Python &
+        Não há &
+        Execução integrada ao ciclo do simulador, adaptada a alta frequência \\ \hline
+        
+        Reprodutibilidade entre execuções e ambientes &
+        Alta &
+        Sensibilidade a \emph{seeds} &
+        Não há &
+        \emph{Pipeline} formal de exportação, validação e inspeção de agentes \\ \hline
+        
+        Rastreabilidade e versionamento dos agentes &
+        Média &
+        Inconsistência de artefatos, perda de histórico &
+        Não há &
+        Processo padronizado de metadados, versionamento e documentação técnica \\ \hline
+        
+        Integração simples e de baixo acoplamento &
+        Média &
+        Dependências cruzadas, impacto no simulador &
+        Não há &
+        API estável, modular e independente da lógica interna do simulador \\ \hline
+        
     \end{tabular}
 \end{table}
 
 \subsection{Alternativas e Competição}
 
-\textcolor{blue}{ [Identify alternatives the stakeholder perceives as available.
-    These can include buying a competitor's product, building a homegrown solution, or simply maintaining the status quo.
-    List any known competitive choices that exist or may become available.
-    Include the major strengths and weaknesses of each competitor as perceived by the stakeholder or end user.] }
+No contexto do ASA\textsuperscript{2}, diferentes abordagens técnicas são consideradas para a integração e execução de agentes de inteligência artificial em simuladores construtivos e virtuais. Essas abordagens representam alternativas tecnológicas viáveis, mas com diferentes compromissos em termos de desempenho temporal, determinismo, acoplamento e reprodutibilidade.
 
-\section{Overview do Produto}
+As principais classes de alternativas incluem:
 
-\textcolor{blue}{ [This section provides a high level view of the product capabilities, interfaces to other applications, and system configurations. This section usually consists of two subsections, as follows:
-    \newpage
-    \begin{itemize}
-        \item Product perspective
-        \item Assumptions and dependencies]
-    \end{itemize}}
+\begin{itemize}
+    \item \textbf{Runtimes interoperáveis de inferência} (ex.: ONNX Runtime): oferecem portabilidade entre modelos e ferramentas de treinamento, além de bom desempenho em inferência. Entretanto, carecem de mecanismos específicos para controle de estado, sincronização temporal e rastreabilidade no contexto de simulação construtiva, exigindo adaptações adicionais para garantir determinismo e previsibilidade operacional.
+
+    \item \textbf{Runtimes nativos de inferência} (ex.: Libtorch, TensorFlow C++ API): permitem integração direta em aplicações C++ com menor overhead e maior controle do ciclo de execução. Apesar do desempenho favorável, essas abordagens tendem a introduzir forte acoplamento com frameworks específicos, além de maior complexidade de manutenção e validação ao longo do tempo.
+
+    \item \textbf{Execução remota de agentes} (ex.: REST ou gRPC): proporciona flexibilidade arquitetural e isolamento de processos, facilitando a reutilização de agentes treinados externamente. Contudo, a comunicação remota introduz latência adicional, variabilidade temporal e dependência de infraestrutura de rede, tornando essa abordagem inadequada para ciclos de simulação de alta frequência que exigem previsibilidade rigorosa.
+
+    \item \textbf{\emph{Embedding} de Python em aplicações C++}: possibilita acesso direto a modelos e ecossistemas de treinamento amplamente utilizados. No entanto, essa estratégia apresenta elevado acoplamento, dificuldades de depuração, e riscos à estabilidade e à manutenção do simulador.
+\end{itemize}
+
+Embora cada uma dessas alternativas apresente vantagens em contextos específicos, nenhuma atende simultaneamente aos requisitos de determinismo, previsibilidade temporal, baixa latência, reprodutibilidade e baixo acoplamento exigidos pelo ambiente de simulação construtiva e virtual do ASA\textsuperscript{2}. O ASA\textsuperscript{2}/MIIA posiciona-se como uma solução especializada que busca endereçar essas limitações de forma integrada e alinhada ao domínio de simulação.
+
+\section{\emph{Overview} do Produto}
 
 \subsection{Perspectiva do Produto}
 
-\textcolor{blue}{ [This subsection of the \textbf{Vision} document puts the product in perspective to other related products and the user's environment. If the product is independent and totally self-contained, state it here. If the product is a component of a larger system, then this subsection needs to relate how these systems interact and needs to identify the relevant interfaces between the systems. One easy way to display the major components of the larger system, interconnections, and external interfaces is with a block diagram.] }
+O ASA\textsuperscript{2}/MIIA é um componente de infraestrutura especializado na integração e execução de agentes de decisão em simuladores construtivos e virtuais. Ele opera diretamente no ciclo de simulação, provendo mecanismos de execução determinística, previsibilidade temporal, rastreabilidade e uma interface padronizada para agentes treinados externamente.
+
+Ele não substitui o simulador nem os \emph{pipelines} de treinamento de IA; atua como uma camada intermediária especializada, responsável por garantir propriedades críticas de execução, alinhada às diretrizes institucionais do ASA\textsuperscript{2} para integração padronizada de modelos de inteligência artificial.
 
 \subsection{Suposições e Dependências}
 
-\textcolor{blue}{ [List each factor that affects the features stated in the \textbf{Vision} document. List assumptions that, if changed, will alter the \textbf{Vision} document. For example, an assumption may state that a specific operating system will be available for the hardware designated for the software product. If the operating system is not available, the \textbf{Vision} document will need to change.] }
+\begin{itemize}
+    \item Disponibilidade de agentes treinados em PyTorch, SB3 ou ferramentas equivalentes.
+    \item Execução predominante em ambiente Linux de alto desempenho.
+    \item Requisitos operacionais de baixa latência e alta previsibilidade temporal no ciclo do simulador.
+    \item Disponibilidade de especialistas técnicos em C++, simulação e aprendizado por reforço.
+\end{itemize}
 
-\section{Features do Produto}
+\section{\emph{Features} do Produto}
 
-\textcolor{blue}{ [List and briefly describe the product features. Features are the high-level capabilities of the system that are necessary to deliver benefits to the users.
-    Each feature is an externally desired service that typically requires a series of inputs to achieve the desired result.
-    For example, a feature of a problem tracking system might be the ability to provide trending reports.
-    As the use-case model takes shape, update the description to refer to the use cases.\\
-    Because the \textbf{Vision} document is reviewed by a wide variety of involved personnel, the level of detail needs to be general enough for everyone to understand. However, enough detail must be available to provide the team with the information they need to create a use-case model.\\
-    To effectively manage application complexity, we recommend for any new system, or an increment to an existing system, capabilities be abstracted to a high enough level so 25-99 features result. These features provide the fundamental basis for product definition, scope management, and project management. Each feature will be expanded in greater detail in the use-case model.\\
-    Throughout this section, each feature will be externally perceivable by users, operators, or other external systems.
-    These features should include a description of functionality and any relevant usability issues that must be addressed.
-    The following guidelines apply:
-    \begin{itemize}
-        \item Avoid design. Keep feature descriptions at a general level. Focus on capabilities needed and why (not how) they should be implemented.
-        \item If you are using the Rational RequisitePro toolkit, all need to be selected as requirements of type for easy reference and tracking.]
-    \end{itemize}}
-
-\textcolor{blue}{[Define the priority of the different system features. Include, if useful, attributes such as stability, benefit, effort, and risk.]}
+\begin{itemize}
+    \item Execução determinística de agentes de decisão integrados ao simulador.
+    \item Suporte a múltiplos formatos de exportação de políticas (ex.: PyTorch, ONNX).
+    \item Mecanismos de rastreabilidade, versionamento e metadados dos agentes.
+    \item Instrumentação e monitoramento do desempenho do agente durante a simulação.
+    \item \emph{Pipeline} de validação mínima do agente (integridade, compatibilidade e \emph{seeds}).
+\end{itemize}
 
 \section{Outros Requisitos do Produto}
 
-\textcolor{blue}{ [At a high level, list applicable standards, hardware, or platform requirements; performance requirements; and environmental requirements.\\
-    Define the quality ranges for performance, robustness, fault tolerance, usability, and similar characteristics that are not captured in the Feature Set.\\
-    Note any design constraints, external constraints, or other dependencies.\\
-    Define any specific documentation requirements, including user manuals, online help, installation, labeling, and packaging requirements.\\
-    Define the priority of these other product requirements. Include, if useful, attributes such as stability, benefit, effort, and risk.] }
+\begin{itemize}
+    \item Latência compatível com ciclos de simulação de alta frequência.
+    \item Robustez contra falhas no carregamento, inicialização ou execução de agentes.
+    \item API C++ simples, estável e de baixo acoplamento com o simulador.
+    \item Documentação técnica cobrindo integração, operação, validação e \emph{troubleshooting}.
+    \item Garantias de segurança como requisito estrutural do produto, incluindo mecanismos para prevenir, detectar e conter a execução de agentes maliciosos ou não conformes no contexto da simulação.
+\end{itemize}
