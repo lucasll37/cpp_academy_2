@@ -1,13 +1,20 @@
 stages:
   - sanity
 
-sanity_check:
+sanity_merge_request:
   stage: sanity
   tags:
-    - ai-model-runtime
+    - asa2-miia
   script:
-    - echo "Pipeline CI/CD inicial funcionando"
+    - echo "Sanity check (Merge Request)"
   rules:
-    # Executa em Merge Request cujo target é main
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-      when: always
+
+sanity_main:
+  stage: sanity
+  tags:
+    - asa2-miia
+  script:
+    - echo "Sanity check (main)"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

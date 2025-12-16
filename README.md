@@ -1,3 +1,7 @@
+[![pipeline status](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
+[![coverage report](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
+[![Latest Release](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/badges/release.svg)](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/releases)
+
 # AI Model Runtime
 
 Repositório oficial do projeto **AI Model Runtime**, organizado segundo as diretrizes internas do ASA e integrado ao fluxo de desenvolvimento GitLab + Nextcloud.
