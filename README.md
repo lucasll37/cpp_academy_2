@@ -1,5 +1,5 @@
-[![pipeline status](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg)](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/commits/main)
-[![coverage report](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg)](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/commits/main)
+[![pipeline status](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
+[![coverage report](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
 [![Latest Release](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/badges/release.svg)](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/releases)
 
 # AI Model Runtime
