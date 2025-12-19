@@ -4,7 +4,7 @@
 
 \section{Introdução}
 
-O propósito deste documento é coletar, analisar e definir as necessidades de alto nível e as principais \emph{features} do ASA$^{2}$/MIIA. O documento foca nas capacidades necessárias aos \emph{stakeholders} e usuários-alvo, bem como nas motivações que justificam essas necessidades. Os detalhes de como o ASA$^{2}$/MIIA atende tais necessidades são especificados em artefatos complementares, incluindo casos de uso, \emph{user stories} e documentação suplementar.
+O propósito deste documento é coletar, analisar e definir as necessidades de alto nível e as principais \emph{features} do ASA\textsuperscript{2}/MIIA. O documento foca nas capacidades necessárias aos \emph{stakeholders} e usuários-alvo para viabilizar a interoperabilidade entre modelos de inteligência artificial (IA) treinados externamente e agentes autônomos executados em simuladores construtivos, com ênfase em cenários nos quais o simulador construtivo está integrado a ambientes de simulação virtual. Os detalhes de como o ASA\textsuperscript{2}/MIIA atende essas necessidades são especificados em artefatos complementares, incluindo casos de uso, \emph{user stories} e documentação suplementar.
 
 \subsection{Referências}
 
@@ -22,16 +22,16 @@ O propósito deste documento é coletar, analisar e definir as necessidades de a
     \begin{tabular}{|p{0.3\textwidth}|p{0.65\textwidth}|}
         \hline
             \textbf{O problema de} &
-            Integrar e executar, de forma determinística e com baixa latência, agentes de decisão baseados em modelos de inteligência artificial associados a simuladores construtivos e virtuais, garantindo estabilidade, previsibilidade temporal e isolamento operacional. \\
+            Viabilizar a interoperabilidade, de forma controlada e determinística, entre modelos de inteligência artificial treinados externamente e agentes autônomos executados em simuladores construtivos, mantendo baixa latência, previsibilidade temporal e isolamento operacional, inclusive em ambientes nos quais o simulador construtivo está integrado à simulação virtual. \\
         \hline
             \textbf{afeta} &
-            Engenheiros de simulação, integradores de sistemas, equipes de P\&D e operadores que dependem de agentes autônomos ou semi-autônomos capazes de atuar em ciclos de simulação de alta frequência. \\
+            Engenheiros de simulação, integradores de sistemas, equipes de P\&D e operadores que dependem de agentes autônomos ou semi-autônomos capazes de atuar em ciclos de simulação. \\
         \hline
             \textbf{cujo impacto é} &
-            A impossibilidade de empregar agentes de IA em simulações de nível operacional; integrações frágeis, não determinísticas ou de difícil depuração; instabilidade do simulador; aumento de retrabalho e dívida técnica; e a incapacidade de validar cenários com rigor metodológico. \\
+            A impossibilidade de empregar modelos de IA associados a agentes em simulações de nível operacional; acoplamentos frágeis, não determinísticos ou de difícil depuração; instabilidade do simulador; aumento de retrabalho e dívida técnica; e a incapacidade de validar cenários com rigor metodológico. \\
         \hline
             \textbf{uma solução bem-sucedida seria} &
-            Um mecanismo padronizado, documentado e tecnicamente validado que permita executar agentes de decisão com desempenho consistente, latência controlada, comportamento reproduzível e um processo de integração simples, rastreável e confiável. \\
+            Um mecanismo padronizado, documentado e tecnicamente validado que viabilize a interoperabilidade entre diferentes modelos de IA e agentes autônomos, assegurando desempenho consistente, latência controlada, comportamento reproduzível e um processo rastreável e confiável de incorporação de modelos. \\
         \hline
     \end{tabular}
 \end{table}
@@ -40,21 +40,21 @@ A solução envolve um conjunto de propriedades complementares:
 
 \begin{itemize}
 
-    \item \textbf{Determinismo:} para um mesmo conjunto de observações e estado interno, o agente deve produzir exatamente a mesma ação, de forma consistente entre execuções. Isso elimina variabilidade indesejada e permite a reprodução rigorosa de cenários.
+    \item \textbf{Determinismo:} para um mesmo conjunto de observações e estado interno, o modelo deve produzir exatamente as mesmas saídas, de forma consistente entre execuções. Isso elimina variabilidade indesejada e permite a reprodução rigorosa de cenários quando essas saídas são utilizadas pelos agentes.
 
-    \item \textbf{Previsibilidade temporal:} o tempo necessário para que o agente processe suas entradas e gere uma ação deve permanecer dentro de limites bem definidos. A simulação depende de ciclos estáveis; qualquer variação temporal pode comprometer a integridade do ambiente virtual.
+    \item \textbf{Previsibilidade temporal:} o tempo necessário para que o modelo processe suas entradas e gere suas saídas deve permanecer dentro de limites bem definidos. A simulação depende de ciclos estáveis; qualquer variação temporal pode comprometer a execução do agente no ciclo do simulador.
 
-    \item \textbf{Baixa latência:} a inferência deve ser suficientemente rápida para não atrasar o avanço do simulador. Em simulações de alta frequência, atrasos acumulados inviabilizam a operação.
+    \item \textbf{Baixa latência:} a inferência do modelo deve ser suficientemente rápida para não atrasar o avanço do simulador. Em simulações de alta frequência, atrasos acumulados inviabilizam a operação dos agentes.
 
-    \item \textbf{Isolamento operacional:} falhas, exceções ou comportamentos inesperados do agente não podem comprometer o simulador. A solução deve permitir detectar, conter e registrar falhas sem interromper a execução global.
+    \item \textbf{Isolamento operacional:} falhas, exceções ou comportamentos inesperados do modelo não podem comprometer o simulador nem os agentes em execução. A solução deve permitir detectar, conter e registrar falhas associadas aos modelos.
 
-    \item \textbf{Reprodutibilidade:} o comportamento observado de um agente deve poder ser repetido em diferentes execuções, máquinas ou versões do ambiente, desde que os mesmos artefatos (modelo, parâmetros e \emph{seeds}) sejam utilizados.
+    \item \textbf{Reprodutibilidade:} as saídas produzidas por um modelo devem poder ser repetidas em diferentes execuções, máquinas ou versões do ambiente, desde que os mesmos artefatos (parâmetros e \emph{seeds}) sejam utilizados.
 
-    \item \textbf{Rastreabilidade e verificação:} cada agente deve possuir metadados claros (versão, origem, parâmetros e dependências). A execução deve permitir inspeção, instrumentação e validação contínua, facilitando a depuração e a avaliação metodológica.
+    \item \textbf{Rastreabilidade e verificação:} cada modelo deve possuir metadados claros (versão, origem, parâmetros e dependências). A execução deve permitir inspeção, instrumentação e validação contínua das inferências, facilitando a depuração e a avaliação metodológica.
 
 \end{itemize}
 
-Em conjunto, essas propriedades permitem a utilização confiável de agentes de IA em cenários operacionais, experimentais e de validação, preservando a integridade temporal e operacional do ciclo de simulação.
+Em conjunto, essas propriedades viabilizam a interoperabilidade controlada entre modelos de IA e agentes autônomos no ciclo de simulação.
 
 \subsection{Declaração de Posicionamento do Produto}
 
@@ -62,82 +62,72 @@ Em conjunto, essas propriedades permitem a utilização confiável de agentes de
     \begin{tabular}{|p{0.2\textwidth}|p{0.75\textwidth}|}
         \hline
             \textbf{Para} &
-            Engenheiros de simulação, integradores de sistemas e equipes de P\&D que precisam empregar agentes de inteligência artificial em simuladores construtivos e virtuais. \\
+            Engenheiros de simulação, integradores de sistemas, equipes de P\&D e operadores que dependem de agentes autônomos ou semi-autônomos capazes de atuar de forma estável e previsível em ciclos de simulação. \\
         \hline
             \textbf{Que} &
-            Enfrentam limitações técnicas ao integrar agentes treinados em ambientes externos ao simulador, como latência imprevisível, falta de determinismo, acoplamento excessivo e dificuldades de validação e manutenção. \\
+            Enfrentam dificuldades técnicas ao empregar diferentes modelos de IA treinados externamente em agentes já implementados no simulador construtivo, resultando em acoplamento excessivo, dificuldades de validação e elevado custo de manutenção. \\
         \hline
             \textbf{O ASA$^{2}$/MIIA} &
-            É um mecanismo especializado para integração e execução de agentes de decisão baseados em IA. \\
+            É um mecanismo especializado de interoperabilidade entre modelos de IA e agentes autônomos executados em simuladores construtivos. \\
         \hline
             \textbf{Que} &
-            Permite que esses agentes sejam implantados e executados de forma eficiente, determinística, com baixa latência e reprodutibilidade garantida dentro do ciclo de simulação. \\
+            Viabiliza a interoperabilidade controlada entre modelos de IA e agentes autônomos, assegurando determinismo, baixa latência, reprodutibilidade e isolamento operacional no ciclo de simulação. \\
         \hline
             \textbf{Diferentemente de} &
-            Servidores genéricos de inferência, arquiteturas distribuídas ou integrações \emph{ad-hoc} frágeis e não reprodutíveis. \\
+            Servidores genéricos de inferência, arquiteturas distribuídas de propósito geral ou soluções \emph{ad-hoc} que introduzem forte acoplamento com a lógica do simulador e variabilidade indesejada no ciclo de execução. \\
         \hline
             \textbf{Nosso produto} &
-            Foca especificamente no domínio de simulação construtiva e virtual, priorizando desempenho temporal, estabilidade operacional, previsibilidade do agente, rastreabilidade do modelo e baixo acoplamento com o simulador. \\
+           Prioriza desempenho temporal, estabilidade operacional, previsibilidade do comportamento dos agentes, rastreabilidade dos modelos e baixo acoplamento. \\
         \hline
     \end{tabular}
 \end{table}
 
 \subsection{Limites e Não-Objetivos do Produto}
 
-O ASA\textsuperscript{2}/MIIA tem como objetivo fornecer mecanismos controlados e previsíveis para a integração e execução de agentes de IA em simuladores construtivos e virtuais. No entanto, este produto não se propõe a:
+O ASA\textsuperscript{2}/MIIA não se propõe a:
 
 \begin{itemize}
-    \item Garantir determinismo absoluto independentemente de variações de hardware, compiladores, bibliotecas numéricas ou configurações de execução fora do ambiente controlado.
-    \item Substituir simuladores, motores físicos ou \emph{pipelines} de treinamento de agentes de inteligência artificial.
+    \item Integrar-se diretamente a simuladores virtuais ou substituir mecanismos de acoplamento entre simuladores construtivos e ambientes de simulação virtual, atuando exclusivamente no contexto do simulador construtivo.
+    \item Garantir determinismo absoluto independentemente de variações de \emph{hardware}, compiladores, bibliotecas numéricas ou configurações de execução fora de um ambiente controlado.
+    \item Substituir simuladores, motores físicos ou \emph{pipelines} de treinamento de agentes de IA.
     \item Corrigir deficiências intrínsecas dos modelos de IA, tais como instabilidade de políticas, vieses de treinamento ou comportamentos emergentes indesejados.
-    \item Eliminar a necessidade de validação metodológica, testes experimentais e análise crítica dos resultados produzidos pelos agentes.
+    \item Eliminar a necessidade de validação metodológica, testes experimentais e análise crítica dos resultados produzidos pelos modelos e agentes.
 \end{itemize}
 
 Esses limites são assumidos explicitamente como parte do escopo do produto.
 
-
 \section{Descrição dos \emph{Stakeholders} e Usuários}
 
-Esta seção descreve os principais \emph{stakeholders} e usuários envolvidos no projeto, bem como os problemas fundamentais percebidos no contexto atual de integração de agentes de inteligência artificial em simulações construtivas e virtuais. O objetivo é fornecer o pano de fundo e a justificativa para a definição dos requisitos do sistema.
+Esta seção descreve os principais \emph{stakeholders} e usuários envolvidos no projeto, bem como os problemas fundamentais percebidos no contexto atual da utilização de modelos de inteligência artificial por agentes autônomos em simuladores construtivos. O objetivo é fornecer o pano de fundo e a justificativa para a definição dos requisitos do sistema.
+
+\newpage
 
 \subsection{Resumo dos \emph{Stakeholders}}
 
 \begin{table}[h]
-    \begin{tabular}{| p{0.2\textwidth} | p{0.3\textwidth} | p{0.42\textwidth} |}
+    \begin{tabular}{| p{0.25\textwidth} | p{0.35\textwidth} | p{0.35\textwidth} |}
         \hline Nome & Descrição & Responsabilidades \\ \hline
         
         \textbf{Product Owner (PO)} &
         Responsável pela visão, prioridades e valor do produto &
-        Define prioridades, valida entregas e aprova requisitos e escopo \\ \hline
+        Define prioridades, valida entregas, aprova requisitos e delimita o escopo do produto \\ \hline
         
-        \textbf{Pesquisador de Agentes de IA} &
-        Responsável por gerar, treinar e avaliar agentes de decisão &
-        Fornece artefatos treinados, valida comportamento e apoia decisões técnicas relacionadas às políticas \\ \hline
-        
-        \textbf{Engenheiro de Simulação} &
-        Responsável pelo simulador construtivo/virtual e por sua manutenção &
-        Garante compatibilidade, integra o mecanismo ao simulador e assegura estabilidade temporal \\ \hline
+        \textbf{Pesquisador de Modelos de IA} &
+        Responsável pelo desenvolvimento, treinamento e avaliação dos modelos de inteligência artificial &
+        Fornece modelos treinados, documenta limitações, valida resultados e orienta decisões técnicas relacionadas às políticas de decisão \\ \hline
 
     \end{tabular}
 \end{table}
 
-\newpage
-
 \subsection{Resumo dos Usuários}
 
 \begin{table}[h]
-    \begin{tabular}{| p{0.2\textwidth} | p{0.2\textwidth} | p{0.3\textwidth} | p{0.2\textwidth} | }
-        \hline Nome & Descrição & Responsabilidades & \emph{Stakeholder} \\ \hline
+    \begin{tabular}{| p{0.30\textwidth} | p{0.30\textwidth} | p{0.30\textwidth} |}
+        \hline Nome & Descrição & Responsabilidades \\ \hline
               
-        \textbf{Pesquisador de Agentes de IA} &
-        Treinador e analista das políticas &
-        Gera agentes, interpreta falhas e avalia comportamento e desempenho &
-        Pesquisador de Agentes de IA \\ \hline
-        
-        \textbf{Analista de Simulação} &
-        Usuário final do ambiente de simulação &
-        Executa cenários, observa os efeitos dos agentes e reporta problemas &
-        Product Owner \\ \hline
+        \textbf{Engenheiro de Simulação} &
+        Responsável pela configuração e manutenção do simulador construtivo &
+        Utiliza o ASA\textsuperscript{2}/MIIA para estabelecer e manter a interoperabilidade entre modelos de IA e agentes autônomos, assegurando compatibilidade, estabilidade temporal e correto funcionamento no ciclo de simulação \\ \hline
 
     \end{tabular}
 \end{table}
@@ -146,109 +136,105 @@ Esta seção descreve os principais \emph{stakeholders} e usuários envolvidos n
 
 Os usuários operam predominantemente em estações de trabalho Linux, integradas ao ambiente institucional do ASA\textsuperscript{2}.
 
-\subsubsection{Pesquisador de Agentes de IA}
+\subsubsection{Engenheiro de Simulação}
 
-Atua no desenvolvimento e treinamento de agentes utilizando ferramentas baseadas em Python. O processo envolve a criação de ambientes de simulação para treinamento, a instrumentação de experimentos, o ajuste de hiperparâmetros e a geração de artefatos de modelo. Os agentes resultantes são exportados em formatos derivados do ecossistema PyTorch, incluindo metadados adicionais de versão e configuração.
-
-\subsubsection{Analista de Simulação}
-
-Utiliza interfaces de análise baseadas em Python (como JupyterHub ou Jupyter Notebooks) e APIs fornecidas pelo simulador para inspeção de estados, coleta de métricas e geração de relatórios sobre cenários experimentais.
-
-\newpage
+O Engenheiro de Simulação atua na configuração, operação e manutenção do simulador construtivo, sendo o principal usuário do ASA\textsuperscript{2}/MIIA. Suas atividades incluem a incorporação e substituição de modelos de inteligência artificial utilizados pelos agentes autônomos, a configuração de parâmetros de execução e a verificação do correto funcionamento do mecanismo no ciclo de simulação.
 
 \subsection{Resumo das Principais Necessidades dos \emph{Stakeholders} e Usuários}
 
-As necessidades a seguir refletem dois eixos complementares: (i) propriedades críticas de execução dos agentes no ciclo de simulação e (ii) requisitos de integração, governança técnica e manutenção do produto ao longo do tempo.
+As necessidades a seguir refletem dois eixos complementares: (i) propriedades críticas de execução dos agentes no ciclo de simulação e (ii) requisitos de interoperabilidade, governança técnica e manutenção do produto ao longo do tempo.
 
 \begin{table}[h]
-    \begin{tabular}{| p{0.20\textwidth} | p{0.12\textwidth} | p{0.15\textwidth} | p{0.18\textwidth} | p{0.21\textwidth} |}
+    \begin{tabular}{| p{0.22\textwidth} | p{0.12\textwidth} | p{0.17\textwidth} | p{0.18\textwidth} | p{0.21\textwidth} |}
         \hline
         \textbf{Necessidade} & \textbf{Prioridade} & \textbf{Preocupações} & \textbf{Solução Atual} & \textbf{Soluções Propostas} \\ \hline
         
-        Execução determinística dos agentes &
+        Execução determinística dos agentes no ciclo de simulação &
         Alta &
-        Variabilidade temporal, efeitos estocásticos &
+        Variabilidade temporal, efeitos estocásticos dos modelos &
         Não há &
-        Mecanismo padronizado com controle explícito de estado e temporização \\ \hline
+        Mecanismo padronizado para execução controlada de modelos com gestão explícita de estado e temporização \\ \hline
         
-        Previsibilidade temporal no ciclo de simulação &
+        Interoperabilidade simples e de baixo acoplamento entre modelos de IA e agentes &
         Alta &
-        Overhead de comunicação, dependência de Python &
+        Dependências cruzadas, impacto no simulador &
         Não há &
-        Execução integrada ao ciclo do simulador, adaptada a alta frequência \\ \hline
+        Interfaces estáveis e bem definidas entre modelos externos e agentes no simulador construtivo \\ \hline
         
         Reprodutibilidade entre execuções e ambientes &
         Alta &
-        Sensibilidade a \emph{seeds} &
+        Sensibilidade a \emph{seeds} e dependências de execução &
         Não há &
-        \emph{Pipeline} formal de exportação, validação e inspeção de agentes \\ \hline
+        \emph{Pipeline} formal de exportação, validação e inspeção de modelos de IA \\ \hline
         
-        Rastreabilidade e versionamento dos agentes &
+        Rastreabilidade e versionamento dos modelos &
         Média &
         Inconsistência de artefatos, perda de histórico &
         Não há &
-        Processo padronizado de metadados, versionamento e documentação técnica \\ \hline
-        
-        Integração simples e de baixo acoplamento &
+        Processo padronizado de metadados, versionamento e documentação técnica dos modelos \\ \hline
+
+        Previsibilidade temporal no ciclo de simulação &
         Média &
-        Dependências cruzadas, impacto no simulador &
+        Overhead de inferência e impacto perceptível na interação humana em cenários de simulação virtual &
         Não há &
-        API estável, modular e independente da lógica interna do simulador \\ \hline
+        Execução sincronizada ao ciclo do simulador, compatível com simulações de alta frequência \\ \hline
         
     \end{tabular}
 \end{table}
 
 \subsection{Alternativas e Competição}
 
-No contexto do ASA\textsuperscript{2}, diferentes abordagens técnicas são consideradas para a integração e execução de agentes de inteligência artificial em simuladores construtivos e virtuais. Essas abordagens representam alternativas tecnológicas viáveis, mas com diferentes compromissos em termos de desempenho temporal, determinismo, acoplamento e reprodutibilidade.
+No contexto do ASA\textsuperscript{2}, diferentes abordagens técnicas podem ser consideradas para viabilizar a interoperabilidade entre modelos de inteligência artificial e agentes autônomos no ciclo de simulação construtiva, incluindo cenários nos quais o simulador construtivo encontra-se integrado a ambientes de simulação virtual. Essas abordagens representam alternativas tecnológicas viáveis, porém com diferentes compromissos em termos de desempenho temporal, determinismo, acoplamento e reprodutibilidade.
 
 As principais classes de alternativas incluem:
 
 \begin{itemize}
     \item \textbf{Runtimes interoperáveis de inferência} (ex.: ONNX Runtime): oferecem portabilidade entre modelos e ferramentas de treinamento, além de bom desempenho em inferência. Entretanto, carecem de mecanismos específicos para controle de estado, sincronização temporal e rastreabilidade no contexto de simulação construtiva, exigindo adaptações adicionais para garantir determinismo e previsibilidade operacional.
 
-    \item \textbf{Runtimes nativos de inferência} (ex.: Libtorch, TensorFlow C++ API): permitem integração direta em aplicações C++ com menor overhead e maior controle do ciclo de execução. Apesar do desempenho favorável, essas abordagens tendem a introduzir forte acoplamento com frameworks específicos, além de maior complexidade de manutenção e validação ao longo do tempo.
+    \item \textbf{Runtimes nativos de inferência} (ex.: Libtorch, TensorFlow C++ API): permitem incorporação direta em aplicações C++ com menor \emph{overhead} e maior controle do ciclo de execução. Apesar do desempenho favorável, essas abordagens tendem a introduzir forte acoplamento com \emph{frameworks} específicos, além de maior complexidade de manutenção e validação ao longo do tempo.
 
-    \item \textbf{Execução remota de agentes} (ex.: REST ou gRPC): proporciona flexibilidade arquitetural e isolamento de processos, facilitando a reutilização de agentes treinados externamente. Contudo, a comunicação remota introduz latência adicional, variabilidade temporal e dependência de infraestrutura de rede, tornando essa abordagem inadequada para ciclos de simulação de alta frequência que exigem previsibilidade rigorosa.
+    \item \textbf{Execução remota de inferência} (ex.: REST ou gRPC): proporciona flexibilidade arquitetural e isolamento de processos, facilitando a reutilização de modelos treinados externamente. Contudo, a comunicação remota introduz latência adicional, variabilidade temporal e dependência de infraestrutura de rede, tornando essa abordagem inadequada para ciclos de simulação de alta frequência que exigem previsibilidade rigorosa.
 
-    \item \textbf{\emph{Embedding} de Python em aplicações C++}: possibilita acesso direto a modelos e ecossistemas de treinamento amplamente utilizados. No entanto, essa estratégia apresenta elevado acoplamento, dificuldades de depuração, e riscos à estabilidade e à manutenção do simulador.
+    \item \textbf{\emph{Embedding} de Python em aplicações C++}: possibilita acesso direto a modelos e ecossistemas de treinamento amplamente utilizados. No entanto, essa estratégia apresenta elevado acoplamento, dificuldades de depuração e riscos à estabilidade e à manutenção do simulador.
 \end{itemize}
 
-Embora cada uma dessas alternativas apresente vantagens em contextos específicos, nenhuma atende simultaneamente aos requisitos de determinismo, previsibilidade temporal, baixa latência, reprodutibilidade e baixo acoplamento exigidos pelo ambiente de simulação construtiva e virtual do ASA\textsuperscript{2}. O ASA\textsuperscript{2}/MIIA posiciona-se como uma solução especializada que busca endereçar essas limitações de forma integrada e alinhada ao domínio de simulação.
+Embora cada uma dessas alternativas apresente vantagens em contextos específicos, nenhuma atende simultaneamente aos requisitos de determinismo, previsibilidade temporal, baixa latência, reprodutibilidade e baixo acoplamento exigidos pelo ambiente de simulação construtiva do ASA\textsuperscript{2}. O ASA\textsuperscript{2}/MIIA posiciona-se como uma solução especializada que busca endereçar essas limitações de forma coerente com o domínio de simulação construtiva.
 
 \section{\emph{Overview} do Produto}
 
 \subsection{Perspectiva do Produto}
 
-O ASA\textsuperscript{2}/MIIA é um componente de infraestrutura especializado na integração e execução de agentes de decisão em simuladores construtivos e virtuais. Ele opera diretamente no ciclo de simulação, provendo mecanismos de execução determinística, previsibilidade temporal, rastreabilidade e uma interface padronizada para agentes treinados externamente.
+O ASA\textsuperscript{2}/MIIA é um componente de infraestrutura especializado em prover interoperabilidade entre modelos de inteligência artificial e agentes autônomos executados em simuladores construtivos. Ele opera diretamente no ciclo de simulação, assegurando determinismo, previsibilidade temporal, rastreabilidade e uma interface padronizada entre modelos externos e agentes internos ao simulador.
 
-Ele não substitui o simulador nem os \emph{pipelines} de treinamento de IA; atua como uma camada intermediária especializada, responsável por garantir propriedades críticas de execução, alinhada às diretrizes institucionais do ASA\textsuperscript{2} para integração padronizada de modelos de inteligência artificial.
+O ASA\textsuperscript{2}/MIIA não substitui o simulador nem os \emph{pipelines} de treinamento de IA; atua como uma camada especializada responsável por garantir propriedades críticas de execução, alinhada às diretrizes institucionais do ASA\textsuperscript{2} para interoperabilidade padronizada de modelos de IA.
+
+No contexto do ASA\textsuperscript{2}, esses mecanismos são empregados prioritariamente em ambientes nos quais o simulador construtivo encontra-se integrado a simuladores virtuais, impondo requisitos adicionais de previsibilidade temporal e estabilidade operacional.
 
 \subsection{Suposições e Dependências}
 
 \begin{itemize}
-    \item Disponibilidade de agentes treinados em PyTorch, SB3 ou ferramentas equivalentes.
+    \item Disponibilidade de modelos de IA treinados em PyTorch, SB3 ou ferramentas equivalentes.
     \item Execução predominante em ambiente Linux de alto desempenho.
-    \item Requisitos operacionais de baixa latência e alta previsibilidade temporal no ciclo do simulador.
-    \item Disponibilidade de especialistas técnicos em C++, simulação e aprendizado por reforço.
+    \item Requisitos operacionais de baixa latência e alta previsibilidade temporal no ciclo do simulador construtivo.
+    \item Disponibilidade de especialistas técnicos em C++, simulação e inteligência artificial.
 \end{itemize}
 
 \section{\emph{Features} do Produto}
 
 \begin{itemize}
-    \item Execução determinística de agentes de decisão integrados ao simulador.
-    \item Suporte a múltiplos formatos de exportação de políticas (ex.: PyTorch, ONNX).
-    \item Mecanismos de rastreabilidade, versionamento e metadados dos agentes.
-    \item Instrumentação e monitoramento do desempenho do agente durante a simulação.
-    \item \emph{Pipeline} de validação mínima do agente (integridade, compatibilidade e \emph{seeds}).
+    \item Interoperabilidade controlada entre modelos de IA e agentes autônomos no ciclo do simulador construtivo.
+    \item Suporte a múltiplos formatos de exportação de modelos (ex.: PyTorch, ONNX).
+    \item Mecanismos de rastreabilidade, versionamento e metadados dos modelos de IA.
+    \item Instrumentação e monitoramento da inferência dos modelos durante a simulação.
+    \item \emph{Pipeline} de validação mínima de modelos (integridade, compatibilidade e controle de \emph{seeds}).
 \end{itemize}
 
 \section{Outros Requisitos do Produto}
 
 \begin{itemize}
-    \item Latência compatível com ciclos de simulação de alta frequência.
-    \item Robustez contra falhas no carregamento, inicialização ou execução de agentes.
-    \item API C++ simples, estável e de baixo acoplamento com o simulador.
-    \item Documentação técnica cobrindo integração, operação, validação e \emph{troubleshooting}.
-    \item Garantias de segurança como requisito estrutural do produto, incluindo mecanismos para prevenir, detectar e conter a execução de agentes maliciosos ou não conformes no contexto da simulação.
+    \item Latência compatível com ciclos de simulação construtiva de alta frequência, incluindo cenários de simulação virtual com interação humana.
+    \item Robustez contra falhas no carregamento, inicialização ou execução de modelos de IA.
+    \item API C++ simples, estável e de baixo acoplamento com o simulador construtivo.
+    \item Documentação técnica cobrindo interoperabilidade, operação, validação e \emph{troubleshooting}.
+    \item Garantias de segurança como requisito estrutural do produto, incluindo mecanismos para prevenir, detectar e conter a execução de modelos de IA maliciosos ou não conformes no contexto da simulação.
 \end{itemize}
