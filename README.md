@@ -31,10 +31,10 @@
   </a>
 </div>
 
-<p align="center">
+<div align="center">
   <a href="#principais-features">Principais Features</a> •
   <a href="#licenca">Licença</a>
-</p>
+</div>
 
 ## Principais Features
 * Interoperabilidade controlada entre modelos de IA e agentes autônomos no ciclo do simulador construtivo.
