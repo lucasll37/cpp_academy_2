@@ -2,17 +2,11 @@
   <img src="./docs/img/asa2-miia-1019x117.png" alt="ASA2-MIIA" />
 </p>
 
-<p align="center">
-  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines">
-    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg" />
-  </a>
-  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines">
-    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg" />
-  </a>
-  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/releases">
-    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/badges/release.svg" />
-  </a>
-</p>
+<div align="center">
+  [![pipeline status](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
+  [![coverage report](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
+  [![Latest Release](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/badges/release.svg)](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/releases)
+</div>
 
 ---
 
