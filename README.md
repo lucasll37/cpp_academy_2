@@ -1,60 +1,50 @@
-[![pipeline status](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
-[![coverage report](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg)]( https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines)
-[![Latest Release](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/badges/release.svg)](https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/releases)
+<div align="center">
 
-# AI Model Runtime
+  <h1>
+    <a href="https://www.asa.dcta.mil.br">
+      <img
+        src="./docs/img/asa2-miia-1019x117.png"
+        alt="ASA2/MIIA"
+        width="800"
+      >
+    </a>
+    <br>
+    ASA2/MIIA
+  </h1>
 
-Repositório oficial do projeto **AI Model Runtime**, organizado segundo as diretrizes internas do ASA e integrado ao fluxo de desenvolvimento GitLab + Nextcloud.
+  <h4>
+    Mecanismos de Interoperabilidade entre Modelos de Inteligência Artificial e
+    Agentes Autônomos em Simuladores Construtivos.
+  </h4>
 
-Este documento apresenta a visão geral da estrutura do projeto, sua organização, regras de contribuição e funcionamento do pipeline básico de CI/CD.
+</div>
 
-## Estrutura e Padrões do Repositório
+<div align="center">
+  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines">
+    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg" alt="pipeline status">
+  </a>
+  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines">
+    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg" alt="coverage report">
+  </a>
+  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/releases">
+    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/badges/release.svg" alt="Latest Release">
+  </a>
+</div>
 
-### Estrutura no Nextcloud
+<div align="center">
+  <a href="#principais-features">Principais Features</a> •
+  <a href="#licenca">Licença</a>
+</div>
 
-Toda documentação e organização administrativa está no diretório raiz **ASA2** no Nextcloud:
-```yaml stages:
-ASA2
-│
-├── Apresentações
-│
-├── Formulários Finais para Assinar
-│
-├── Pesquisa
-│ └── Mecanismos de Integração para Execução de Modelos de Aprendizado de Máquina
-│ 	├── admin
-│ 	├── docs
-│ 	│ ├── artigos (contém artigos pesquisados durante a execução dos Cards)
-│ 	│ └── Cards (São documentos com descrição de tarefas micro para a conclusão do Scrum geral)
-│ 	├── mvp
-│ 	└── research
-│
-├── Revisões
-│
-├── Sprints
-│ 	├── 0
-│ 	└── exemplos
-│
-└── Técnico
-```
+## Principais Features
+* Interoperabilidade controlada entre modelos de IA e agentes autônomos no ciclo do simulador construtivo.
+* Suporte a múltiplos formatos de exportacão de modelos (ex.: PyTorch, ONNX).
+* Mecanismos de rastreabilidade, versionamento e metadados dos modelos de IA.
+* Instrumentacão e monitoramento da inferência dos modelos durante a simulação.
+* Pipeline de validacão mínima de modelos (integridade, compatibilidade e controle de seeds).
 
-### Estrutura Inicial do Repositório
+## Licença
 
-A estrutura base do repositório segue o padrão definido:
+Este projeto é de uso institucional restrito e protegido pela legislação brasileira de software.
 
-```yaml stages:
-ai-model-runtime/
-│
-├── artifacts
-├── build
-├── ci
-├── deploy
-├── docs
-├── examples
-├── include
-├── scripts
-├── src
-├── tests
-├── third_party
-└── tools
-```
+Consulte o arquivo [LICENSE.md](LICENSE.md) para os termos completos de uso, conforme a Lei nº 9.609/1998.
