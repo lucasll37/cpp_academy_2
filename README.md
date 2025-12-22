@@ -1,6 +1,12 @@
-<p align="center">
-  <img src="./docs/img/asa2-miia-1019x117.png" alt="ASA2-MIIA" />
-</p>
+<h1 align="center">
+  <br>
+  <a href="https://www.asa.dcta.mil.br"><img src="./docs/img/asa2-miia-1019x117.png" alt="ASA2/MIIA" width="800"></a>
+  <br>
+  ASA2/MIIA
+  <br>
+</h1>
+
+<h4 align="center">Mecanismos de Interoperabilidade entre Modelos de Inteligência Artificial e Agentes Autônomos em Simuladores Construtivos.</h4>
 
 <p align="center">
   <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines">
@@ -14,7 +20,7 @@
   </a>
 </p>
 
----
+
 
 # AI Model Runtime
 
