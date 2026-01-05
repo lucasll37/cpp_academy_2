@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bvr_air_combat_model"
+version = "0.1.0"
+description = "Uma ferramenta de linha de comando para carregar modelos SB3 PPO"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "stable-baselines3",
+    "torch",
+]
+
+[project.scripts]
+# Cria o comando 'bvr_air_combat_model' no terminal
+bvr_air_combat_model = "bvr_air_combat_model.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bvr_air_combat_model"]
+
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest",
+  "pytest-mock", # Ajudar a mockar o carregamento do SB3 PPO
+  "pytest-cov",  # Coverage/Cobertura
+]
+
+[tool.hatch.envs.test.scripts]
+run = "pytest {args:tests}"
+# Isto executa o pytest e gera um relatório para o código dentro do pacote
+cov = "pytest --cov=bvr_air_combat_model --cov-report=term-missing {args:tests}"
