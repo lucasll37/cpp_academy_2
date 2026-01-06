@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "bvr_air_combat_model"
+name = "sb3_ppo_to_onnx_converter"
 version = "0.1.0"
-description = "Uma ferramenta de linha de comando para carregar modelos SB3 PPO"
+description = "Uma ferramenta de linha de comando para carregar modelos SB3 PPO e exportá-los no formato ONNX"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
@@ -14,11 +14,11 @@ dependencies = [
 ]
 
 [project.scripts]
-# Cria o comando 'bvr_air_combat_model' no terminal
-bvr_air_combat_model = "bvr_air_combat_model.main:main"
+# Cria o comando 'sb3ppo2onnx' no terminal
+sb3ppo2onnx = "sb3_ppo_to_onnx_converter.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/bvr_air_combat_model"]
+packages = ["src/sb3_ppo_to_onnx_converter"]
 
 [tool.hatch.envs.test]
 dependencies = [
@@ -30,4 +30,4 @@ dependencies = [
 [tool.hatch.envs.test.scripts]
 run = "pytest {args:tests}"
 # Isto executa o pytest e gera um relatório para o código dentro do pacote
-cov = "pytest --cov=bvr_air_combat_model --cov-report=term-missing {args:tests}"
+cov = "pytest --cov=sb3_ppo_to_onnx_converter --cov-report=term-missing {args:tests}"
