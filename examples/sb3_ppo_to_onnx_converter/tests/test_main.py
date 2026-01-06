@@ -26,11 +26,26 @@ def test_cli_argument_parsing(mocker, tmp_path):
     dummy_path = tmp_path / "cli_model.zip"
     dummy_path.write_text("dummy")
     
-    # Mock da função de carregamento interna para verificar se ela é chamada pela função main().
-    mock_loader = mocker.patch("sb3_ppo_to_onnx_converter.main.load_trained_model")
+    # Criamos um mock para representar o modelo retornado
+    mock_model = mocker.Mock()
+    
+    # Mock da função de carregamento interna para retornar nosso mock_model
+    mock_loader = mocker.patch(
+        "sb3_ppo_to_onnx_converter.main.load_trained_model", 
+        return_value=mock_model
+    )
+    
+    # Mock da função de exportação para evitar que o torch tente fazer o tracing de um objeto Mock
+    # Isso resolve o "RuntimeError: Found <class 'unittest.mock.MagicMock'> in output"
+    mock_exporter = mocker.patch("sb3_ppo_to_onnx_converter.main.export_model_to_onnx")
     
     # Mock do sys.argv usando o seguinte comando: sb3ppo2onnx cli_model.zip
     mocker.patch("sys.argv", ["sb3ppo2onnx", str(dummy_path)])
     
     main()
+    
+    # Verifica se o carregador foi chamado com o caminho correto
     mock_loader.assert_called_once_with(str(dummy_path))
+    
+    # Verifica se a exportação foi chamada com o modelo retornado pelo carregador
+    mock_exporter.assert_called_once_with(mock_model)

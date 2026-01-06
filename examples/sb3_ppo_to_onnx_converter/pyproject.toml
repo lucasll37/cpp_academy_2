@@ -11,6 +11,10 @@ requires-python = ">=3.8"
 dependencies = [
     "stable-baselines3",
     "torch",
+    "onnx",
+    "onnxruntime",
+    "onnxscript",
+    "numpy"
 ]
 
 [project.scripts]
