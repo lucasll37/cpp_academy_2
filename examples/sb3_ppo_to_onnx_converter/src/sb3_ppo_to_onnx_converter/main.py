@@ -1,92 +1,103 @@
-"""Módulo para carregar um modelo treinado com Proximal Policy Optimization (PPO) de um caminho fornecido por linha de comando."""
+"""
+Módulo para carregar um modelo treinado com Proximal Policy Optimization (PPO)
+e exportá-lo para ONNX.
+"""
 
-import torch as th
 import argparse
 from pathlib import Path
 from typing import Tuple
 
+import torch as th
 from stable_baselines3 import PPO
 from stable_baselines3.common.policies import BasePolicy
 
-import onnx
-import onnxruntime as ort
-import numpy as np
 
-# 1. Define a wrapper class to make the policy onnx-compatible
+# ---------------------------------------------------------------------
+# ONNX wrapper
+# ---------------------------------------------------------------------
+
 class OnnxableSB3Policy(th.nn.Module):
     def __init__(self, policy: BasePolicy):
         super().__init__()
         self.policy = policy
 
     def forward(self, observation: th.Tensor) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
-        # NOTE: Preprocessing is included, but postprocessing
-        # (clipping/inscaling actions) is not,
-        # If needed, you also need to transpose the images so that they are channel first
-        # use deterministic=False if you want to export the stochastic policy
-        # policy() returns `actions, values, log_prob` for PPO
         return self.policy(observation, deterministic=True)
 
-def load_trained_model(model_path):
-    """
-    Carrega um modelo PPO de um caminho de arquivo zip fornecido.
-    
-    Args:
-        model_path (str): O caminho no sistema para o arquivo .zip que contém os dados do modelo.
-    """
-    # Path da pathlib tem compatibilidade cross-platform
-    path = Path(model_path)
-    
-    if not path.exists():
-        print(f"Erro: O arquivo {model_path} não existe.")
-        return
 
-    # Carrega o modelo; device='cpu' é setado explicitamente
-    model = PPO.load(path, device="cpu")
-    print(f"Modelo carregado com sucesso de: {path}")
+# ---------------------------------------------------------------------
+# Model loading
+# ---------------------------------------------------------------------
+
+def load_trained_model(model_path: Path) -> PPO:
+    if not model_path.exists():
+        raise FileNotFoundError(f"Arquivo de modelo não encontrado: {model_path}")
+
+    if model_path.suffix != ".zip":
+        raise ValueError(f"O arquivo do modelo deve ser .zip, recebido: {model_path}")
+
+    model = PPO.load(model_path, device="cpu")
+    print(f"Modelo carregado: {model_path}")
     return model
 
 
-def export_model_to_onnx(model, onnx_path="my_ppo_model.onnx"):
-    """Função isolada para exportação para evitar problemas de tracing em testes."""
-    
-    # 3. Create an instance of the Onnxable policy
+# ---------------------------------------------------------------------
+# ONNX export
+# ---------------------------------------------------------------------
+
+def export_model_to_onnx(model: PPO, onnx_path: Path):
     onnx_policy = OnnxableSB3Policy(model.policy)
 
-    # 4. Create a dummy input tensor matching the observation space
-    observation_size = model.observation_space.shape
-    dummy_input = th.randn(1, *observation_size)
+    if not model.observation_space.shape:
+        raise RuntimeError("Observation space inválido ou indefinido")
 
-    # 5. Export the model to ONNX format
+    dummy_input = th.randn(1, *model.observation_space.shape)
+
+    onnx_path.parent.mkdir(parents=True, exist_ok=True)
+
     th.onnx.export(
         onnx_policy,
         dummy_input,
-        "my_ppo_model.onnx",
+        onnx_path.as_posix(),
         opset_version=18,
-        input_names=["input"]
+        dynamo=False, # Isto por default é True, o que é a forma mais "moderna" e recomendada, mas está false por ser menos verbose
+        input_names=["observation"],
+        output_names=["action", "value", "log_prob"],
+        dynamic_axes={"observation": {0: "batch"}}
     )
 
+    print(f"Modelo exportado para ONNX: {onnx_path}")
+
+
+# ---------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------
 
 def main():
-    """Entry point para fazer o parsing dos argumentos de linha de comando e carregamento do modelo."""
     parser = argparse.ArgumentParser(
-        description="Carrega um modelo treinado SB3 PPO."
+        description="Exporta um modelo PPO treinado para formato ONNX."
     )
-    
-    # Adicionar argumento posicional para o caminho do modelo
+
     parser.add_argument(
-        "model_path", 
-        type=str, 
-        help="Caminho para o arquivo .zip do modelo treinado (e.g., model.zip)"
+        "model_path",
+        type=Path,
+        help="Caminho para o arquivo .zip do modelo PPO"
+    )
+
+    parser.add_argument(
+        "onnx_output",
+        type=Path,
+        help="Caminho de saída do arquivo ONNX (e.g. output/model.onnx)"
     )
 
     args = parser.parse_args()
-    
-    # Executa o carregamento
-    model = load_trained_model(args.model_path)
 
-    # Verifica se o modelo foi carregado antes de prosseguir
-    if model:
-        export_model_to_onnx(model)
+    try:
+        model = load_trained_model(args.model_path)
+        export_model_to_onnx(model, args.onnx_output)
+    except Exception as e:
+        print(f"Erro: {e}")
+        exit(1)
 
 
 if __name__ == "__main__":

@@ -1,51 +1,89 @@
 import pytest
 from pathlib import Path
-from sb3_ppo_to_onnx_converter.main import load_trained_model, main
 
-def test_load_trained_model_file_not_found(capsys):
-    """Teste se o carregador lida corretamente com arquivos ausentes."""
-    load_trained_model("non_existent_model.zip")
-    captured = capsys.readouterr()
-    assert "Erro: O arquivo non_existent_model.zip não existe." in captured.out
+from sb3_ppo_to_onnx_converter.main import (
+    load_trained_model,
+    export_model_to_onnx,
+    main,
+)
+
+# ---------------------------------------------------------------------
+# load_trained_model
+# ---------------------------------------------------------------------
+
+def test_load_trained_model_file_not_found():
+    with pytest.raises(FileNotFoundError):
+        load_trained_model(Path("non_existent_model.zip"))
+
+
+def test_load_trained_model_invalid_extension(tmp_path):
+    bad_file = tmp_path / "model.txt"
+    bad_file.write_text("nope")
+
+    with pytest.raises(ValueError):
+        load_trained_model(bad_file)
+
 
 def test_load_trained_model_success(mocker, tmp_path):
-    """Teste o carregamento bem-sucedido do modelo usando um mock."""
-    # Crie um arquivo fictício para passar na verificação de existência.
-    dummy_path = tmp_path / "model.zip"
-    dummy_path.write_text("dummy data")
-    
-    # Simule o PPO.load para que não executemos código pesado de fato.
-    mock_ppo_load = mocker.patch("sb3_ppo_to_onnx_converter.main.PPO.load")
-    
-    load_trained_model(str(dummy_path))
-    
-    mock_ppo_load.assert_called_once_with(Path(dummy_path), device="cpu")
+    model_path = tmp_path / "model.zip"
+    model_path.write_text("fake model")
+
+    mock_ppo_load = mocker.patch(
+        "sb3_ppo_to_onnx_converter.main.PPO.load",
+        return_value="mock_model"
+    )
+
+    model = load_trained_model(model_path)
+
+    mock_ppo_load.assert_called_once_with(model_path, device="cpu")
+    assert model == "mock_model"
+
+
+# ---------------------------------------------------------------------
+# export_model_to_onnx
+# ---------------------------------------------------------------------
+
+def test_export_model_to_onnx_calls_torch_export(mocker, tmp_path):
+    fake_model = mocker.Mock()
+    fake_model.observation_space.shape = (4,)
+    fake_model.policy = mocker.Mock()
+
+    mock_export = mocker.patch("sb3_ppo_to_onnx_converter.main.th.onnx.export")
+
+    output_path = tmp_path / "out.onnx"
+
+    export_model_to_onnx(fake_model, output_path)
+
+    mock_export.assert_called_once()
+
+
+# ---------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------
 
 def test_cli_argument_parsing(mocker, tmp_path):
-    """Teste se a CLI passa corretamente o caminho para o carregador."""
-    dummy_path = tmp_path / "cli_model.zip"
-    dummy_path.write_text("dummy")
-    
-    # Criamos um mock para representar o modelo retornado
+    model_path = tmp_path / "model.zip"
+    model_path.write_text("fake model")
+
+    onnx_path = tmp_path / "model.onnx"
+
     mock_model = mocker.Mock()
-    
-    # Mock da função de carregamento interna para retornar nosso mock_model
+
     mock_loader = mocker.patch(
-        "sb3_ppo_to_onnx_converter.main.load_trained_model", 
+        "sb3_ppo_to_onnx_converter.main.load_trained_model",
         return_value=mock_model
     )
-    
-    # Mock da função de exportação para evitar que o torch tente fazer o tracing de um objeto Mock
-    # Isso resolve o "RuntimeError: Found <class 'unittest.mock.MagicMock'> in output"
-    mock_exporter = mocker.patch("sb3_ppo_to_onnx_converter.main.export_model_to_onnx")
-    
-    # Mock do sys.argv usando o seguinte comando: sb3ppo2onnx cli_model.zip
-    mocker.patch("sys.argv", ["sb3ppo2onnx", str(dummy_path)])
-    
+
+    mock_exporter = mocker.patch(
+        "sb3_ppo_to_onnx_converter.main.export_model_to_onnx"
+    )
+
+    mocker.patch(
+        "sys.argv",
+        ["sb3ppo2onnx", str(model_path), str(onnx_path)]
+    )
+
     main()
-    
-    # Verifica se o carregador foi chamado com o caminho correto
-    mock_loader.assert_called_once_with(str(dummy_path))
-    
-    # Verifica se a exportação foi chamada com o modelo retornado pelo carregador
-    mock_exporter.assert_called_once_with(mock_model)
+
+    mock_loader.assert_called_once_with(model_path)
+    mock_exporter.assert_called_once_with(mock_model, onnx_path)
