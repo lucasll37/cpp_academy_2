@@ -1,10 +1,12 @@
 import pytest
+import numpy as np
 from pathlib import Path
 
 from sb3_ppo_to_onnx_converter.main import (
     OnnxableSB3Policy,
     load_trained_model,
     export_model_to_onnx,
+    verify_export,
     main,
 )
 
@@ -99,6 +101,49 @@ def test_export_raises_on_invalid_observation_space(mocker, tmp_path):
     with pytest.raises(RuntimeError):
         export_model_to_onnx(fake_model, tmp_path / "out.onnx")
 
+def test_verify_export_passes_when_outputs_match(mocker, tmp_path):
+    fake_model = mocker.Mock()
+    fake_model.observation_space.shape = (4,)
+
+    fake_policy = mocker.Mock()
+    fake_model.policy = fake_policy
+
+    # Fake torch output
+    torch_out = (mocker.Mock(), None, None)
+    torch_out[0].numpy.return_value = np.array([[1.0, 2.0, 3.0, 4.0]])
+    fake_policy.return_value = torch_out
+
+    # Fake ONNX output
+    fake_session = mocker.Mock()
+    fake_session.run.return_value = [np.array([[1.0, 2.0, 3.0, 4.0]])]
+
+    mocker.patch("sb3_ppo_to_onnx_converter.main.ort.InferenceSession", return_value=fake_session)
+    mocker.patch("sb3_ppo_to_onnx_converter.main.th.randn", return_value=mocker.Mock())
+    mocker.patch("sb3_ppo_to_onnx_converter.main.th.no_grad")
+
+    verify_export(fake_model, tmp_path / "model.onnx", n_tests=1)
+
+def test_verify_export_fails_when_outputs_differ(mocker, tmp_path):
+    fake_model = mocker.Mock()
+    fake_model.observation_space.shape = (4,)
+
+    fake_policy = mocker.Mock()
+    fake_model.policy = fake_policy
+
+    torch_out = (mocker.Mock(), None, None)
+    torch_out[0].numpy.return_value = np.array([[1.0, 2.0, 3.0, 4.0]])
+    fake_policy.return_value = torch_out
+
+    fake_session = mocker.Mock()
+    fake_session.run.return_value = [np.array([[9.0, 9.0, 9.0, 9.0]])]
+
+    mocker.patch("sb3_ppo_to_onnx_converter.main.ort.InferenceSession", return_value=fake_session)
+    mocker.patch("sb3_ppo_to_onnx_converter.main.th.randn", return_value=mocker.Mock())
+    mocker.patch("sb3_ppo_to_onnx_converter.main.th.no_grad")
+
+    with pytest.raises(RuntimeError):
+        verify_export(fake_model, tmp_path / "model.onnx", n_tests=1)
+
 # ---------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------
@@ -119,6 +164,8 @@ def test_cli_argument_parsing(mocker, tmp_path):
     mock_exporter = mocker.patch(
         "sb3_ppo_to_onnx_converter.main.export_model_to_onnx"
     )
+
+    mocker.patch("sb3_ppo_to_onnx_converter.main.verify_export")
 
     mocker.patch(
         "sys.argv",
@@ -141,6 +188,8 @@ def test_main_handles_exception_and_exits(mocker, tmp_path):
         "sb3_ppo_to_onnx_converter.main.load_trained_model",
         side_effect=RuntimeError("boom")
     )
+
+    mocker.patch("sb3_ppo_to_onnx_converter.main.verify_export")
 
     mock_exit = mocker.patch("sb3_ppo_to_onnx_converter.main.exit")
 

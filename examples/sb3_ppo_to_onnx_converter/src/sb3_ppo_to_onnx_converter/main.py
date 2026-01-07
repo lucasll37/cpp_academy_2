@@ -11,6 +11,9 @@ import torch as th
 from stable_baselines3 import PPO
 from stable_baselines3.common.policies import BasePolicy
 
+import onnxruntime as ort
+import numpy as np
+
 
 # ---------------------------------------------------------------------
 # ONNX wrapper
@@ -69,6 +72,36 @@ def export_model_to_onnx(model: PPO, onnx_path: Path):
     print(f"Modelo exportado para ONNX: {onnx_path}")
 
 
+def verify_export(model: PPO, onnx_path: Path, n_tests: int = 5, atol: float = 1e-5):
+    print("\nVerificando equivalência PyTorch <---> ONNX")
+
+    ort_session = ort.InferenceSession(onnx_path.as_posix(), providers=["CPUExecutionProvider"])
+
+    for i in range(n_tests):
+        obs = th.randn(1, *model.observation_space.shape)
+
+        with th.no_grad():
+            torch_out = model.policy(obs, deterministic=True)
+
+        ort_inputs = {"observation": obs.numpy()}
+        onnx_out = ort_session.run(None, ort_inputs)
+
+        torch_action = torch_out[0].numpy()
+
+        diff = np.abs(torch_action - onnx_out[0])
+
+        print(
+            f"Teste {i+1}: "
+            f"max error = {diff.max():.6f} | "
+            f"mean error = {diff.mean():.6f}"
+        )
+
+        if not np.allclose(torch_action, onnx_out[0], atol=atol):
+            raise RuntimeError("Diferença numérica acima da tolerância")
+
+    print("Verificação concluída: exportação válida.")
+
+
 # ---------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------
@@ -95,6 +128,7 @@ def main():
     try:
         model = load_trained_model(args.model_path)
         export_model_to_onnx(model, args.onnx_output)
+        verify_export(model, args.onnx_output)
     except Exception as e:
         print(f"Erro: {e}")
         exit(1)
