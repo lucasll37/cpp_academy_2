@@ -1,0 +1,189 @@
+\begin{center}
+    \textbf{\Huge{Relatório de Spike Técnico - Estudo de Caracterização e Integração de Modelos de Inteligência Artificial}}
+\end{center}
+
+\section{Introdução}
+
+O propósito deste documento é apresentar os resultados de um spike técnico realizado para aprofundar o entendimento sobre os modelos de Inteligência Artificial atualmente utilizados no projeto, bem como sobre a forma como esses modelos são estruturados, executados e como podem ser eventualmente integrados ao simulador. O trabalho foi motivado pela necessidade de reduzir incertezas técnicas e estabelecer uma base conceitual mais sólida para decisões de engenharia relacionadas à arquitetura da solução.
+
+\subsection{Referências}
+
+\begin{itemize}
+    \item Documento n\textsuperscript{o} ASA2/MIIA/001, ``\textbf{Visão de Produto}'', Instituto de Estudos Avançados (IEAv), 2025
+    \item Repositório ASA2/MIIA, Merge Request 10, \url{https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/commit/9811d09abd5180fac9fac4a377f6987685d9e009}, Instituto de Estudos Avançados (IEAv), 2026
+\end{itemize}
+\newpage
+
+\section{Caracterização dos Modelos de IA}
+
+Esta seção apresenta a caracterização técnica dos modelos de Inteligência Artificial utilizados no projeto, com foco em sua estrutura, funcionamento e implicações para a arquitetura do sistema. O objetivo é descrever de forma concreta o que esses modelos representam do ponto de vista de engenharia de software e como se dá sua interação com o ambiente de simulação.
+
+\subsection{Estrutura e Representação dos Modelos}
+
+Os modelos de IA analisados são produtos de treinamento realizado no ecossistema da biblioteca \emph{Stable-Baselines3}, em particular utilizando o algoritmo \emph{PPO} (\emph{Proximal Policy Optimization}). Do ponto de vista prático, esses modelos não correspondem a um único arquivo executável ou artefato isolado, mas a um conjunto de arquivos e estruturas que encapsulam os pesos da rede neural, metadados do treinamento, configuração do ambiente e dependências do \emph{framework} utilizado. É comum que essa estrutura esteja organizada na forma de arquivos \emph{ZIP}, com nomes indicando o tipo de algoritmo utilizado, \emph{seed} e número de \emph{steps} de treinamento para uma versão específica do modelo.
+
+A seguir apresenta-se a estrutura típica de um modelo treinado com PPO no formato gerado pela biblioteca Stable-Baselines3:
+
+\vspace{0.5cm}
+
+\begin{lstlisting}[language=bash]
+  $ less PPO_seed_1975_3600000_steps.zip
+  Archive:  PPO_seed_1975_3600000_steps.zip
+ Length   Method    Size  Cmpr    Date    Time   CRC-32   Name
+--------  ------  ------- ---- ---------- ----- --------  ----
+   21353  Stored    21353   0% 2025-12-11 15:23 6b8183bc  data
+    1261  Stored     1261   0% 1980-01-01 00:00 6cdd3008  pytorch_variables.pth
+  156156  Stored   156156   0% 1980-01-01 00:00 048b9650  policy.pth
+  313006  Stored   313006   0% 1980-01-01 00:00 56116f1c  policy.optimizer.pth
+       5  Stored        5   0% 2025-12-11 15:23 51d40e63  _stable_baselines3_version
+     241  Stored      241   0% 2025-12-11 15:23 4063029b  system_info.txt
+--------          -------  ---                            -------
+  492022           492022   0%                            6 files
+\end{lstlisting}
+
+\vspace{0.5cm}
+
+A execução direta desses modelos depende do ambiente \emph{Python} e das bibliotecas que os suportam, o que impõe restrições relevantes em termos de portabilidade, versionamento e integração com outros componentes do sistema que não compartilham o mesmo ecossistema de execução. Por exemplo, a forma de carregamento de um modelo treinado com o algoritmo \emph{PPO} é diferente de um modelo treinado com o algoritmo \emph{DQN} (\emph{Deep Q-Network}), conforme ilustrado a seguir:
+
+\vspace{0.5cm}
+
+\begin{lstlisting}[language=python]
+  from stable_baselines3 import PPO, DQN
+
+  ...
+  
+  # API Proximal Policy Optimization
+  model = PPO.load(model_path, device="cpu")
+  # API Deep Q-Network
+  model = DQN.load(model_path, device="cpu")
+\end{lstlisting}
+
+O que prejudica a generalidade de eventuais soluções de integração desses modelos, haja vista que não apenas restringiria o uso da linguagem de programação para Python mas também demandaria o uso de condicionais específicos a depender de como o modelo foi treinado.
+
+\subsection{Conceitos Fundamentais: State, Observations e Actions}
+
+Durante a análise, tornou-se necessário estabelecer uma distinção precisa entre os conceitos centrais que regem a interação entre o simulador e os modelos de Inteligência Artificial: \emph{state}, \emph{observation} e \emph{action}.
+
+O \textit{state} corresponde à representação completa do cenário simulado em um dado instante. Ele é mantido internamente pelo simulador e contém todas as informações relevantes do ambiente, como posições das entidades, velocidades, orientações, estados internos de sensores, entre muitos outros atributos físicos e lógicos.
+
+A \textit{observation}, por sua vez, não é uma cópia direta do \textit{state}. Ela consiste em uma visão parcial e transformada desse estado, construída especificamente para atender às necessidades de um determinado modelo de IA. Em geral, a \textit{observation} utiliza apenas um subconjunto dos atributos do \textit{state} e aplica etapas de pré-processamento, como normalização e cálculo de grandezas relativas.
+
+A normalização consiste na transformação de valores físicos de diferentes escalas (por exemplo, metros, graus, metros por segundo) para uma faixa numérica comum, tipicamente entre 0 e 1 ou entre -1 e 1, com o objetivo de facilitar o processo de aprendizado do modelo.
+
+Um exemplo de componentes de uma \textit{observation} é apresentado a seguir, ilustrando como o modelo recebe não valores brutos do simulador, mas grandezas relativas e normalizadas para duas entidades simuladas B1 e R1:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|}
+        \hline
+        \textbf{\emph{Observation}} \\
+        \hline
+        Diferença de magnitude normalizada dos azimutes relativos para (B1,R1) \\
+        \hline
+        Distância oblíqua normalizada para (B1,R1) \\
+        \hline
+        Diferença de magnitude normalizada das velocidades aerodinâmicas para (B1,R1) \\
+        \hline
+        Diferença de magnitude normalizada dos azimutes relativos para (B1,R2) \\
+        \hline
+        Distância oblíqua normalizada para (B1,R2) \\
+        \hline
+        Diferença de magnitude normalizada das velocidades aerodinâmicas para (B1,R2) \\
+        \hline
+        Diferença de magnitude normalizada dos azimutes relativos para (B2,R1) \\
+        \hline
+        Distância oblíqua normalizada para (B2,R1) \\
+        \hline
+        Diferença de magnitude normalizada das velocidades aerodinâmicas para (B2,R1) \\
+        \hline
+        Diferença de magnitude normalizada dos azimutes relativos para (B2,R2) \\
+        \hline
+        Distância oblíqua normalizada para (B2,R2) \\
+        \hline
+        Diferença de magnitude normalizada das velocidades aerodinâmicas para (B2,R2) \\
+        \hline
+        Diferença de magnitude normalizada dos azimutes relativos para (B1,B2) \\
+        \hline
+        Distância oblíqua normalizada para (B1,B2) \\
+        \hline
+        Diferença de magnitude normalizada das velocidades aerodinâmicas para (B1,B2) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+O termo \textit{action} corresponde à saída produzida pelo modelo a partir da \textit{observation} recebida. Essa ação representa a decisão tomada pela política aprendida durante o treinamento e é utilizada pelo simulador para atualizar o \textit{state}, influenciando diretamente a evolução do cenário.
+
+A relação entre \textit{state}, \textit{observation} e \textit{action} define o ciclo fundamental de interação entre o simulador e o modelo de IA.
+
+
+\subsection{Ciclo de Inferência e Integração com o Sistema}
+
+O ciclo de inferência pode ser descrito, de forma simplificada, pelas seguintes etapas:
+\begin{itemize}
+    \item O simulador mantém e atualiza continuamente o \textit{state} completo do ambiente.
+    \item A partir do \textit{state}, constrói-se a \textit{observation} específica para o modelo de IA, aplicando seleção de atributos e pré-processamento (por exemplo, normalização e cálculo de grandezas relativas).
+    \item A \textit{observation} é fornecida ao modelo de IA como vetor de entrada.
+    \item O modelo executa a inferência de forma determinística e produz uma \emph{action}.
+    \item A \textit{action} é aplicada ao ambiente pelo sistema, modificando o \textit{state}.
+    \item O ciclo se repete no próximo passo de simulação.
+\end{itemize}
+
+Esse fluxo estabelece uma dependência clara entre a representação interna do simulador e a interface esperada pelo modelo, criando um acoplamento técnico que deve ser cuidadosamente gerenciado do ponto de vista arquitetural.
+
+
+\section{Desenvolvimento do Conversor SB3 PPO \textrightarrow{} ONNX}
+
+\subsection{Motivação}
+
+Durante a caracterização dos modelos de IA utilizados no projeto, tornou-se evidente que a dependência direta do ecossistema Python e das bibliotecas específicas de treinamento impunha limitações significativas à arquitetura do sistema. A execução de inferência estava fortemente acoplada às mesmas ferramentas utilizadas durante o treinamento, dificultando a portabilidade dos modelos, o versionamento controlado e a integração com componentes externos ao ambiente Python.
+
+Além disso, a ausência de um formato padronizado e independente para a representação dos modelos impedia a utilização de runtimes especializados de inferência e restringia as possibilidades de implantação do sistema em diferentes ambientes computacionais. Diante desse cenário, tornou-se necessário investigar uma estratégia que permitisse desacoplar o modelo treinado do seu ambiente original de execução, preservando seu comportamento funcional e ampliando sua interoperabilidade.
+
+Nesse contexto, a conversão dos modelos PPO treinados com a biblioteca Stable-Baselines3 para o formato \emph{ONNX} foi adotada como abordagem inicial, como estudo de viabilidade para uma arquitetura mais modular, portátil e sustentável.
+
+\subsection{Implementação}
+
+\subsubsection{Estratégia adotada}
+
+A estratégia consistiu em isolar explicitamente a política treinada pelo algoritmo \emph{PPO} e exportá-la para o formato \emph{ONNX}, de modo que o modelo resultante pudesse ser executado por \emph{runtimes} de inferência independentes do ambiente de treinamento original. Esse processo envolveu o encapsulamento da política em um módulo \emph{PyTorch}, o carregamento dos pesos treinados e a exportação da rede para o formato \emph{ONNX} por meio das ferramentas disponibilizadas pelo próprio \emph{framework}.
+
+A inferência foi configurada de forma determinística, assegurando reprodutibilidade e permitindo a validação numérica direta entre os resultados produzidos no ambiente original e aqueles obtidos pelo modelo exportado.
+
+\subsubsection{Ferramentas utilizadas}
+
+Foram utilizadas as seguintes ferramentas e tecnologias no desenvolvimento do conversor:
+
+\begin{itemize}
+    \item Stable-Baselines3 para carregamento do modelo PPO treinado;
+    \item PyTorch para reconstrução e manipulação da rede neural;
+    \item Utilitários de exportação ONNX fornecidos pelo PyTorch;
+    \item ONNX Runtime para validação e execução de inferência do modelo exportado.
+\end{itemize}
+
+\subsubsection{Desafios técnicos}
+
+Durante a implementação, foram enfrentados desafios relacionados à correta reconstrução da política de decisão, à compatibilidade entre operações suportadas pelo ONNX e aquelas utilizadas no modelo original, bem como à validação da equivalência funcional entre a inferência executada no ambiente original e a inferência executada via runtime externo.
+
+Esses desafios exigiram ajustes na definição da rede, tratamento cuidadoso de tensores de entrada e saída e validações sistemáticas do comportamento do modelo convertido.
+
+\subsection{Resultados}
+
+O processo de conversão resultou em um modelo funcional no formato \emph{ONNX}, capaz de executar inferência de forma independente do ambiente de treinamento original em \emph{Python}. O modelo exportado pôde ser executado com sucesso utilizando um \emph{runtime} externo, mantendo equivalência numérica com o modelo original treinado em \emph{Stable-Baselines3}, conforme verificado por testes sistemáticos de erro máximo e médio.
+
+Essa abordagem proporcionou benefícios diretos à arquitetura do sistema, incluindo maior portabilidade dos modelos, redução do acoplamento com bibliotecas de treinamento, facilitação do versionamento e ampliação das possibilidades de integração com outros componentes e plataformas de execução.
+
+\begin{lstlisting}[language=bash]
+  $ sb3ppo2onnx PPO_seed_1975_3600000_steps.zip PPO_seed_1975_3600000_steps.onnx
+  Modelo carregado: PPO_seed_1975_3600000_steps.zip
+  Modelo exportado para ONNX: PPO_seed_1975_3600000_steps.onnx
+  
+  Verificando equivalencia PyTorch <---> ONNX
+  Teste 1: max error = 0.000000 | mean error = 0.000000
+  Teste 2: max error = 0.000000 | mean error = 0.000000
+  Teste 3: max error = 0.000000 | mean error = 0.000000
+  Teste 4: max error = 0.000000 | mean error = 0.000000
+  Teste 5: max error = 0.000000 | mean error = 0.000000
+  Verificacao concluida: exportacao valida.
+\end{lstlisting}
+
+Cabe ressaltar que a adoção do formato \emph{ONNX}, no contexto deste trabalho, deve ser entendida como um estudo técnico de viabilidade e não como uma decisão arquitetural definitiva. A avaliação realizada teve como objetivo verificar a possibilidade de desacoplamento entre o ambiente de treinamento e o ambiente de execução, bem como investigar os impactos dessa estratégia sobre portabilidade, desempenho e integridade funcional do modelo. A decisão final quanto ao formato de representação e ao \emph{runtime} de inferência a ser adotado pelo sistema será tomada em etapas posteriores do projeto, à luz dos resultados obtidos neste estudo e de outros requisitos técnicos e operacionais ainda em análise.
