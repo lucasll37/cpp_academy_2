@@ -1,0 +1,151 @@
+\begin{center}
+    \textbf{\Huge{Relatório - \emph{Open Neural Network Exchange} (ONNX) e Possíveis Aplicações}}
+\end{center}
+
+\section{Introdução}
+
+O propósito deste documento é analisar o padrão \emph{Open Neural Network Exchange} (ONNX) sob a perspectiva de sua aplicação como mecanismo de interoperabilidade de modelos de inteligência artificial (IA) em sistemas de simulação construtiva de alta fidelidade. O foco está na avaliação de seu papel como formato intermediário capaz de desacoplar os processos de treinamento, implantação e execução de modelos de IA, preservando portabilidade, modularidade e controle arquitetural do sistema.
+
+A análise é conduzida no contexto de ambientes de simulação complexos, nos quais diferentes paradigmas de decisão (redes neurais, estruturas simbólicas como \emph{behavior trees} e abordagens híbridas) devem coexistir e integrar-se de forma coerente ao ciclo de simulação, sem impor dependência rígida a motores específicos de inferência ou a pipelines de treinamento.
+
+
+\subsection{Referências}
+
+\begin{itemize}
+    \item Documento Institucional Preliminar, ``\textbf{Ambiente de Simulação Aeroespacial Avançado -- ASA$^{2}$}'', Instituto de Estudos Avançados (IEAv), 2025.
+    \item RATUL, Ishrak Jahan; ZHOU, Yuxiao; YANG, Kecheng. Accelerating deep learning inference: A comparative analysis of modern acceleration frameworks. Electronics, v. 14, n. 15, p. 2977, 2025.
+    \item POCHELU, Pierrick. Deep learning inference frameworks benchmark. arXiv preprint arXiv:2210.04323, 2022.
+    \item BRAGA, Pedro Henrique Spinosa. Implantação de modelos de aprendizado de máquina no formato onnx utilizando diferentes frameworks. 2023.
+\end{itemize}
+
+\newpage
+
+\section{ONNX como Contrato de Representação de Modelos}
+
+O \emph{Open Neural Network Exchange} (ONNX) foi concebido como um formato intermediário padronizado para a representação de modelos de aprendizado de máquina e aprendizado profundo, com o objetivo explícito de promover interoperabilidade entre diferentes ferramentas de treinamento, bibliotecas e ambientes de execução. Conforme destacado por Braga (2023), o ONNX estabelece um conjunto comum de operadores e um modelo de dados capaz de descrever redes neurais de forma independente de framework, permitindo que modelos treinados em plataformas distintas sejam implantados em ambientes heterogêneos sem a necessidade de reescrita de código.
+
+Sob a ótica de sistemas de simulação construtiva de alta fidelidade, essa característica assume papel estrutural: o ONNX passa a funcionar como um contrato estável entre o processo de desenvolvimento de modelos de inteligência artificial e o ambiente de simulação propriamente dito. Tal contrato viabiliza a separação clara entre as fases de concepção, treinamento, validação e execução dos modelos de decisão baseados em aprendizado de máquina, preservando a integridade arquitetural do simulador e reduzindo o acoplamento entre seus componentes.
+
+\subsection{Separação entre Treinamento, Representação e Execução}
+
+Uma das contribuições centrais do padrão ONNX é a formalização da separação entre os processos de treinamento, representação e execução de modelos de inteligência artificial. Essa separação é evidenciada de forma consistente nos trabalhos analisados, nos quais o modelo é inicialmente desenvolvido e treinado em um determinado framework, posteriormente convertido para o formato ONNX e, então, executado por diferentes motores de inferência de forma intercambiável.
+
+Braga (2023) demonstra esse princípio ao empregar modelos treinados em PyTorch e Keras que, após convertidos para o formato ONNX, são executados pelo ONNX Runtime em cenários de inferência em lote e em tempo real, sem necessidade de alterações na estrutura do modelo original. De forma semelhante, Ratul et al. (2025) adotam o ONNX como formato intermediário entre o processo de treinamento em PyTorch e a execução em motores especializados como ONNX Runtime, TensorRT, Apache TVM e JAX, ressaltando o papel do formato como elemento de desacoplamento entre desenvolvimento e implantação.
+
+Essa separação é fundamental para sistemas de simulação de longa vida útil, pois permite que o ambiente de simulação permaneça estável enquanto os modelos de decisão podem evoluir de maneira independente. A Figura~\ref{fig:separacao_onnx} ilustra essa decomposição conceitual.
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{c}
+Treinamento (PyTorch, Keras, RL, etc.) \\
+$\downarrow$ \\
+\textbf{Representação Padronizada (ONNX)} \\
+$\downarrow$ \\
+Execução (ONNX Runtime, TensorRT, TVM, etc.)
+\end{tabular}
+\caption{Separação conceitual entre treinamento, representação e execução de modelos por meio do ONNX.}
+\label{fig:separacao_onnx}
+\end{figure}
+
+Os resultados experimentais de Braga (2023) reforçam os benefícios práticos dessa abordagem. A Tabela~\ref{tab:desempenho_onnx} sintetiza parte dos resultados de desempenho obtidos na inferência em lote para o modelo ResNet50, evidenciando que a conversão para ONNX não apenas preserva a funcionalidade do modelo, como também pode proporcionar ganhos de desempenho em relação às execuções diretas nos frameworks de treinamento.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\hline
+\textbf{Framework} & \textbf{Tempo Médio (s)} & \textbf{Uso Médio de CPU (\%)} & \textbf{Uso Médio de Memória (\%)} \\
+\hline
+ONNX Runtime & 0.018 & 88.0 & 39.4 \\
+PyTorch & 0.033 & 58.8 & 37.7 \\
+Keras & 0.048 & 19.4 & 41.3 \\
+\hline
+\end{tabular}
+\caption{Resultados de inferência em lote para o modelo ResNet50 (adaptado de Braga, 2023).}
+\label{tab:desempenho_onnx}
+\end{table}
+
+Esses resultados indicam que o formato ONNX viabiliza não apenas interoperabilidade, mas também um ciclo de vida mais flexível e eficiente para modelos de decisão baseados em aprendizado de máquina, sem impor dependência direta ao framework de treinamento ou ao motor de execução utilizado no ambiente de implantação.
+
+\subsection{Portabilidade e Longevidade do Modelo}
+
+A portabilidade de modelos de inteligência artificial é um requisito central em sistemas de simulação de alta fidelidade, sobretudo em projetos de longa duração, nos quais plataformas de hardware, bibliotecas e ferramentas de desenvolvimento tendem a evoluir de forma independente ao longo do tempo. Nesse contexto, o ONNX atua como um mecanismo de estabilização arquitetural, permitindo que modelos de decisão permaneçam utilizáveis mesmo diante da obsolescência ou substituição de tecnologias específicas.
+
+Braga (2023) demonstra que modelos treinados em diferentes frameworks, como PyTorch e Keras, podem ser convertidos para ONNX e executados de forma consistente no ONNX Runtime, preservando funcionalidade e desempenho. Ratul et al. (2025) reforçam essa característica ao mostrar que o mesmo modelo ONNX pode ser implantado em múltiplos motores de inferência, como ONNX Runtime, TensorRT, Apache TVM e JAX, explorando diferentes compromissos entre latência, consumo energético e vazão de processamento conforme as restrições da plataforma de destino.
+
+De forma complementar, Pochelu (2022) apresenta resultados experimentais indicando que a troca de motores de inferência sobre um mesmo modelo ONNX produz variações significativas de desempenho e tempo de carregamento, sem qualquer impacto na definição funcional do modelo, o que evidencia o papel do ONNX como elemento de desacoplamento entre concepção e execução.
+
+Para sistemas de simulação construtiva, esse comportamento permite que o ambiente de simulação permaneça estável enquanto os modelos de decisão evoluem de forma independente, favorecendo manutenção, atualização incremental e sustentabilidade técnica ao longo do ciclo de vida do sistema.
+
+\subsection{Independência de Motor de Execução}
+
+A independência em relação ao motor de execução constitui uma consequência direta da adoção do ONNX como formato intermediário de representação de modelos. Ao estabelecer um contrato técnico estável entre o modelo e o ambiente de execução, o ONNX permite que a escolha do mecanismo de inferência seja tratada como uma decisão de engenharia de implantação, sem impacto sobre a definição funcional do agente nem sobre a arquitetura do sistema.
+
+Os experimentos apresentados por Ratul et al. (2025) evidenciam essa propriedade ao comparar o desempenho de modelos ONNX executados em diferentes motores, como ONNX Runtime, TensorRT, Apache TVM e JAX, demonstrando variações significativas em latência, consumo energético e vazão de processamento conforme o backend selecionado. Pochelu (2022) complementa essa análise ao mostrar que o tempo de carregamento e a eficiência de execução podem variar substancialmente entre motores, reforçando a importância de manter o modelo desacoplado da tecnologia de execução.
+
+Em ambientes de simulação de alta fidelidade, essa independência permite selecionar motores distintos conforme requisitos específicos do cenário, como previsibilidade temporal, controle determinístico, restrições de hardware ou metas de desempenho, sem comprometer a integridade arquitetural do simulador nem exigir modificações nos modelos de decisão.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccc}
+\hline
+\textbf{Motor} & \textbf{Latência} & \textbf{Throughput} & \textbf{Consumo Energético} & \textbf{Tempo de Carregamento} \\
+\hline
+ONNX Runtime & Baixa & Média & Médio & Médio \\
+TensorRT & Muito baixa & Alta & Baixo & Médio \\
+Apache TVM & Baixa & Alta & Médio & Alto \\
+OpenVINO & Média & Média & Baixo & Baixo \\
+JAX/XLA & Baixa & Alta & Médio & Alto \\
+\hline
+\end{tabular}
+\caption{Comparação qualitativa de motores de inferência com base em Ratul et al. (2025) e Pochelu (2022).}
+\label{tab:comparacao_motores}
+\end{table}
+
+Os resultados experimentais apresentados por Ratul et al. (2025) indicam que o TensorRT tende a oferecer a menor latência e o maior throughput, enquanto o ONNX Runtime apresenta melhor equilíbrio entre desempenho e flexibilidade. Pochelu (2022) observa ainda variações significativas no tempo de carregamento dos modelos, destacando o impacto do motor de inferência na responsividade do sistema. Esses dados reforçam a necessidade de manter a escolha do backend desacoplada da arquitetura do simulador.
+
+\subsection{Limitações do ONNX}
+
+Apesar de suas vantagens como formato de interoperabilidade, o ONNX apresenta limitações conceituais claras quanto ao escopo dos modelos que é capaz de representar. O padrão foi projetado para descrever modelos computacionais expressos como grafos de operadores numéricos, característica que o torna particularmente adequado para redes neurais profundas, modelos de aprendizado de máquina e políticas de aprendizado por reforço baseadas em funções aproximadoras.
+
+Entretanto, paradigmas de decisão de natureza simbólica ou estrutural, tais como \emph{behavior trees}, máquinas de estados finitos, sistemas baseados em regras e planejadores lógicos, não podem ser representados de forma adequada no formato ONNX. Esses modelos possuem semânticas operacionais que não se reduzem a grafos de operadores matemáticos e, portanto, extrapolam o domínio conceitual para o qual o ONNX foi concebido. Embora existam tentativas de codificar tais estruturas de controle em grafos numéricos, tais abordagens resultam em representações artificiais, de difícil manutenção e semanticamente frágeis.
+
+Além disso, o ONNX não define mecanismos nativos para expressar aspectos temporais, eventos discretos ou dependências explícitas de estado de alto nível, elementos frequentemente centrais em arquiteturas de agentes e em sistemas de simulação construtiva. Dessa forma, embora o ONNX seja uma solução robusta para a representação de modelos neurais, ele não deve ser interpretado como um mecanismo universal de representação de agentes de inteligência artificial, mas sim como um componente especializado dentro de uma arquitetura mais ampla e heterogênea.
+
+\section{Integração de ONNX em uma Arquitetura de Agentes}
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{c}
+\textbf{Agente} \\
+\hline
+Percepção \\
+$\downarrow$ \\
+\textbf{Decisão} \\
+\begin{tabular}{|c|}
+Política Neural (ONNX) \\
+Behavior Tree \\
+Sistema de Regras \\
+Módulos Híbridos \\
+\end{tabular} \\
+$\downarrow$ \\
+Atuação
+\end{tabular}
+\caption{Estrutura conceitual de um agente integrando múltiplos paradigmas de decisão.}
+\label{fig:arquitetura_agente}
+\end{figure}
+
+A Figura~\ref{fig:arquitetura_agente} ilustra a organização conceitual do agente, evidenciando o papel do ONNX como contrato especializado no interior da camada de decisão, coexistindo de forma controlada com mecanismos simbólicos e estruturais.
+
+A incorporação do ONNX em uma arquitetura de agentes para sistemas de simulação construtiva de alta fidelidade deve ser conduzida de forma a respeitar suas capacidades e limitações conceituais. Em vez de tratar o ONNX como um mecanismo universal de representação de agentes, sua aplicação mais eficaz consiste em posicioná-lo como contrato de representação para um subconjunto específico dos mecanismos de decisão: aqueles baseados em modelos neurais e aprendizado de máquina.
+
+Nesse contexto, o agente passa a ser estruturado como uma entidade modular composta por diferentes camadas funcionais, tais como percepção, decisão e atuação. A camada de decisão, por sua vez, pode abrigar múltiplos paradigmas de controle, incluindo políticas neurais representadas em ONNX, estruturas simbólicas como \emph{behavior trees}, módulos baseados em regras e abordagens híbridas. Todos integrados sob uma interface comum de interação com o ciclo de simulação.
+
+Essa organização permite que modelos neurais representados em ONNX coexistam de forma coerente com mecanismos simbólicos e estruturais, preservando a semântica própria de cada paradigma e evitando forçar representações inadequadas em um formato único. O resultado é uma arquitetura de agentes extensível, na qual a evolução de um componente de decisão não compromete os demais, favorecendo experimentação, manutenção e evolução progressiva do sistema.
+
+Além disso, ao estabelecer o ONNX como contrato estável entre o domínio do treinamento e o domínio da execução no simulador, a arquitetura obtém um alto grau de desacoplamento entre desenvolvimento de modelos e implementação do ambiente de simulação. Tal separação é particularmente valiosa em sistemas de longa duração, nos quais os requisitos operacionais, os modelos de decisão e as plataformas de hardware tendem a evoluir de forma independente ao longo do tempo.
+
+\section{Conclusão}
+
+Este relatório apresentou uma análise do ONNX como mecanismo de interoperabilidade para modelos de inteligência artificial no contexto de sistemas de simulação construtiva de alta fidelidade. Ao longo do estudo, demonstrou-se que o ONNX desempenha papel central na separação entre treinamento, representação e execução de modelos neurais, promovendo portabilidade, longevidade e independência em relação aos motores de inferência, sem impor acoplamentos estruturais ao ambiente de simulação.
+
+Ao mesmo tempo, foram explicitadas as limitações conceituais do ONNX, evidenciando que seu escopo se restringe à representação de modelos baseados em aprendizado de máquina e aprendizado profundo, não sendo adequado para a descrição de paradigmas simbólicos ou estruturais, como \emph{behavior trees} e máquinas de estados. A partir dessa constatação, estabeleceu-se uma arquitetura de agentes na qual o ONNX ocupa o papel de contrato especializado dentro de um sistema mais amplo e heterogêneo, assegurando flexibilidade, modularidade e sustentabilidade técnica ao longo do ciclo de vida do simulador.
