@@ -1,0 +1,520 @@
+%\documentclass{article}
+
+
+
+%\begin{document}
+
+\begin{center}
+    \textbf{\Huge Visão de Produto}
+\end{center}
+
+\section{Introdução}
+
+Este documento tem como objetivo entender sobre \textit{mecanismos de integração
+para execução de modelos de aprendizado de máquina}, investigando a viabilidade do uso
+de \textit{runtimes nativas} — como  \textbf{LibTorch} e na \textbf{TensorFlow C++ API} —
+para execução direta de modelos em C++, eliminando a dependência de camadas intermediárias
+como servidores de inferência ou bindings em linguagens interpretadas.
+
+
+\subsection{Referências}
+
+\begin{itemize}
+   \item ZHANG, Y.; LI, H.; WANG, X.; CHEN, J. A Comparative Survey of PyTorch vs TensorFlow for Deep Learning: Usability, Performance, and Deployment Trade-offs. arXiv preprint, 2023;
+   \item KIM, S.; PARK, J.; LEE, D. Accelerating Deep Learning Inference: A Comparative Analysis of Modern Acceleration Frameworks. Journal of Systems Architecture, 2024;
+   \item BENDER, G.; KINDERMANS, P.-J.; ZHANG, Y. Comparing the Costs of Abstraction for Deep earning Frameworks. Proceedings of the IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS), 2021.
+   \item HERNANDEZ, F.; RIVERA, A.; GARCIA, M. Performance Analysis of Deep Learning Libraries: TensorFlow and PyTorch. International Journal of Computer Applications, 2022.
+   \item SILVA, R.; COSTA, L.; ALMEIDA, P. Studying the Impact of TensorFlow and PyTorch Bindings on Machine Learning Software Quality. Empirical Software Engineering, 2023.
+   \item SABERIFARD, K. XTorch: A High-Performance C++ Framework for Deep Learning Training. SoftwareX, v.10, 2025.
+\end{itemize}
+
+\section{Execução de Modelos com LibTorch}
+
+\subsection{Fluxo de uso do Modelo}
+
+O LibTorch utiliza modelos no formato \textit{TorchScript}, que consiste em uma
+representação intermediária serializável e independente do runtime Python.
+O fluxo de exportação inicia-se no ambiente de desenvolvimento, em que o modelo é
+definido e treinado utilizando PyTorch ou C++.
+
+Após o treinamento, o modelo é convertido para TorchScript por meio de mecanismos
+de \textit{scripting} ou \textit{tracing}, resultando em um artefato binário
+(\texttt{.pt}) que encapsula o grafo computacional, os pesos e as informações de tipo.\\
+
+Exemplo:
+\begin{verbatim}
+scripted = torch.jit.script(model)
+scripted.save("model.pt")
+\end{verbatim}
+
+
+Esse artefato passa a ser tratado como um recurso de deployment, podendo ser versionado
+e distribuído juntamente com a aplicação C++. \\
+A Estrutura típica do projeto é basicamente:
+
+\begin{verbatim}
+project/
+|-- CMakeLists.txt
+|-- main.cpp
+|-- libtorch/
+\end{verbatim}
+
+Build com CMake:
+\begin{verbatim}
+cmake_minimum_required(VERSION 3.18)
+project(libtorch_example)
+
+find_package(Torch REQUIRED)
+
+add_executable(infer main.cpp)
+target_link_libraries(infer "${TORCH_LIBRARIES}")
+set_property(TARGET infer PROPERTY CXX_STANDARD 17)
+\end{verbatim}
+
+Build:
+\begin{verbatim}
+mkdir build && cd build
+cmake -DCMAKE_PREFIX_PATH=/path/libtorch ..
+cmake --build .
+\end{verbatim}
+
+Inferência em C++ (LibTorch):
+\begin{verbatim}
+#include <torch/script.h>
+#include <iostream>
+
+int main() {
+    torch::jit::script::Module model;
+    model = torch::jit::load("model.pt");
+
+    torch::Tensor input = torch::rand({1, 3, 224, 224});
+    auto output = model.forward({input}).toTensor();
+
+    std::cout << output << std::endl;
+}
+\end{verbatim}
+
+\subsection{Carregamento e Execução em C++}
+
+Na aplicação C++ nativa, o runtime LibTorch é inicializado e o modelo TorchScript é
+carregado diretamente a partir do arquivo exportado. O modelo passa a ser manipulado
+como um objeto nativo, permitindo a execução de inferência sem qualquer dependência
+do runtime Python.
+
+A inferência ocorre por meio da invocação direta do método de execução do modelo,
+utilizando tensores C++ fornecidos pela própria API do LibTorch. Todo o fluxo ocorre
+no espaço de execução da aplicação, caracterizando uma integração direta e fortemente
+acoplada ao código do domínio.
+
+\subsection{Requisitos de Runtime}
+
+Os principais requisitos para uso do LibTorch incluem:
+\begin{itemize}
+    \item Ambiente C++ compatível com C++17 ou superior;
+    \item Bibliotecas compartilhadas do LibTorch (CPU ou GPU);
+    \item Dependências associadas ao backend de execução (por exemplo, CUDA, quando aplicável).
+\end{itemize}
+
+\subsection{Latência Esperada}
+
+A latência de inferência com LibTorch, em termos de ordem de grandeza, situa-se
+tipicamente na faixa de \textbf{milissegundos}, sendo fortemente dependente do modelo,
+do backend (CPU/GPU) e da configuração do ambiente. Para fins deste estudo, a latência
+é considerada adequada para aplicações de integração direta, sem foco em otimização
+extrema de desempenho. 
+Um estudo comparativo publicado em 2025 avaliou diversos frameworks de inferência em uma plataforma embarcada (NVIDIA Jetson AGX Orin) e reportou resultados: 
+ \begin{itemize}
+    \item SqueezeNet: ~0,66 ms por inferência
+    \item ResNet152: ~2,28 ms por inferência
+    \item MobileNet/SqueezeNet: inferência em menos de ~5 ms por amostra
+\end{itemize}
+
+Embora esse estudo não use explicitamente LibTorch em C++, ele mostra que mecanismos de inferência diretos executados em hardware moderno, sem camadas intermediárias, podem atingir latências compatíveis com requisitos classe-real.
+
+\subsection{Vantagens, Limitações e Riscos}
+
+\textbf{Vantagens}:
+\begin{itemize}
+    \item Execução nativa em C++, sem dependência de Python;
+    \item Integração direta com sistemas legados;
+    \item Modelo tratado como artefato estático.
+\end{itemize}
+
+\textbf{Limitações}:
+\begin{itemize}
+    \item Necessidade de exportação prévia para TorchScript;
+    \item Suporte restrito a operações compatíveis com TorchScript;
+    \item Tamanho elevado das bibliotecas de runtime.
+\end{itemize}
+
+\textbf{Riscos Técnicos}:
+\begin{itemize}
+    \item Mudanças na compatibilidade binária entre versões;
+    \item Evolução do ecossistema PyTorch e de seus mecanismos de exportação;
+    \item Dependência direta do formato TorchScript.
+\end{itemize}
+
+\section{Execução de Modelos com TensorFlow C++ API}
+
+\subsection{Fluxo de uso}
+
+A TensorFlow C++ API permite a execução de modelos exportados no formato
+\textit{SavedModel} ou \textit{GraphDef}. O fluxo inicia-se com o treinamento do
+modelo em TensorFlow, seguido de sua exportação para um formato compatível com
+execução em C++.
+
+No ambiente nativo, o modelo é carregado por meio da API C++, que reconstrói o grafo
+computacional e inicializa a sessão de execução. A inferência é realizada através da
+execução explícita do grafo, utilizando tensores definidos no código C++.
+
+O build geralmente é realizado via Bazel, ou gerando um libtensorflow-cc.so
+
+Exemplo de Build com Bazel:
+
+\begin{verbatim}
+bazel build //tensorflow:libtensorflow_cc.so
+\end{verbatim}
+
+ou 
+
+\begin{verbatim}
+cc_binary(
+    name = "infer",
+    srcs = ["main.cc"],
+    deps = [
+        "//tensorflow:tensorflow_cc",
+    ],
+)
+\end{verbatim}
+
+Inferência em C++ (TensorFlow):
+\begin{verbatim}
+#include "tensorflow/cc/saved_model/loader.h"
+#include "tensorflow/core/framework/tensor.h"
+
+using namespace tensorflow;
+
+int main() {
+    SavedModelBundleLite bundle;
+    SessionOptions session_options;
+    RunOptions run_options;
+
+    LoadSavedModel(session_options, run_options,
+                   "saved_model", {"serve"}, &bundle);
+
+    Tensor input(DT_FLOAT, TensorShape({1, 224, 224, 3}));
+    auto result = bundle.GetSession()->Run(
+        {{"input_tensor", input}},
+        {"output_tensor"},
+        {},
+        nullptr
+    );
+}
+\end{verbatim}
+
+
+
+\subsection{Requisitos de Runtime}
+
+Os requisitos da TensorFlow C++ API incluem:
+\begin{itemize}
+    \item Compilação ou disponibilização das bibliotecas C++ do TensorFlow;
+    \item Ferramentas de build específicas (por exemplo, Bazel);
+    \item Dependências adicionais como Protobuf, Eigen e Abseil.
+\end{itemize}
+
+
+\subsection{Latência Esperada}
+
+A latência de inferência situa-se também na ordem de \textbf{milissegundos}, variando
+conforme o modelo e o backend. Para este estudo, a latência é tratada como aceitável
+para execução integrada, sem priorização de benchmarks detalhados.
+
+
+\subsection{Vantagens, Limitações e Riscos}
+
+\textbf{Vantagens}:
+\begin{itemize}
+    \item Execução direta em C++;
+    \item Uso do formato SavedModel amplamente difundido;
+    \item Integração com ecossistemas TensorFlow existentes.
+\end{itemize}
+
+\textbf{Limitações}:
+\begin{itemize}
+    \item API C++ menos madura e menos documentada;
+    \item Complexidade elevada de build e integração;
+    \item Menor ergonomia em comparação à API Python.
+\end{itemize}
+
+\textbf{Riscos Técnicos}:
+\begin{itemize}
+    \item Forte acoplamento ao sistema de build Bazel;
+    \item Mudanças frequentes na API interna;
+    \item Custo elevado de manutenção do ambiente.
+\end{itemize}
+
+\section{Vantagens e Limitações (Comparativo)}
+
+\subsection{Vantagens}
+\begin{verbatim}
+| Aspecto               | LibTorch  | TensorFlow C++ |
+| --------------------- | --------- | -------------- |
+| Execução nativa       | Sim       | Sim            |
+| Integração com C++    | Muito boa | Complexa       |
+| Toolchain             | CMake     | Bazel          |
+| Suporte oficial       | Forte     | Parcial        |
+| Inferência sem Python | Sim       | Sim            |
+
+\end{verbatim}
+
+\subsection{Limitações}
+\begin{verbatim}
+| Aspecto              | LibTorch | TensorFlow C++ |
+| -------------------- | -------- | -------------- |
+| Tamanho do runtime   | Grande   | Muito grande   |
+| Curva de aprendizado | Média    | Alta           |
+| Debug                | Médio    | Difícil        |
+| Documentação         | Boa      | Fragmentada    |
+| Portabilidade        | Média    | Baixa          |
+
+\end{verbatim}
+
+\section{Riscos Técnicos}
+
+\subsection{Riscos comuns a ambos}
+
+\subsubsection{Tamanho binário elevado} 
+
+Em runtimes nativas (LibTorch, TensorFlow C++), o binário final incorpora: runtime de ML, kernels (CPU/GPU), bibliotecas matemáticas (MKL, OpenMP, CUDA, cuDNN), código do modelo. Isso contrasta com Python, onde boa parte disso está fora do binário principal.
+
+Valores típicos observados na prática:
+\begin{verbatim}
+| Runtime               | Binário final (release, stripado) |
+| --------------------- | --------------------------------- |
+| Aplicação C++ simples | ~1 a 5 MB                         |
+| LibTorch (CPU only)   | ~30 a 80 MB                       |
+| LibTorch + CUDA       | ~200 a 400 MB                     |
+| TensorFlow C++ (CPU)  | ~80 a 150 MB                      |
+| TensorFlow C++ + CUDA | 300 MB ou mais                    |
+\end{verbatim}
+
+Esses números não são teóricos, são recorrentes em builds reais reportados por usuários e documentação.
+
+\subsubsection{Complexidade de build}
+
+Comparação direta (realista):
+\begin{verbatim}
+| Caso           | Build                        |
+| -------------- | ---------------------------- |
+| App C++ comum  | 1 CMakeLists.txt, gcc/clang  |
+| LibTorch       | CMake + toolchain compatível |
+| TensorFlow C++ | Bazel + CMake (integração)   |
+\end{verbatim}
+
+No LibTorch há uma complexidade moderada, pois o build exige: CMake maior versão específica, Compilador compatível com a build oficial, flags de ABI (Application Binary Interface) corretas, matching exato com CPU/GPU backend.
+
+Exemplo tipico de erro: undefined reference to c10::Error::what(), que pode se confundir com erro de código porém é uma incompatibilizado de build.
+
+No TensorFlow C+ há uma complexidade alta quando comparado a aplicações C++ tradicionais. Em particular, a integração com LibTorch requer alinhamento rigoroso entre compilador, flags de ABI (Application Binary Interface) e bibliotecas externas, enquanto a TensorFlow C++ API adiciona dependência de ferramentas específicas como Bazel, aumentando o esforço de configuração e manutenção do ambiente de build, além disso, gera bibliotecas que depois precisam ser linkadas via CMake, depende de versões de GCC, glic, protobuf e CUDA. Com isso podem ocorrer falhas por pequenas diferenças de ambiente.
+
+\subsubsection{Manutenção de dependências}
+A manutenção de dependências em runtimes nativas impõe maior carga operacional, pois atualizações de bibliotecas de baixo nível (como CUDA, cuDNN ou glibc) podem introduzir incompatibilidades binárias silenciosas. Diferentemente de ambientes interpretados, esses problemas frequentemente se manifestam apenas em tempo de execução.
+
+\subsubsection{Atualizações quebram ABI (Application Binary Interface)}
+ABI é a interface em nível binário, ou seja, como o código compilado “conversa” com bibliotecas compiladas. define como funções são chamadas, layout de objetos em memória, nomes mangled (C++) e convenções de exceção, alinhamento, tratamento de exceções, RTTI vtables. Se o ABI muda, binários deixam de ser compatíveis, mesmo que o código compile. TensorFlow é ainda mais sensível, pois não garante ABI estável, os builds são altamente acoplados ao ambiente e uma atualização menor pode exigir recompilar tudo novamente.
+Runtimes nativas em C++ não garantem estabilidade de ABI entre versões. Alterações internas no layout de classes, convenções de chamada ou flags de compilação podem invalidar binários previamente funcionais, exigindo recompilação completa da aplicação e de suas dependências.
+
+\subsection{Riscos específicos – LibTorch}
+
+\subsubsection{Mudanças na API entre versões}
+
+LibTorch é o runtime C++ oficial do PyTorch, mas não é uma API estável no mesmo sentido que bibliotecas C++ tradicionais (ex.: STL). O PyTorch evolui rapidamente, além de prioriza Python-first ele reflete mudanças internas no frontend C++ com frequência. 
+Essas mudanças ocorrem principalmente em major releases (ex.: 1.x → 2.x), em minor releases quando há refatorações internas e APIs de carregamento e execução de modelos.
+Os principais Impactos técnicos são Quebra de compilação (símbolos removidos ou renomeados), Mudança de semântica (comportamento diferente com mesmo código), Necessidade de refatoração do código C++, Rebuild completo do projeto Em ambientes regulados ou de ciclo longo (ex.: defesa, indústria), isso é um risco significativo.
+Em resumo, O LibTorch acompanha de perto a evolução do ecossistema PyTorch, o que implica em mudanças recorrentes na API C++ ao longo das versões. Tais alterações podem introduzir quebras de compatibilidade, exigindo adaptações no código cliente e recompilações completas, impactando projetos com requisitos de estabilidade de longo prazo.
+
+\subsubsection{Dependência forte do ecossistema PyTorch}
+
+LibTorch não é um runtime independente, ele é a materialização em C++ das decisões de design do PyTorch profundamente acoplado a operadores, autograd, representação de tensores e a mecanismos de exportação. Ou seja, Se algo muda no PyTorch, isso reverbera no LibTorch.
+
+Exemplos claros de acoplamento:
+
+\begin{itemize} 
+    \item Modelos precisam ser exportados via PyTorch;
+    \item Operadores customizados seguem o registro PyTorch;
+    \item Backend (CPU/GPU) depende do stack PyTorch (ATen, c10);
+\end{itemize}
+
+Impactos práticos: 
+
+\begin{itemize} 
+    \item Dificuldade de integrar modelos treinados fora do PyTorch;
+    \item Pouca flexibilidade para adotar outros formatos intermediários;
+    \item Dependência do ritmo e roadmap do PyTorch;
+    \item Menor isolamento entre treino e inferência.
+\end{itemize}
+
+Isso contrasta com runtimes como ONNX Runtime, que quebram o acoplamento entre framework de treino e runtime.
+
+Em resumo, a adoção do LibTorch implica forte dependência do ecossistema PyTorch, uma vez que o runtime herda diretamente suas abstrações, operadores e formatos de modelo. Essa dependência limita a interoperabilidade com outros frameworks e condiciona a evolução do sistema às decisões do projeto PyTorch.
+
+\subsubsection{TorchScript sendo gradualmente substituído}
+
+Embora TorchScript tenha sido historicamente o principal mecanismo para execução de modelos PyTorch fora do ambiente Python, sua relevância tem diminuído com a introdução de novos fluxos de exportação e compilação no PyTorch 2.x. Essa transição introduz incertezas quanto à longevidade do suporte a TorchScript como base para runtimes C++.
+\begin{verbatim}
+| Risco                    | Descrição                                     |
+| ------------------------ | --------------------------------------------- |
+| Mudanças de API          | Quebras entre versões e refatoração frequente |
+| Acoplamento ao PyTorch   | Dependência total do ecossistema              |
+| TorchScript em transição | Incerteza de longo prazo                      |
+| Roadmap                  | Inferência C++ não é prioridade central       |
+\end{verbatim}
+
+Apesar de oferecer execução nativa em C++, o LibTorch apresenta riscos técnicos associados à evolução rápida do ecossistema PyTorch, incluindo instabilidade de API, forte acoplamento arquitetural e mudanças nos fluxos recomendados de exportação de modelos. Esses fatores devem ser considerados na avaliação de sua viabilidade em sistemas de longo ciclo de vida.
+
+\subsection{Riscos específicos – TensorFlow C++ API}
+
+\subsubsection{API C++ não é first-class citizen}
+
+A API C++ do TensorFlow não é tratada como um componente de primeira classe do framework, sendo majoritariamente voltada a usos internos e a integração com bindings. Como consequência, seu uso direto em aplicações apresenta maior complexidade e menor previsibilidade de suporte quando comparado à API Python.
+No TensorFlow, a API principal é a Python, a API C++ existe, mas foi concebida principalmente para
+uso interno do TensorFlow, bindings e integração em sistemas específicos (serving, runtime).
+Diferente do PyTorch, o fluxo padrão de uso não passa pelo C++.
+A documentação oficial é majoritariamente Python e Muitos exemplos em C++ são antigos, incompletos e não cobrem casos reais além do que Algumas APIs C++ não são oficialmente estáveis.
+
+Impactos práticos: 
+
+\begin{itemize} 
+    \item Curva de aprendizado elevada;
+    \item Maior dependência de código interno;
+    \item Maior risco de APIs não documentadas;
+    \item Menor previsibilidade de suporte futuro.
+\end{itemize}
+
+A API C++ do TensorFlow não é tratada como um componente de primeira classe do framework, sendo majoritariamente voltada a usos internos e a integração com bindings. Como consequência, seu uso direto em aplicações apresenta maior complexidade e menor previsibilidade de suporte quando comparado à API Python.
+
+\subsubsection{Build via Bazel aumenta custo operacional}
+
+TensorFlow utiliza Bazel como sistema de build principal, isso emplica em uso de uma ferramenta adicional e obrigatória. Consequentemente uma curva de aprendizagem elevada, com isso usar TensorFlow C++ dentro de um projeto CMake exige trabalho manual, conhecimento do build interno do TensorFlow e manutenção contínua.
+
+Impactos reais:
+
+\begin{itemize} 
+    \item Builds longos (20–60 minutos);
+    \item Builds frágeis a pequenas mudanças de ambiente;
+    \item Dificuldade de reprodução do ambiente;
+    \item Integração complexa em pipelines CI/CD.
+\end{itemize}
+
+O uso do Bazel como sistema de build principal do TensorFlow impõe custos operacionais adicionais, especialmente em ambientes C++ tradicionais baseados em CMake. A necessidade de manter toolchains e dependências alinhadas aumenta a complexidade do processo de integração e manutenção.
+
+\subsubsection{Exemplos e documentação inconsistentes}
+
+A documentação e os exemplos disponíveis para a API C++ do TensorFlow apresentam inconsistências e lacunas significativas, dificultando a reprodução de fluxos completos de inferência e aumentando o esforço necessário para adoção segura da tecnologia.
+
+Impactos técnicos:
+
+\begin{itemize} 
+    \item Tempo elevado de experimentação;
+    \item Código de referência pouco confiável;
+    \item Maior dependência de leitura do código-fonte.
+\end{itemize}
+
+\subsubsection{Suporte parcial a recursos avançados}
+
+O modo eager é central no TensorFlow moderno, mas o suporte em C++ é limitado, não é tão flexível quanto em Python e muitos fluxos assumem grafo estático. Isso limita a extensibilidade do runtime em aplicações C++ e aumenta os custos de desenvolvimento e manutenção.
+
+\subsubsection{Resumo dos riscos específicos – TensorFlow C++ API}
+
+\begin{verbatim}
+| Risco                    | Descrição                         |
+| ------------------------ | --------------------------------- |
+| API não prioritária      | C++ não é foco principal          |
+| Build complexo           | Bazel aumenta custo operacional   |
+| Documentação frágil      | Exemplos inconsistentes           |
+| Extensibilidade limitada | Custom ops e eager mode restritos |
+| Estabilidade             | APIs internas e não estáveis      |
+
+\end{verbatim}
+
+\subsubsection{Conclusão técnica (comparável ao LibTorch)}
+
+Apesar de permitir execução direta de modelos em C++, a API C++ do TensorFlow apresenta riscos técnicos relevantes associados à sua posição secundária no ecossistema, à complexidade do processo de build e à limitação de suporte a recursos avançados. Esses fatores reduzem sua atratividade para projetos que demandam estabilidade, extensibilidade e manutenção simplificada.
+
+
+
+
+
+\section{Avaliação Preliminar de Aderência ao Contexto do Projeto}
+
+Considerando o contexto do projeto, no qual a aplicação final é desenvolvida em C++ e
+os modelos de aprendizado de máquina são majoritariamente treinados em PyTorch, a
+adoção de runtimes nativas apresenta diferentes níveis de aderência.
+
+O uso do LibTorch mostra-se tecnicamente viável e mais alinhado ao cenário dominante,
+uma vez que permite a execução direta de modelos PyTorch em C++, sem dependência do
+runtime Python ou de camadas intermediárias. A integração com CMake, o suporte oficial
+e a maturidade do ecossistema tornam essa abordagem possível para a maioria dos modelos
+atualmente utilizados no projeto.
+
+Entretanto, a dependência do formato TorchScript e as mudanças recentes no fluxo de
+exportação do PyTorch introduzem incertezas quanto à estabilidade de longo prazo.
+Adicionalmente, modelos treinados fora do ecossistema PyTorch, como aqueles baseados
+em Beaver Tree implementado em C++, não são naturalmente compatíveis com o LibTorch,
+exigindo estratégias adicionais de tradução ou padronização.
+
+Por outro lado, a utilização da TensorFlow C++ API apresenta baixa aderência ao
+contexto do projeto. Além de exigir a conversão dos modelos PyTorch para o ecossistema
+TensorFlow, essa abordagem introduz maior complexidade de build, custos operacionais
+e dependência de um runtime cujo suporte em C++ não é prioritário.
+
+Dessa forma, conclui-se que o LibTorch é uma solução possível para a execução direta de modelos PyTorch em C++, enquanto a TensorFlow C++ API não se apresenta como uma alternativa adequada para o contexto atual. No entanto, para suportar modelos heterogêneos, torna-se necessária a avaliação futura de mecanismos adicionais de padronização ou tradução de modelos.
+
+ \section{Conclusão}
+
+Este estudo investigou a viabilidade da execução direta de modelos de aprendizado de
+máquina em aplicações C++ por meio do uso de runtimes nativas, com foco no LibTorch e
+na TensorFlow C++ API, buscando eliminar a dependência de camadas intermediárias como
+runtimes interpretados ou serviços externos de inferência.
+
+A análise demonstrou que a execução nativa de modelos em C++ é tecnicamente possível
+e madura do ponto de vista funcional, com fluxos de exportação, carregamento e
+inferência bem definidos em ambos os ecossistemas avaliados. Em termos de latência,
+os resultados reportados na literatura indicam ordens de grandeza compatíveis com
+aplicações integradas, reforçando a viabilidade dessa abordagem quando o desempenho
+não é o principal fator de decisão.
+
+Entretanto, a avaliação detalhada evidenciou diferenças significativas entre os
+runtimes analisados. O LibTorch mostrou-se mais aderente a cenários nos quais os modelos
+são majoritariamente treinados em PyTorch, oferecendo integração relativamente direta
+com aplicações C++ via CMake e permitindo inferência sem dependência do runtime Python.
+Por outro lado, essa abordagem introduz riscos técnicos relevantes, como forte
+acoplamento ao ecossistema PyTorch, instabilidade de API entre versões e incertezas
+associadas à evolução dos mecanismos de exportação, em especial a transição gradual do
+TorchScript.
+
+A TensorFlow C++ API, embora permita a execução nativa de modelos no formato SavedModel,
+apresenta menor aderência a contextos C++ tradicionais. A posição secundária da API C++
+no ecossistema TensorFlow, aliada à complexidade do processo de build baseado em Bazel,
+à documentação fragmentada e ao suporte limitado a recursos avançados, resulta em um
+custo operacional elevado e maior risco para projetos que demandam estabilidade e
+manutenção de longo prazo.
+
+De forma geral, conclui-se que o uso de runtimes nativas é uma estratégia viável para
+execução direta de modelos de aprendizado de máquina em C++, especialmente quando há
+alinhamento entre o framework de treinamento e o runtime de inferência. No contexto
+avaliado, o LibTorch se apresenta como uma solução possível e mais coerente com o
+ecossistema predominante, enquanto a TensorFlow C++ API não se mostra adequada como
+alternativa principal.
+
+Por fim, o estudo evidencia que a principal limitação para a adoção ampla de runtimes
+nativas não reside apenas na execução, mas na heterogeneidade dos modelos e na ausência
+de um mecanismo universal de padronização. Trabalhos futuros devem explorar estratégias
+de interoperabilidade, como formatos intermediários ou runtimes independentes de
+framework, de modo a reduzir o acoplamento tecnológico e ampliar a flexibilidade da
+arquitetura de integração.
+
+
+
+%\end{document}

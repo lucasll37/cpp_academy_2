@@ -1,0 +1,44 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{setspace} % Spacing between the lines.
+\usepackage{mathptmx} % Setting the font family to the Times New Roman.
+\usepackage{geometry} % Margins definition package.
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\geometry{a4paper, left=2cm, right=2cm, bottom=4cm, top=3cm} % Margins definition.
+\setstretch{1.5} % Defining the spacing to 1.5.
+\setlength{\parindent}{0pt}
+\pagestyle{fancy}
+
+
+\input{commands}
+
+\def\projectname{ASA$^{2}$/MIIA - Mecanismos de Interoperabilidade entre Modelos de Inteligência Artificial e Agentes Autônomos em Simuladores Construtivos}
+\def\title{{Relatório do estudo de Runtimes Nativas (Libtorch e TensorFlow C++ API)}}
+\def\companyname{Instituto de Estudos Avançados (IEAv)}
+\def\version{{1.0}}
+\def\datereview{29/01/2026}
+\def\documentid{Documento n\textsuperscript{o} ASA2/MIIA/{004 (verificar numeração correta)}}
+
+\begin{document}
+
+\input{content/cover}
+
+\newpage
+
+\input{content/revision}
+
+\newpage
+
+\renewcommand{\contentsname}{\centering\huge\textbf{Sumário}}
+\tableofcontents
+
+\newpage
+
+\input{content/doc}
+
+\end{document}
