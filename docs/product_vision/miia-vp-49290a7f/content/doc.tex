@@ -4,7 +4,7 @@
 
 \section{Introdução}
 
-O propósito deste documento é coletar, analisar e definir as necessidades de alto nível e as principais \emph{features} do ASA\textsuperscript{2}/MIIA. O documento foca nas capacidades necessárias aos \emph{stakeholders} e usuários-alvo para viabilizar a interoperabilidade entre modelos de inteligência artificial (IA) treinados externamente e agentes autônomos executados em simuladores construtivos, com ênfase em cenários nos quais o simulador construtivo está integrado a ambientes de simulação virtual. Os detalhes de como o ASA\textsuperscript{2}/MIIA atende essas necessidades são especificados em artefatos complementares, incluindo casos de uso, \emph{user stories} e documentação suplementar.
+O propósito deste documento é coletar, analisar e definir as necessidades de alto nível e as principais \emph{features} do MIIA. O documento foca nas capacidades necessárias aos \emph{stakeholders} e usuários-alvo para viabilizar a interoperabilidade entre modelos de inteligência artificial (IA) treinados externamente e agentes autônomos executados em simuladores construtivos, com ênfase em cenários nos quais o simulador construtivo está integrado a ambientes de simulação virtual. Os detalhes de como o MIIA atende essas necessidades são especificados em artefatos complementares, incluindo casos de uso, \emph{user stories} e documentação suplementar.
 
 \subsection{Referências}
 
@@ -67,7 +67,7 @@ Em conjunto, essas propriedades viabilizam a interoperabilidade controlada entre
             \textbf{Que} &
             Enfrentam dificuldades técnicas ao empregar diferentes modelos de IA treinados externamente em agentes já implementados no simulador construtivo, resultando em acoplamento excessivo, dificuldades de validação e elevado custo de manutenção. \\
         \hline
-            \textbf{O ASA$^{2}$/MIIA} &
+            \textbf{O MIIA} &
             É um mecanismo especializado de interoperabilidade entre modelos de IA e agentes autônomos executados em simuladores construtivos. \\
         \hline
             \textbf{Que} &
@@ -84,7 +84,7 @@ Em conjunto, essas propriedades viabilizam a interoperabilidade controlada entre
 
 \subsection{Limites e Não-Objetivos do Produto}
 
-O ASA\textsuperscript{2}/MIIA não se propõe a:
+O MIIA não se propõe a:
 
 \begin{itemize}
     \item Integrar-se diretamente a simuladores virtuais ou substituir mecanismos de acoplamento entre simuladores construtivos e ambientes de simulação virtual, atuando exclusivamente no contexto do simulador construtivo.
@@ -127,18 +127,18 @@ Esta seção descreve os principais \emph{stakeholders} e usuários envolvidos n
               
         \textbf{Engenheiro de Simulação} &
         Responsável pela configuração e manutenção do simulador construtivo &
-        Utiliza o ASA\textsuperscript{2}/MIIA para estabelecer e manter a interoperabilidade entre modelos de IA e agentes autônomos, assegurando compatibilidade, estabilidade temporal e correto funcionamento no ciclo de simulação \\ \hline
+        Utiliza o MIIA para estabelecer e manter a interoperabilidade entre modelos de IA e agentes autônomos, assegurando compatibilidade, estabilidade temporal e correto funcionamento no ciclo de simulação \\ \hline
 
     \end{tabular}
 \end{table}
 
 \subsection{Ambiente de Usuário}
 
-Os usuários operam predominantemente em estações de trabalho Linux, integradas ao ambiente institucional do ASA\textsuperscript{2}.
+Os usuários operam predominantemente em estações de trabalho Linux, integradas ao ambiente institucional do IEAv.
 
 \subsubsection{Engenheiro de Simulação}
 
-O Engenheiro de Simulação atua na configuração, operação e manutenção do simulador construtivo, sendo o principal usuário do ASA\textsuperscript{2}/MIIA. Suas atividades incluem a incorporação e substituição de modelos de inteligência artificial utilizados pelos agentes autônomos, a configuração de parâmetros de execução e a verificação do correto funcionamento do mecanismo no ciclo de simulação.
+O Engenheiro de Simulação atua na configuração, operação e manutenção do simulador construtivo, sendo o principal usuário do MIIA. Suas atividades incluem a incorporação e substituição de modelos de inteligência artificial utilizados pelos agentes autônomos, a configuração de parâmetros de execução e a verificação do correto funcionamento do mecanismo no ciclo de simulação.
 
 \subsection{Resumo das Principais Necessidades dos \emph{Stakeholders} e Usuários}
 
@@ -184,7 +184,7 @@ As necessidades a seguir refletem dois eixos complementares: (i) propriedades cr
 
 \subsection{Alternativas e Competição}
 
-No contexto do ASA\textsuperscript{2}, diferentes abordagens técnicas podem ser consideradas para viabilizar a interoperabilidade entre modelos de inteligência artificial e agentes autônomos no ciclo de simulação construtiva, incluindo cenários nos quais o simulador construtivo encontra-se integrado a ambientes de simulação virtual. Essas abordagens representam alternativas tecnológicas viáveis, porém com diferentes compromissos em termos de desempenho temporal, determinismo, acoplamento e reprodutibilidade.
+Diferentes abordagens técnicas podem ser consideradas para viabilizar a interoperabilidade entre modelos de inteligência artificial e agentes autônomos no ciclo de simulação construtiva, incluindo cenários nos quais o simulador construtivo encontra-se integrado a ambientes de simulação virtual. Essas abordagens representam alternativas tecnológicas viáveis, porém com diferentes compromissos em termos de desempenho temporal, determinismo, acoplamento e reprodutibilidade.
 
 As principais classes de alternativas incluem:
 
@@ -198,17 +198,17 @@ As principais classes de alternativas incluem:
     \item \textbf{\emph{Embedding} de Python em aplicações C++}: possibilita acesso direto a modelos e ecossistemas de treinamento amplamente utilizados. No entanto, essa estratégia apresenta elevado acoplamento, dificuldades de depuração e riscos à estabilidade e à manutenção do simulador.
 \end{itemize}
 
-Embora cada uma dessas alternativas apresente vantagens em contextos específicos, nenhuma atende simultaneamente aos requisitos de determinismo, previsibilidade temporal, baixa latência, reprodutibilidade e baixo acoplamento exigidos pelo ambiente de simulação construtiva do ASA\textsuperscript{2}. O ASA\textsuperscript{2}/MIIA posiciona-se como uma solução especializada que busca endereçar essas limitações de forma coerente com o domínio de simulação construtiva.
+Embora cada uma dessas alternativas apresente vantagens em contextos específicos, nenhuma atende simultaneamente aos requisitos de determinismo, previsibilidade temporal, baixa latência, reprodutibilidade e baixo acoplamento exigidos pelo ambiente de simulação construtiva. O MIIA posiciona-se como uma solução especializada que busca endereçar essas limitações de forma coerente com o domínio de simulação construtiva.
 
 \section{\emph{Overview} do Produto}
 
 \subsection{Perspectiva do Produto}
 
-O ASA\textsuperscript{2}/MIIA é um componente de infraestrutura especializado em prover interoperabilidade entre modelos de inteligência artificial e agentes autônomos executados em simuladores construtivos. Ele opera diretamente no ciclo de simulação, assegurando determinismo, previsibilidade temporal, rastreabilidade e uma interface padronizada entre modelos externos e agentes internos ao simulador.
+O MIIA é um componente de infraestrutura especializado em prover interoperabilidade entre modelos de inteligência artificial e agentes autônomos executados em simuladores construtivos. Ele opera diretamente no ciclo de simulação, assegurando determinismo, previsibilidade temporal, rastreabilidade e uma interface padronizada entre modelos externos e agentes internos ao simulador.
 
-O ASA\textsuperscript{2}/MIIA não substitui o simulador nem os \emph{pipelines} de treinamento de IA; atua como uma camada especializada responsável por garantir propriedades críticas de execução, alinhada às diretrizes institucionais do ASA\textsuperscript{2} para interoperabilidade padronizada de modelos de IA.
+O MIIA não substitui o simulador nem os \emph{pipelines} de treinamento de IA; atua como uma camada especializada responsável por garantir propriedades críticas de execução, alinhada às diretrizes institucionais para interoperabilidade padronizada de modelos de IA.
 
-No contexto do ASA\textsuperscript{2}, esses mecanismos são empregados prioritariamente em ambientes nos quais o simulador construtivo encontra-se integrado a simuladores virtuais, impondo requisitos adicionais de previsibilidade temporal e estabilidade operacional.
+Esses mecanismos são empregados prioritariamente em ambientes nos quais o simulador construtivo encontra-se integrado a simuladores virtuais, impondo requisitos adicionais de previsibilidade temporal e estabilidade operacional.
 
 \subsection{Suposições e Dependências}
 
