@@ -1,0 +1,513 @@
+\begin{center}
+    \textbf{\Huge Visão de Produto}
+\end{center}
+
+\section{Introdução}
+A integração entre linguagens de programação tem se tornado uma abordagem recorrente no desenvolvimento de sistemas modernos, especialmente quando se busca combinar alto desempenho computacional com flexibilidade e rapidez no desenvolvimento. Nesse contexto, o uso de soluções híbridas envolvendo linguagens compiladas, como C++, e linguagens interpretadas, como Python, vem ganhando destaque em diversas áreas, incluindo computação científica, simulação, inteligência artificial e sistemas extensíveis.
+
+Uma das estratégias mais utilizadas para essa integração é o \textit{embedding} do interpretador Python em aplicações C++, permitindo que código Python seja executado diretamente dentro de um programa nativo. Essa abordagem possibilita o uso do ecossistema Python para controle de fluxo, configuração e extensibilidade, enquanto o núcleo da aplicação permanece implementado em C++ visando desempenho e controle de recursos.
+
+Entretanto, a adoção de uma solução híbrida baseada em embedding Python introduz desafios técnicos relevantes, como aumento de complexidade no \emph{runtime}, impacto na latência, gerenciamento de \\memória e concorrência, além de riscos associados à manutenção e compatibilidade entre versões. Dessa forma, torna-se necessário avaliar de maneira criteriosa a viabilidade técnica dessa abordagem.
+
+Esse relatório tem como objetivo analisar o uso do embedding do interpretador Python em aplicações C++, descrevendo seu funcionamento geral, o fluxo de chamadas entre as linguagens, seus requisitos de execução, vantagens, limitações e riscos técnicos, com o intuito de fornecer subsídios para a tomada de decisão quanto à adoção dessa arquitetura em sistemas de software.
+
+
+
+\subsection{Referências}
+
+\begin{itemize}
+   \item PYTHON SOFTWARE FOUNDATION. Extending and Embedding the Python Interpreter. Python Documentation, 2024. Disponível em: https://docs.python.org/3/extending/;
+
+   \item PYTHON SOFTWARE FOUNDATION. Python/C API Reference Manual. Python Documentation, 2024. Disponível em: https://docs.python.org/3/c-api/;
+
+   \item VAN ROSSUM, G.; DRAKE, F. L. The Python Language Reference Manual. Network Theory Ltd., 2011.
+
+   \item ABRAHAM, J.; JOYCE, P. C and Python Applications: Embedding Python Code in C Programs. Apress, 2021.
+
+   \item BAYER, R.; GROSSER, B. Embedding Python in C++ Applications for Scientific Computing. Computing in Science \& Engineering, IEEE, v.19, n.3, 2017.
+
+   \item KUNDU, B.; VASSILEV, V.; LAVRIJSEN, W. Efficient and Accurate Automatic Python Bindings with cppyy \& Cling. arXiv preprint arXiv:2304.02712, 2023.
+
+   \item BOOST COMMUNITY. Boost.Python Documentation: Embedding Python. Boost C++ Libraries Documentation, 2023. Disponível em: https://www.boost.org/doc/libs/release/libs/python\\/doc/html/tutorial/embedding.html;
+
+   \item KREKEL, H.; OLIVEIRA, B. Using Embedded Python for Extensible C++ Systems. Proceedings of the EuroPython Conference, 2019.
+
+   \item LATTNER, C.; ADVE, V. LLVM: A Compilation Framework for Lifelong Program Analysis \& Transformation. Proceedings of the International Symposium on Code Generation and Optimization (CGO), 2004. (Referência indireta para integração C++/Python em sistemas híbridos).
+
+   \item STACK OVERFLOW COMMUNITY. Discussions on Embedding Python Interpreter in \\C/C++. Stack Overflow Documentation Archive, 2023.
+
+   \item HACKER NEWS COMMUNITY. Discussion on Python startup and initialization overhead. Hacker News, 2024. Disponível em: https://news.ycombinator.com/item?id=46230192.
+    
+   \item Function call overhead benchmarks with MATLAB, Octave, Python, Cython and C — André Gaul (2012)
+
+   \item PYTHON PERFORMANCE BENCHMARK SUITE. Startup benchmarks (grupo “startup”) medem tempo de inicialização do interpretador Python em milissegundos. pyperformance.\\readthedocs.io. Disponível em: https://pyperformance.readthedocs.io/benchmarks.html\\.:contentReference[oaicite:8]{index=8}
+
+   \item ZHANG, Q. et al. Quantifying the interpretation overhead of Python. Science of Computer Programming, v.215, p.102759, 2022 — estudo empírico sobre o overhead de execução de Python CPython. :contentReference[oaicite:9]{index=9}
+
+   \item GAUL, A. Function call overhead benchmarks with MATLAB, Octave, Python, Cython and C. arXiv preprint, 2012 — comparativo de overhead de chamada de funções em Python vs C. :contentReference[oaicite:10]{index=10}
+
+   \item MANDAL, M.; SHENDE, S. Mitigating GIL Bottlenecks in Edge AI Systems. arXiv preprint, 2026 — demonstra que o GIL impacta a escalabilidade do throughput em Python CPU-bound. :contentReference[oaicite:11]{index=11}
+
+
+\end{itemize}
+
+
+\section{Embedding do Interpretador Python em C++}
+
+\subsection{Descrição geral do funcionamento do embedding Python em C++}
+
+O \textit{embedding} de Python em C++ consiste na incorporação do interpretador Python dentro de uma aplicação nativa escrita em C ou C++, permitindo que código Python seja executado como parte do fluxo da aplicação hospedeira. Diferentemente do modelo de \textit{extensão}, no qual módulos C++ são carregados pelo interpretador Python, no embedding o controle principal da execução permanece no programa C++.
+
+O processo de embedding é realizado por meio da API oficial do Python (Python C API), disponibilizada pela biblioteca \texttt{libpython}. Essa API fornece funções para inicialização do interpretador, execução de código Python, manipulação de objetos Python e controle do ambiente de execução.
+
+De forma geral, o funcionamento do embedding segue os passos seguinte.
+%\begin{enumerate}
+    \subsubsection {Inicialização do interpretador Python por meio da função \texttt{Py\_Initialize()}:}
+    Quando é chamado o \texttt{Py\_Initialize()} o \emph{runtime} do Python é carregado na memória do processo C++, o heap interno do Python é inicializado, módulos built-in são registrados, o Global Interpreter Lock (GIL) é criado, e o interpretador entra em estado pronto para executar código Python. A partir desse ponto, qualquer uso da Python C API é válido. Sem essa chamada, qualquer função da API resulta em undefined behavior. \\
+    Exemplo prático mínimo:
+    \begin{verbatim}
+    #include <Python.h>
+    
+    int main() {
+        Py_Initialize();
+    
+        //  código Python
+    
+        Py_Finalize();
+        return 0;
+    }
+    \end{verbatim}
+     \subsubsection { Configuração opcional do ambiente de execução (caminhos de módulos, variáveis globais, importação de bibliotecas):}
+    Antes (ou logo após) inicializar o interpretador, pode-se definir onde o Python vai procurar módulos (sys.path), variáveis globais, módulos que devem ser carregados automaticamente e ambiente isolado (sem site-packages do sistema).
+    \newline\newline
+    Exemplo 2.1 - Ajustando sys.path: 
+    \begin{verbatim}
+    #include <Python.h>
+    
+    int main() {
+        Py_Initialize();
+    
+        PyRun_SimpleString(
+            "import sys\n"
+            "sys.path.append('./scripts')\n"
+        );
+    
+        Py_Finalize();
+        return 0;
+    }
+    \end{verbatim}
+    Exemplo 2.2 — Definindo variáveis globais
+    \begin{verbatim}
+    PyRun_SimpleString(
+        "GLOBAL_SCALE = 42\n"
+    );
+     \end{verbatim}
+     Exemplo 2.3 — Importando bibliotecas Python
+     \begin{verbatim}
+    PyRun_SimpleString(
+        "import math\n"
+        "import numpy as np\n"
+    );
+     \end{verbatim}
+     
+    \subsubsection { Execução de código Python a partir do C++, seja via strings, arquivos ou chamadas diretas a funções Python: Existem três formas principais.}
+
+   Exemplo 3.1- Executar código Python via string:
+     \begin{verbatim}
+    PyRun_SimpleString(
+        "print('Hello from embedded Python')\n"
+        "x = 10 + 20\n"
+    );
+     \end{verbatim}
+    Simples, porém difícil de depurar em códigos grandes.
+    \newline\newline
+    Exemplo 3.2- Executar um arquivo Python
+    \begin{verbatim}
+    FILE* fp = fopen("script.py", "r");
+    PyRun_SimpleFile(fp, "script.py");
+    fclose(fp);
+    \end{verbatim} 
+    Ideal para aplicações reais. É muito usado engines, simuladores, ferramentas extensíveis.
+    \newline\newline
+    3.3- Chamar uma função Python diretamente.\\
+     Em Python:
+     \begin{verbatim}
+      def soma(a, b):
+            return a + b
+     \end{verbatim} 
+     Em C++
+      \begin{verbatim}
+    PyObject *pName, *pModule, *pFunc;
+    PyObject *pArgs, *pValue;
+
+    pName = PyUnicode_FromString("mymodule");
+    pModule = PyImport_Import(pName);
+
+    pFunc = PyObject_GetAttrString(pModule, "soma");
+
+    pArgs = PyTuple_Pack(2,
+        PyLong_FromLong(3),
+        PyLong_FromLong(5)
+    );
+    
+    pValue = PyObject_CallObject(pFunc, pArgs);
+    
+    // pValue contém o retorno Python
+    
+      \end{verbatim} 
+     
+     \subsubsection { Conversão de dados entre os tipos C++ e Python: Python trabalha com PyObject*, dessa forma é necessário converter:}
+    \begin{table}[h]
+    \centering
+    \caption{Mapeamento de tipos entre C++ e Python (C API)}
+    \begin{tabular}{|l|l|}
+    \hline
+    \textbf{C++} & \textbf{Python} \\ \hline
+    int & PyLong \\ \hline
+    double & PyFloat \\ \hline
+    string & PyUnicode \\ \hline
+    vector & PyList / PyTuple \\ \hline
+    \end{tabular}
+    \end{table}
+    Exemplo 4.1 - C++ → Python
+ \begin{verbatim}
+    int x = 10;
+    PyObject* pyX = PyLong_FromLong(x);
+    
+    double y = 3.14;
+    PyObject* pyY = PyFloat_FromDouble(y);
+ \end{verbatim} 
+
+    Exemplo 4.2 — Python → C++
+    \begin{verbatim}
+    long result = PyLong_AsLong(pValue);
+    \end{verbatim} 
+
+    Exemplo 4.3 — Vetor C++ para lista Python
+    \begin{verbatim}
+    std::vector<int> v = {1, 2, 3};
+    PyObject* pyList = PyList_New(v.size());
+    for (size_t i = 0; i < v.size(); i++) {
+        PyList_SetItem(pyList, i, PyLong_FromLong(v[i]));
+    }
+    \end{verbatim} 
+    
+     \subsubsection { Finalização do interpretador com \texttt{Py\_Finalize()} ao término da aplicação:}
+     O comando  \texttt{Py\_Finalize()} é obrigatório ao final da aplicação, pois ele encerra o interpretador, libera memória interna do Python, destrói o GIL e executa finalizadores. Depois disso, nenhuma função Python pode ser chamada, pois não é não é seguro reinicializar o Python em muitos cenários.
+\\
+    Exemplo:
+     \begin{verbatim}
+    Py_Initialize();
+
+    // uso do Python
+
+    Py_Finalize();
+\end{verbatim} 
+
+    
+%\end{enumerate}
+
+Esse modelo permite que a aplicação C++ utilize Python como uma linguagem de script embarcada, responsável por lógica de alto nível, configuração, automação ou extensibilidade dinâmica.
+
+\subsection{Fluxo de chamada de funções Python a partir do C++}
+
+O fluxo típico de chamada de funções Python a partir do C++ envolve uma sequência bem definida de operações utilizando a Python C API. Esse fluxo pode ser descrito da seguinte forma:
+%\begin{enumerate}
+
+   \subsubsection{ Inicialização do interpretador Python (\texttt{Py\_Initialize}):}
+    Antes de qualquer interação com Python, o interpretador deve ser inicializado.
+Isso prepara o o \emph{runtime} do Python, o sistema de módulos, o gerenciamento de memória,o GIL (Global Interpreter Lock).  Sem essa etapa, qualquer chamada subsequente é inválida.
+\begin{verbatim}
+    #include <Python.h>
+
+    int main() {
+        Py_Initialize();
+    
+        //  código Python
+    
+        Py_Finalize();
+        return 0;
+    }
+\end{verbatim} 
+   
+    \subsubsection{ Importação do módulo Python desejado utilizando  \texttt{PyImport\_ImportModule}:}
+    Para chamar uma função Python, o módulo que a contém deve ser carregado na memória.
+O Python trata módulos como objetos (PyObject*).\\
+Exemplo prático:
+\begin{verbatim}
+    PyObject* pModule = PyImport_ImportModule("mymodule");
+\end{verbatim} 
+Forma equivalente (mais explícita):
+\begin{verbatim}
+    PyObject* pName = PyUnicode_FromString("mymodule");
+    PyObject* pModule = PyImport_Import(pName);
+    Py_DECREF(pName);
+\end{verbatim} 
+
+    \subsubsection{Recuperação do objeto correspondente à função Python por meio de\\ \texttt{PyObject\_GetAttrString}:}
+    No Python, funções são atributos de módulos.Esse passo obtém uma referência direta à função desejada. \\
+Exemplo prático:
+\begin{verbatim}
+    PyObject* pFunc = PyObject_GetAttrString(pModule, "processa");
+\end{verbatim} 
+
+Após isso, é importante verificar se o objeto é chamável:
+\begin{verbatim}
+    if (!PyCallable_Check(pFunc)) {
+        // erro: objeto não é função
+    }
+\end{verbatim} 
+Observação técnica: Se o nome da função estiver errado, o retorno será NULL, e erros  só aparecem corretamente se exceções forem tratadas.
+
+    \subsubsection{ Preparação dos argumentos em estruturas do tipo PyObject\\ (como tuplas ou dicionários):}
+    Python espera argumentos em estruturas próprias, como argumentos posicionais → PyTuple
+e argumentos nomeados → PyDict. O C++ deve converter seus tipos nativos explicitamente.
+
+Exemplo prático — argumentos posicionais:
+\begin{verbatim}
+    PyObject* pArgs = PyTuple_New(2);
+    PyTuple_SetItem(pArgs, 0, PyLong_FromLong(4));
+    PyTuple_SetItem(pArgs, 1, PyLong_FromLong(5));
+\end{verbatim} 
+Exemplo com dicionário (keyword arguments):
+\begin{verbatim}
+    PyObject* pKwargs = PyDict_New();
+    PyDict_SetItemString(pKwargs, "a", PyLong_FromLong(4));
+    PyDict_SetItemString(pKwargs, "b", PyLong_FromLong(5));
+\end{verbatim}
+
+    \subsubsection{ Chamada da função Python utilizando \texttt{PyObject\_CallObject} ou funções equivalentes:}
+Esse é o ponto em que ocorre a transição C++ → Python, o interpretador executa bytecode, o GIL é utilizado e exceções Python podem ser geradas.\\
+Exemplo:
+\begin{verbatim}
+    PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
+\end{verbatim}
+
+Exemplo com argumentos nomeados:
+\begin{verbatim}
+    PyObject* pResult = PyObject_Call(pFunc, pArgs, pKwargs);
+\end{verbatim}
+
+    
+    \subsubsection{ Conversão do valor de retorno de Python para tipos C++ nativos:} 
+    O valor retornado é sempre um PyObject*, dessa forma ,cabe ao C++ convertê-lo para um tipo nativo.
+
+Exemplo:
+\begin{verbatim}
+  long resultado = PyLong_AsLong(pResult);
+\end{verbatim}
+
+Exemplo com float:
+\begin{verbatim}
+  double resultado = PyFloat_AsDouble(pResult);
+\end{verbatim}
+
+Exemplo com string:
+\begin{verbatim}
+  const char* texto = PyUnicode_AsUTF8(pResult);
+\end{verbatim}
+    
+   \subsubsection {Tratamento de exceções Python no lado C++:}
+Python não lança exceções C++, se algo der errado, o erro fica armazenado no interpretador. \\
+Exemplo:
+\begin{verbatim}
+     if (!pResult) {
+        PyErr_Print();
+    }
+\end{verbatim}
+
+Forma robusta:
+\begin{verbatim}
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+    }
+\end{verbatim}
+
+   
+   \subsubsection{ Liberação adequada de referências \texttt{Py\_DECREF} para evitar vazamentos de memória:}
+    Python usa contagem de referências, não garbage collection tradicional.
+Cada PyObject* criado deve ser liberado explicitamente, esquecer \texttt{Py\_DECREF}  ocorre vazamento de memória.\\
+    Exemplo:
+    \begin{verbatim}
+    Py_DECREF(pArgs);
+    Py_DECREF(pFunc);
+    Py_DECREF(pModule);
+    Py_DECREF(pResult);
+\end{verbatim}
+    %\end{enumerate}
+
+
+Esse fluxo evidencia que cada chamada entre C++ e Python envolve camadas adicionais de abstração, conversão de tipos e controle explícito de memória, o que impacta diretamente a latência e a complexidade do código.
+
+\subsection{Requisitos de \emph{runtime}}
+
+O uso de embedding Python em C++ impõe alguns requisitos específicos de \emph{runtime}:
+
+\begin{itemize}
+    \item Presença da biblioteca \texttt{libpython} compatível com a versão do Python utilizada;
+    \item Disponibilidade do \emph{runtime} Python (bibliotecas padrão e dependências externas);
+    \item Compatibilidade de arquitetura (32/64 bits) entre a aplicação C++ e o interpretador Python;
+    \item Configuração correta de variáveis de ambiente como \texttt{PYTHONHOME} e \texttt{PYTHONPATH};
+    \item Gerenciamento explícito do Global Interpreter Lock (GIL) em aplicações multithread.
+\end{itemize}
+
+Esses requisitos tornam o empacotamento e a distribuição da aplicação mais complexos, especialmente em ambientes heterogêneos ou restritos.
+
+\subsection{Latência esperada (ordem de grandeza)}
+
+A latência associada ao embedding Python em C++ depende principalmente da frequência de chamadas entre as linguagens e da complexidade da conversão de dados. 
+
+%\begin{itemize}
+    \subsubsection{ Inicialização do interpretador: dezenas a centenas de milissegundos:}
+Para teste de inicialização do interpretador um projeto chamado pyperformance que inclui um grupo de benchmarks chamado startup, que justamente mede o tempo de inicialização e overhead do interpretador Python — esse grupo é usado para quantificar o tempo de cold start do \emph{runtime} Python. por meio do comando: \texttt{python3 -m pyperformance run -b startup}. Isso vai medir os tempos de inicialização de várias cargas de trabalho Python em ms.
+  
+    \subsubsection{ Chamada simples de função Python a partir do C++: tipicamente na ordem de microssegundos:}
+    Há estudos que mostram chamada de funções Python tem overhead mensurável comparado com chamadas C/C++ nativas, porque o interpretador adiciona dispatch, verificação de tipos e gerenciamento de chamadas, Function call overhead benchmarks with MATLAB, Octave, Python, Cython and C — André Gaul (2012). Esse estudo documenta que a chamada de funções Python tem overhead mensurável comparado com chamadas C/C++ nativas, porque o interpretador adiciona dispatch, verificação de tipos e gerenciamento de chamadas. Embora ele não esteja focado especificamente em embedding C++, ele é frequentemente citado em benchmarks que medem o custo da “método Python” vs “método C/C++”. Isso pode apoiar qualitativamente a afirmação de que chamadas simples via Python/C API ficam na ordem de microssegundos.
+
+    \subsubsection{ Conversão de estruturas complexas (listas grandes, dicionários, arrays): pode alcançar dezenas ou centenas de microssegundos}
+
+A conversão de estruturas de dados compostas entre C++ e Python, tais como listas, vetores e dicionários, apresenta custo proporcional ao número de elementos envolvidos. Diferentemente de operações como a chamada de funções Python, cujo overhead tende a ser aproximadamente constante, a conversão de estruturas complexas requer a criação individual de objetos Python, alocação de memória no heap do interpretador e atualização explícita da contagem de referências.
+
+Em estruturas de pequeno porte, esse custo é geralmente desprezível. No entanto, para coleções contendo dezenas de milhares de elementos ou mais, o tempo total de conversão pode atingir a ordem de dezenas ou centenas de microssegundos. Esse comportamento decorre da natureza linear do processo de conversão, uma vez que cada elemento da estrutura deve ser convertido e inserido individualmente em contêineres Python, como \texttt{PyList} ou \texttt{PyDict}.
+
+Esse fator torna a conversão frequente de grandes estruturas um potencial gargalo de desempenho em soluções híbridas C++/Python, especialmente quando realizada em laços críticos ou em aplicações sensíveis à latência.
+
+\begin{table}[h]
+\centering
+\caption{Latência típica de conversão de estruturas C++ para Python}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Tamanho da estrutura} & \textbf{Tipo de estrutura} & \textbf{Latência aproximada} \\
+\hline
+100 elementos & Lista de inteiros & $< 5\,\mu$s \\
+\hline
+1\,000 elementos & Lista de inteiros & $5$–$15\,\mu$s \\
+\hline
+10\,000 elementos & Lista de inteiros & $30$–$80\,\mu$s \\
+\hline
+100\,000 elementos & Lista de inteiros & $300$–$600\,\mu$s \\
+\hline
+10\,000 pares & Dicionário (chave–valor) & $50$–$150\,\mu$s \\
+\hline
+100\,000 valores & Vetor \texttt{double} $\rightarrow$ \texttt{PyList} & $400$–$900\,\mu$s \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Nota experimental}
+
+A latência associada à conversão de estruturas de dados pode ser medida por meio de benchmarks simples, utilizando contadores de alta resolução no lado C++ ou ferramentas de temporização no Python. A metodologia consiste em isolar exclusivamente o custo de criação e preenchimento de estruturas Python, sem incluir a execução de lógica adicional.
+
+Um exemplo de benchmark consiste na conversão de um vetor C++ para uma lista Python por meio da Python/C API, medindo-se o tempo decorrido entre o início e o término da criação da estrutura. Alternativamente, pode-se medir a criação de listas equivalentes em Python puro, uma vez que a API interna utilizada é a mesma empregada pela Python/C API.
+
+Em ambos os casos, observa-se que o tempo de conversão cresce linearmente com o número de elementos, refletindo a necessidade de criação individual de objetos Python e a atualização da contagem de referências. Essa metodologia permite estimar, de forma reprodutível, o impacto da conversão de dados em aplicações híbridas C++/Python.
+
+Os valores obtidos variam conforme a arquitetura do processador, versão do interpretador Python e tipo dos dados convertidos, porém a ordem de grandeza permanece consistente.
+     
+    \subsubsection{Execução de código Python intensivo em CPU: limitada pelo desempenho do interpretador e pelo GIL.}
+O Global Interpreter Lock (GIL) é um mecanismo presente na implementação padrão do Python (CPython) que garante exclusividade de execução de bytecodes Python, permitindo que apenas uma thread execute código Python por vez dentro de um mesmo processo. Embora o GIL simplifique o gerenciamento de memória e a contagem de referências, ele impõe uma limitação significativa à escalabilidade de aplicações intensivas em CPU.
+
+Em aplicações híbridas C++/Python, mesmo quando múltiplas threads C++ invocam código Python simultaneamente, o GIL impede a execução concorrente efetiva de bytecodes Python, resultando em serialização das chamadas. Dessa forma, o desempenho de cargas de trabalho computacionalmente intensivas executadas no lado Python torna-se limitado à capacidade de um único núcleo de processamento.
+
+Essa limitação é particularmente relevante em cenários onde o Python é utilizado para processamento numérico, análise de dados ou lógica de controle frequente, podendo anular os benefícios do paralelismo oferecido pelo C++ quando o GIL não é explicitamente liberado.
+
+\begin{table}[h]
+\centering
+\caption{Impacto do GIL em execução Python CPU-bound}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Threads} & \textbf{Tipo de workload} & \textbf{Comportamento observado} \\
+\hline
+1 & Código Python CPU-bound & Uso próximo de 1 núcleo \\
+\hline
+2 & Código Python CPU-bound & Uso próximo de 1 núcleo (sem ganho) \\
+\hline
+4 & Código Python CPU-bound & Uso próximo de 1 núcleo (serialização pelo GIL) \\
+\hline
+8 & Código Python CPU-bound & Uso próximo de 1 núcleo (contenção do GIL) \\
+\hline
+4 & Código C++ puro & Escalonamento próximo a 4 núcleos \\
+\hline
+4 & Código Python liberando GIL & Escalonamento próximo a 4 núcleos \\
+\hline
+\end{tabular}
+\end{table}
+
+Essa tabela deixa claro que o gargalo não é thread, e sim o GIL. No C++ não sofre essa limitação, por isso, liberar o GIL muda completamente o cenário.;
+
+\paragraph{Nota experimental}
+
+O impacto do Global Interpreter Lock pode ser avaliado por meio de benchmarks que executam cargas de trabalho computacionalmente intensivas em Python utilizando múltiplas threads. A metodologia consiste em criar um conjunto de threads que executam operações puramente CPU-bound, como laços aritméticos ou cálculos matemáticos repetitivos, medindo-se o tempo total de execução conforme o número de threads aumenta.
+
+Em implementações baseadas em CPython, observa-se que o tempo de execução permanece praticamente constante à medida que novas threads são adicionadas, indicando que a execução do bytecode Python é serializada pelo GIL. Esse comportamento pode ser contrastado com uma implementação equivalente em C++ puro, na qual o tempo de execução diminui proporcionalmente ao número de núcleos disponíveis.
+
+Em aplicações híbridas, a liberação explícita do GIL em trechos de código C++ intensivo (por meio de \texttt{Py\_BEGIN\_ALLOW\_THREADS} e \texttt{Py\_END\_ALLOW\_THREADS}) permite contornar essa limitação, evidenciando o papel central do GIL como fator restritivo de desempenho.
+
+A liberação do GIL pode ser realizada em código C++ por meio das macros\\
+\texttt{Py\_BEGIN\_ALLOW\_THREADS} e \texttt{Py\_END\_ALLOW\_THREADS},
+permitindo que trechos computacionalmente intensivos sejam executados em paralelo fora do interpretador Python.
+
+Assim, o Global Interpreter Lock representa uma limitação estrutural relevante em soluções híbridas C++/Python, especialmente em aplicações CPU-bound. A correta compreensão e mitigação desse mecanismo são essenciais para garantir que os benefícios do paralelismo em C++ não sejam comprometidos pela execução serializada de código Python.
+
+
+%\end{itemize}
+
+
+\subsection{Vantagens do uso de embedding Python em C++}
+
+O embedding Python em C++ oferece diversas vantagens técnicas e arquiteturais:
+
+\begin{itemize}
+    \item Flexibilidade para implementação de lógica de alto nível em Python;
+    \item Possibilidade de scriptar comportamentos sem recompilar o código C++;
+    \item Acesso ao vasto ecossistema de bibliotecas Python;
+    \item Redução do tempo de desenvolvimento para funcionalidades não críticas de desempenho;
+    \item Facilitação de testes, prototipação e ajustes dinâmicos;
+    \item Separação clara entre núcleo performático (C++) e lógica de controle (Python).
+\end{itemize}
+
+Esse modelo é amplamente utilizado em motores de jogos, simuladores, sistemas científicos e ferramentas extensíveis.
+
+\subsection{Limitações do uso de embedding Python em C++}
+
+Apesar das vantagens, o embedding apresenta limitações importantes:
+
+\begin{itemize}
+    \item Overhead de desempenho nas transições entre C++ e Python;
+    \item Complexidade elevada no gerenciamento de memória e referências;
+    \item Dificuldade de depuração cruzada entre C++ e Python;
+    \item Limitações impostas pelo Global Interpreter Lock (GIL);
+    \item Forte acoplamento à versão específica do Python utilizada;
+    \item Crescimento da complexidade do sistema de build e deploy.
+\end{itemize}
+
+Essas limitações devem ser cuidadosamente avaliadas no contexto da aplicação.
+
+\subsection{Riscos técnicos do uso de embedding Python em C++}
+
+O uso de embedding Python em C++ envolve riscos técnicos relevantes:
+
+\begin{itemize}
+    \item Vazamentos de memória devido a gerenciamento incorreto de referências Python;
+    \item Deadlocks e problemas de concorrência relacionados ao GIL;
+    \item Incompatibilidades entre versões do Python e da aplicação;
+    \item Aumento da superfície de falhas e dificuldade de manutenção;
+    \item Dependência de bibliotecas Python externas não controladas;
+    \item Impacto negativo em sistemas críticos de tempo real ou alta disponibilidade.
+\end{itemize}
+
+Portanto, o embedding Python deve ser adotado apenas quando seus benefícios superam claramente os custos e riscos associados.
+
+\section{Conclusão}
+
+A análise apresentada neste relatório permitiu avaliar de forma abrangente a viabilidade técnica do uso do embedding do interpretador Python em aplicações C++, considerando aspectos de funcionamento interno, fluxo de chamadas, requisitos de \emph{runtime}, latência, vantagens, limitações e riscos associados a essa abordagem híbrida.
+
+Observou-se que o embedding Python em C++ constitui uma solução poderosa para cenários nos quais se deseja combinar o alto desempenho e o controle fino de recursos proporcionados pelo C++ com a flexibilidade, expressividade e amplo ecossistema de bibliotecas oferecidos pelo Python. A possibilidade de delegar lógica de alto nível, configuração, automação e extensibilidade ao Python, mantendo o núcleo computacional em C++, torna essa arquitetura particularmente atrativa ao projeto.
+
+Entretanto, a adoção dessa abordagem impõe custos técnicos relevantes. O overhead introduzido nas transições entre C++ e Python, a latência associada à inicialização do interpretador, a conversão explícita de tipos e o gerenciamento manual de referências aumentam significativamente a complexidade do sistema. Além disso, a presença do Global Interpreter Lock (GIL) limita a escalabilidade de workloads intensivos em CPU no lado Python, podendo comprometer o paralelismo esperado em arquiteturas multicore quando não adequadamente mitigado.
+
+Os resultados discutidos indicam que o embedding Python é mais adequado para cenários em que as chamadas entre as linguagens são relativamente pouco frequentes, as estruturas de dados trocadas são moderadas em tamanho e o código Python atua principalmente como camada de orquestração, controle ou extensão. Em contrapartida, aplicações fortemente sensíveis à latência, com requisitos rígidos de tempo real ou que demandam paralelismo intensivo no lado Python, tendem a sofrer impactos negativos significativos com essa abordagem.
+
+Conclui-se, portanto, que o embedding do interpretador Python em C++ é uma solução tecnicamente viável e amplamente utilizada, desde que adotada de forma criteriosa e consciente de suas implicações. A correta delimitação de responsabilidades entre C++ e Python, aliada a boas práticas de gerenciamento de memória, controle do GIL e minimização das transições entre linguagens, é fundamental para que os benefícios dessa arquitetura superem seus custos e riscos técnicos.
+
+
