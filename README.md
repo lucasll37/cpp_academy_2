@@ -5,7 +5,7 @@
       <img
         src="./docs/img/miia-1024x768.png"
         alt="MIIA"
-        width="400"
+        width="500"
       >
     </a>
     <br>
