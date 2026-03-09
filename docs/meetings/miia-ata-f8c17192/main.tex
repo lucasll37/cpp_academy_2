@@ -1,0 +1,208 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{setspace}
+\usepackage{mathptmx}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{enumitem}
+
+
+\geometry{a4paper, left=2cm, right=2cm, bottom=4cm, top=3cm}
+\setstretch{1.5}
+\setlength{\parindent}{0pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+
+% ------------------------------------------------
+% HEADER
+% ------------------------------------------------
+\lhead{Ata de Reunião}
+\chead{\meetingcode}
+\rhead{\meetingdate}
+
+% ------------------------------------------------
+% FOOTER
+% ------------------------------------------------
+\fancyfoot[L]{Confidencial}
+\fancyfoot[C]{$\copyright$ \companyname, \the\year}
+\fancyfoot[R]{Página \thepage}
+
+\renewcommand{\footrulewidth}{0pt}
+
+% ------------------------------------------------
+% MACROS DA REUNIÃO
+% ------------------------------------------------
+
+\newcommand{\meetingtitle}{}
+\newcommand{\meetingtype}{}
+\newcommand{\meetingdate}{}
+\newcommand{\meetingtime}{}
+\newcommand{\meetinglocation}{}
+\newcommand{\facilitator}{}
+\newcommand{\notetaker}{}
+\newcommand{\participants}{}
+\newcommand{\meetingobjective}{}
+\newcommand{\meetingcode}{}
+\newcommand{\companyname}{}
+
+\newcommand{\setmeetingtitle}[1]{\renewcommand{\meetingtitle}{#1}}
+\newcommand{\setmeetingtype}[1]{\renewcommand{\meetingtype}{#1}}
+\newcommand{\setmeetingdate}[1]{\renewcommand{\meetingdate}{#1}}
+\newcommand{\setmeetingtime}[1]{\renewcommand{\meetingtime}{#1}}
+\newcommand{\setmeetinglocation}[1]{\renewcommand{\meetinglocation}{#1}}
+\newcommand{\setfacilitator}[1]{\renewcommand{\facilitator}{#1}}
+\newcommand{\setnotetaker}[1]{\renewcommand{\notetaker}{#1}}
+\newcommand{\setparticipants}[1]{\renewcommand{\participants}{#1}}
+\newcommand{\setobjective}[1]{\renewcommand{\meetingobjective}{#1}}
+\newcommand{\setmeetingcode}[1]{\renewcommand{\meetingcode}{#1}}
+\newcommand{\setcompanyname}[1]{\renewcommand{\companyname}{#1}}
+
+
+% ------------------------------------------------
+% INÍCIO DO DOCUMENTO
+% ------------------------------------------------
+
+\begin{document}
+
+\setmeetingcode{MIIA-ATA-f8c17192}
+
+\setmeetingtitle{MIIA - Reunião de Planejamento da Sprint 1}
+\setmeetingtype{SCRUM - Sprint Planning}
+\setmeetingdate{11/02/2026}
+\setmeetingtime{13:30 -- 14:30}
+\setmeetinglocation{Sala de Reuniões do Laboratório de Modelagem e Simulação do IEAv}
+\setfacilitator{Maj QOCon3 CCC \textbf{André} Francisco Morielo Caetano}
+\setnotetaker{Maj QOCon3 CCC \textbf{André} Francisco Morielo Caetano}
+\setcompanyname{Instituto de Estudos Avançados (IEAv)}
+
+\setparticipants{
+\begin{itemize}
+\item Maj QOCon3 CCC \textbf{André} Francisco Morielo Caetano
+\item Cap QOAV Lucas Silva \textbf{Lima}
+\item 1\textsuperscript{o} Ten QOCon CMP R/2 Vinícius Guimarães Marques \textbf{Mattos}
+\end{itemize}
+}
+
+\setobjective{Revisar os cards (atividades) previstas para Sprint, tendo em vista o objetivo maior (EPIC) proposto pela equipe: produzir um documento ``MIIA v1.0'' com design de alto e baixo nível como \emph{blueprint} para a arquitetura que iremos implementar depois}
+
+% ------------------------------------------------
+% TÍTULO
+% ------------------------------------------------
+
+\begin{center}
+{\Large \textbf{\meetingtitle}}\\
+\vspace{0.3em}
+{\small Código da Ata: \meetingcode}
+\end{center}
+
+\vspace{1em}
+
+\textbf{Tipo de Reunião:} \meetingtype
+
+\textbf{Data:} \meetingdate
+
+\textbf{Horário:} \meetingtime
+
+\textbf{Local / Plataforma:} \meetinglocation
+
+\textbf{Facilitador:} \facilitator
+
+\textbf{Responsável pela Ata:} \notetaker
+
+\vspace{1em}
+
+\textbf{Participantes}
+
+\participants
+
+\vspace{1em}
+
+\textbf{Objetivo da Reunião}
+
+\meetingobjective
+
+\vspace{1em}
+
+\textbf{Pauta}
+
+\begin{enumerate}
+\item Avaliar cards com atividades propostas para a Sprint 1, associadas ao projeto MIIA.
+\item Definir próximas ações e identificar os riscos associados às entregas propostas para a Sprint 1.
+\end{enumerate}
+
+\vspace{1em}
+
+\textbf{Discussões}
+
+\begin{itemize}
+\item O Maj André conduziu a reunião apresentando inicialmente uma lista de cards sugeridos para a Sprint 1. Em seguida, cada card foi detalhado e avaliado em conjunto com os demais participantes, que puderam opinar e propor correções ou melhorias. Ao mesmo tempo, o Cap Lima trouxe um segundo conjunto de cards relacionados às atividades que ele vem conduzindo desde a Sprint 0 e que deverão prosseguir na Sprint 1; esses cartões também foram analisados coletivamente pelos presentes.
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Decisões Tomadas}
+
+\begin{itemize}
+\item Os cards revisados foram considerados adequados pela equipe, embora hajam riscos (detalhados abaixo) que podem comprometer as entregas.
+\item A equipe deve concentrar‑se nos entregáveis de maior valor na Sprint atual, mantendo os demais cartões no backlog para as próximas Sprints.
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Ações Definidas}
+
+\begin{longtable}{|p{6cm}|p{4cm}|p{3cm}|}
+\hline
+\textbf{Ação} & \textbf{Responsável} & \textbf{Prazo} \\
+\hline
+ Definir o Design de Alto Nível (HLD) do MIIA e apresentar para o Tech Lead & Maj QOCon3 CCC \textbf{André} & 13/02/2026 \\
+\hline
+ Trabalhar no PoC cliente/servidor do MIIA (gRPC/ONNX Runtime) & Cap QOAV \textbf{Lima} & 23/02/2026 \\
+\hline
+ Resolver, inicialmente, as pendências e atividades de Infraestrutura  & 1\textsuperscript{o} Ten QOCon CMP R/2 \textbf{Mattos} & 23/02/2026 \\
+\hline
+ Trabalhar nos demais cards  & Todos & 13/03/2026 \\
+\hline
+\end{longtable}
+
+\vspace{1em}
+
+\textbf{Bloqueios / Riscos}
+
+\begin{itemize}
+\item Maj André estará de férias de 18/02 a 27/02.
+\item Cap Lima estará com dispensa por instalação de 23/02 a 04/03.
+\item Ten Mattos estará sozinho de 23/02 a 27/02.
+\end{itemize}
+
+\vspace{2em}
+
+\textbf{Encerramento}
+
+Nada mais havendo a tratar, a reunião foi encerrada.
+
+\vspace{3em}
+
+\textbf{Assinaturas}
+
+\vspace{1em}
+
+\begin{longtable}{|p{6cm}|p{9cm}|}
+\hline
+\textbf{Nome} & \textbf{Assinatura} \\
+\hline
+Maj QOCon3 CCC \textbf{André} Francisco Morielo Caetano & \\[2.5cm]
+\hline
+Cap QOAV Lucas Silva \textbf{Lima} & \\[2.5cm]
+\hline
+1\textsuperscript{o} Ten QOCon CMP R/2 Vinícius Guimarães Marques \textbf{Mattos} & \\[2.5cm]
+\hline
+\end{longtable}
+
+\end{document}

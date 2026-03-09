@@ -3,13 +3,13 @@
   <h1>
     <a href="https://www.asa.dcta.mil.br">
       <img
-        src="./docs/img/asa2-miia-1019x117.png"
-        alt="ASA2/MIIA"
-        width="800"
+        src="./docs/img/miia-1024x768.png"
+        alt="MIIA"
+        width="500"
       >
     </a>
     <br>
-    ASA2/MIIA
+    MIIA
   </h1>
 
   <h4>
@@ -20,14 +20,14 @@
 </div>
 
 <div align="center">
-  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines">
-    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/pipeline.svg" alt="pipeline status">
+  <a href="https://gitlab.asa.dcta.mil.br/asa/miia/-/pipelines">
+    <img src="https://gitlab.asa.dcta.mil.br/asa/miia/badges/main/pipeline.svg" alt="pipeline status">
   </a>
-  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/pipelines">
-    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/badges/main/coverage.svg" alt="coverage report">
+  <a href="https://gitlab.asa.dcta.mil.br/asa/miia/-/pipelines">
+    <img src="https://gitlab.asa.dcta.mil.br/asa/miia/badges/main/coverage.svg" alt="coverage report">
   </a>
-  <a href="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/releases">
-    <img src="https://gitlab.asa.dcta.mil.br/asa/asa2-miia/-/badges/release.svg" alt="Latest Release">
+  <a href="https://gitlab.asa.dcta.mil.br/asa/miia/-/releases">
+    <img src="https://gitlab.asa.dcta.mil.br/asa/miia/-/badges/release.svg" alt="Latest Release">
   </a>
 </div>
 
