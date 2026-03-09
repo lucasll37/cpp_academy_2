@@ -4,7 +4,7 @@ stages:
 sanity_merge_request:
   stage: sanity
   tags:
-    - asa2-miia
+    - miia
   script:
     - echo "Sanity check (Merge Request)"
   rules:
@@ -13,7 +13,7 @@ sanity_merge_request:
 sanity_main:
   stage: sanity
   tags:
-    - asa2-miia
+    - miia
   script:
     - echo "Sanity check (main)"
   rules:
