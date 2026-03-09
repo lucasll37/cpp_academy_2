@@ -1,0 +1,205 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{setspace}
+\usepackage{mathptmx}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{longtable}
+\usepackage{enumitem}
+
+
+\geometry{a4paper, left=2cm, right=2cm, bottom=4cm, top=3cm}
+\setstretch{1.5}
+\setlength{\parindent}{0pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+
+% ------------------------------------------------
+% HEADER
+% ------------------------------------------------
+\lhead{Ata de Reunião}
+\chead{\meetingcode}
+\rhead{\meetingdate}
+
+% ------------------------------------------------
+% FOOTER
+% ------------------------------------------------
+\fancyfoot[L]{Confidencial}
+\fancyfoot[C]{$\copyright$ \companyname, \the\year}
+\fancyfoot[R]{Página \thepage}
+
+\renewcommand{\footrulewidth}{0pt}
+
+% ------------------------------------------------
+% MACROS DA REUNIÃO
+% ------------------------------------------------
+
+\newcommand{\meetingtitle}{}
+\newcommand{\meetingtype}{}
+\newcommand{\meetingdate}{}
+\newcommand{\meetingtime}{}
+\newcommand{\meetinglocation}{}
+\newcommand{\facilitator}{}
+\newcommand{\notetaker}{}
+\newcommand{\participants}{}
+\newcommand{\meetingobjective}{}
+\newcommand{\meetingcode}{}
+\newcommand{\companyname}{}
+
+\newcommand{\setmeetingtitle}[1]{\renewcommand{\meetingtitle}{#1}}
+\newcommand{\setmeetingtype}[1]{\renewcommand{\meetingtype}{#1}}
+\newcommand{\setmeetingdate}[1]{\renewcommand{\meetingdate}{#1}}
+\newcommand{\setmeetingtime}[1]{\renewcommand{\meetingtime}{#1}}
+\newcommand{\setmeetinglocation}[1]{\renewcommand{\meetinglocation}{#1}}
+\newcommand{\setfacilitator}[1]{\renewcommand{\facilitator}{#1}}
+\newcommand{\setnotetaker}[1]{\renewcommand{\notetaker}{#1}}
+\newcommand{\setparticipants}[1]{\renewcommand{\participants}{#1}}
+\newcommand{\setobjective}[1]{\renewcommand{\meetingobjective}{#1}}
+\newcommand{\setmeetingcode}[1]{\renewcommand{\meetingcode}{#1}}
+\newcommand{\setcompanyname}[1]{\renewcommand{\companyname}{#1}}
+
+
+% ------------------------------------------------
+% INÍCIO DO DOCUMENTO
+% ------------------------------------------------
+
+\begin{document}
+
+\setmeetingcode{MIIA-ATA-\textcolor{blue}{HASH (gerar hash correto)}}
+
+\setmeetingtitle{\textcolor{blue}{Reunião de Planejamento da Sprint}}
+\setmeetingtype{\textcolor{blue}{SCRUM}}
+\setmeetingdate{\textcolor{blue}{04/03/2026}}
+\setmeetingtime{\textcolor{blue}{14:00 -- 15:00}}
+\setmeetinglocation{\textcolor{blue}{Google Meet}}
+\setfacilitator{\textcolor{blue}{João Silva - nome de quem conduziu a reunião}}
+\setnotetaker{\textcolor{blue}{André Morielo - nome de quem redigiu a ata}}
+\setcompanyname{Instituto de Estudos Avançados (IEAv)}
+
+\setparticipants{
+\begin{itemize}
+\item \textcolor{blue}{João Silva}
+\item \textcolor{blue}{André Morielo}
+\item \textcolor{blue}{Maria Santos}
+\end{itemize}
+}
+
+\setobjective{\textcolor{blue}{Resumir em uma a duas frases os objetivos da reunião. Idealmente não deve ser extenso.}}
+
+% ------------------------------------------------
+% TÍTULO
+% ------------------------------------------------
+
+\begin{center}
+{\Large \textbf{\meetingtitle}}\\
+\vspace{0.3em}
+{\small Código da Ata: \meetingcode}
+\end{center}
+
+\vspace{1em}
+
+\textbf{Tipo de Reunião:} \meetingtype
+
+\textbf{Data:} \meetingdate
+
+\textbf{Horário:} \meetingtime
+
+\textbf{Local / Plataforma:} \meetinglocation
+
+\textbf{Facilitador:} \facilitator
+
+\textbf{Responsável pela Ata:} \notetaker
+
+\vspace{1em}
+
+\textbf{Participantes}
+
+\participants
+
+\vspace{1em}
+
+\textbf{Objetivo da Reunião}
+
+\meetingobjective
+
+\vspace{1em}
+
+\textbf{Pauta}
+
+\begin{enumerate}
+\item \textcolor{blue}{Tópico 1}
+\item \textcolor{blue}{Tópico 2}
+\item \textcolor{blue}{Tópico 3}
+\end{enumerate}
+
+\vspace{1em}
+
+\textbf{Discussões}
+
+\begin{itemize}
+\item \textcolor{blue}{Parágrafo mais extenso se necessário, tratando de eventuais discussões da reunião. Podem mencionar especificamente quando um determinado participante se manifestou, sobre qual tópica a discussão se tratou, entre outros assuntos.}
+\item \textcolor{blue}{Adicionar quantos items forem necessários.}
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Decisões Tomadas}
+
+\begin{itemize}
+\item \textcolor{blue}{Aqui são decisões, e não ações. Exemplo: ``Foi decidido que os cards da Sprint eram adequados, e poderiam ser efetivamente criados nos boards de controle de tarefas''}
+\item \textcolor{blue}{Outro exemplo de decisão: ``Decidiu-se que é necessário estudar mais a fundo o tópico de Behavior Trees''}
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Ações Definidas}
+
+\begin{longtable}{|p{6cm}|p{4cm}|p{3cm}|}
+\hline
+\textbf{Ação} & \textbf{Responsável} & \textbf{Prazo} \\
+\hline
+ \textcolor{blue}{Criar os cards nos boards de controle de tarefas} & \textcolor{blue}{André Morielo} & \textcolor{blue}{01/04/2026} \\
+\hline
+ \textcolor{blue}{Estudar Behavior Trees} & \textcolor{blue}{João Silva} & \textcolor{blue}{A definir} \\
+\hline
+\end{longtable}
+
+\vspace{1em}
+
+\textbf{Bloqueios / Riscos}
+
+\begin{itemize}
+\item \textcolor{blue}{Geralmente associados às decisões ou ações. Exemplo: ``André Morielo sairá de férias no período, podendo impactar no prazo das atividades''}
+\item \textcolor{blue}{Podem ser físicos também. Exemplo: ``Não há computador disponível para executar Behaviro Trees, o que pode impactar o estudo adequado dessas estruturar''}
+\end{itemize}
+
+\vspace{2em}
+
+\textbf{Encerramento}
+
+Nada mais havendo a tratar, a reunião foi encerrada.
+
+\vspace{3em}
+
+\textbf{\textcolor{blue}{Assinaturas - a assinatura de todos é opcional}}
+
+\vspace{1em}
+
+\begin{longtable}{|p{6cm}|p{9cm}|}
+\hline
+\textbf{Nome} & \textbf{Assinatura} \\
+\hline
+João Silva & \\[2.5cm]
+\hline
+André Morielo & \\[2.5cm]
+\hline
+Maria Santos & \\[2.5cm]
+\hline
+\end{longtable}
+
+\end{document}
