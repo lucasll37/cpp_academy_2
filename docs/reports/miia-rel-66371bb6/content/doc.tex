@@ -1,0 +1,224 @@
+\begin{center}
+    \textbf{\Huge{Relatório - Síntese e Decisão Técnica: Estratégias de Execução de Modelos de IA}}
+\end{center}
+
+\section{Introdução}
+
+O propósito deste documento é consolidar os resultados das pesquisas conduzidas nos estudos
+técnicos associados aos Cards S0-3A a S0-3D do projeto MIIA, que investigaram diferentes abordagens
+para execução e integração de modelos de inteligência artificial em ambientes de simulação
+construtiva.
+
+Os estudos analisaram quatro estratégias principais:
+
+\begin{itemize}
+\item Execução por meio de runtimes nativas (LibTorch e TensorFlow C++ API);
+\item Uso do padrão Open Neural Network Exchange (ONNX) como formato intermediário de modelos;
+\item Servimento remoto de modelos (model serving);
+\item Embedding do interpretador Python em aplicações C++.
+\end{itemize}
+
+O objetivo desta síntese é comparar essas abordagens sob a perspectiva de desempenho,
+complexidade de integração, riscos técnicos, esforço de manutenção e aderência ao contexto do
+projeto, culminando na seleção de soluções candidatas para implementação em provas de conceito
+(PoC) ou MVP nas próximas etapas do projeto.
+
+\subsection{Referências}
+
+\begin{itemize}
+    \item Documento n\textsuperscript{o} MIIA-REL-46ff681a, \textbf{Relatório - Estudo de Runtimes Nativas (Libtorch e TensorFlow C++ API)}, Instituto de Estudos Avançados (IEAv), 2025.
+    \item Documento n\textsuperscript{o} MIIA-REL-323690a5, \textbf{Relatório - Model Serving: Práticas e Solucões existentes}, Instituto de Estudos Avançados (IEAv), 2025.
+    \item Documento n\textsuperscript{o} MIIA-REL-333869a8, \textbf{Relatório - Open Neural Network Exchange (ONNX) e Possíveis Aplicações}, Instituto de Estudos Avançados (IEAv), 2025.
+    \item Documento n\textsuperscript{o} MIIA-REL-d6ee0363, \textbf{Relatório - Pesquisa de Embedding de Python em C++}, Instituto de Estudos Avançados (IEAv), 2025.
+\end{itemize}
+
+\section{Síntese dos Estudos}
+
+Esta seção resume os principais achados dos estudos técnicos conduzidos nos CARDS S0-3A a S0-3D,
+os quais investigaram diferentes estratégias para integração e execução de modelos de inteligência
+artificial em sistemas de simulação construtiva.
+
+Os resultados indicam que as abordagens avaliadas atendem a diferentes paradigmas de decisão
+computacional, que podem coexistir dentro da arquitetura do projeto.
+
+\subsection{Runtimes nativas (LibTorch e TensorFlow C++ API)}
+
+Runtimes nativas permitem executar modelos diretamente em aplicações C++, eliminando a
+dependência de ambientes interpretados ou serviços externos.
+
+A inferência ocorre dentro do próprio processo da aplicação, reduzindo a latência e permitindo
+integração direta com sistemas legados. Estudos indicam latências na ordem de milissegundos,
+adequadas para aplicações que exigem execução em tempo quase real.
+
+Entretanto, essa abordagem introduz desafios relevantes de engenharia, incluindo aumento
+significativo do tamanho dos binários, maior complexidade no processo de build e manutenção
+de dependências pesadas de frameworks de aprendizado de máquina.
+
+Além disso, mudanças frequentes nas APIs e incompatibilidades podem aumentar o custo
+de manutenção ao longo do tempo.
+
+No contexto do projeto, observou-se que o uso direto dessas runtimes tende a se tornar
+desnecessário quando os modelos podem ser exportados para um formato intermediário
+padronizado, como o ONNX.
+
+
+\subsection{ONNX como formato intermediário}
+
+O ONNX foi analisado como um mecanismo de interoperabilidade entre frameworks de treinamento
+e motores de inferência.
+
+Seu principal benefício consiste na separação entre treinamento, representação do modelo e
+execução, permitindo que modelos treinados em diferentes frameworks sejam implantados em
+ambientes heterogêneos.
+
+Essa separação reduz o acoplamento arquitetural e facilita a evolução independente dos
+componentes do sistema, sendo particularmente relevante em sistemas de longa vida útil,
+como simuladores complexos.
+
+Além disso, modelos baseados em redes neurais — incluindo modelos utilizados em
+Reinforcement Learning — podem ser exportados para ONNX e executados por runtimes
+especializados sem dependência direta do framework de treinamento.
+
+Dessa forma, o ONNX pode atuar como um contrato arquitetural entre o ambiente de treinamento
+de modelos e o simulador, reduzindo a necessidade de integração direta com frameworks como
+PyTorch ou TensorFlow.
+
+
+\subsection{Servimento remoto de modelos}
+
+O modelo de servimento consiste em disponibilizar modelos de IA como serviços acessados via
+rede por meio de APIs ou microserviços.
+
+Essa abordagem facilita escalabilidade, versionamento e gerenciamento centralizado de modelos,
+características comuns em arquiteturas modernas de ML em produção.
+
+Entretanto, em ambientes de simulação construtiva com requisitos de latência previsível e
+execução síncrona, a dependência de comunicação em rede pode introduzir variabilidade
+temporal e comprometer a consistência do ciclo de simulação.
+
+Assim, embora seja adequada para aplicações distribuídas, essa abordagem apresenta limitações
+para integração direta em loops de simulação de alta frequência.
+
+
+\subsection{Embedding de Python em C++}
+
+O embedding do interpretador Python permite executar código Python diretamente dentro de uma
+aplicação C++, possibilitando acesso ao ecossistema de bibliotecas disponíveis nessa linguagem.
+
+Essa abordagem permite que scripts ou módulos Python sejam utilizados para implementar
+comportamentos complexos ou experimentais, funcionando como um mecanismo de extensibilidade
+do sistema.
+
+Entretanto, essa integração introduz custos operacionais adicionais, como gerenciamento do
+interpretador, conversão de dados entre linguagens e controle do Global Interpreter Lock (GIL).
+
+Apesar dessas limitações, o embedding Python apresenta valor arquitetural relevante ao
+possibilitar a implementação de lógicas procedurais flexíveis, complementando outras
+abordagens de tomada de decisão utilizadas no simulador.
+
+\section{Matriz Comparativa das Alternativas}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+
+\begin{tabular}{|p{3cm}|p{2.5cm}|p{3cm}|p{3.5cm}|p{3cm}|}
+\hline
+\textbf{Abordagem} &
+\textbf{Desempenho Esperado} &
+\textbf{Complexidade de Integração} &
+\textbf{Principais Riscos} &
+\textbf{Aderência ao Projeto} \\
+\hline
+
+Runtimes nativas
+(LibTorch / TensorFlow C++)
+
+& Alta
+
+& Alta
+
+& Dependências pesadas de framework,
+complexidade de build e risco de incompatibilidades de API
+
+& Baixa a moderada.
+Tornam-se desnecessárias quando modelos podem ser exportados para ONNX. \\
+
+\hline
+
+ONNX + Runtime de Inferência
+
+& Alta
+
+& Média
+
+& Limitações ocasionais de operadores ou conversão de modelos
+
+& Alta.
+Permite desacoplamento entre treinamento e execução e atende
+modelos baseados em redes neurais e RL. \\
+
+\hline
+
+Model Serving
+
+& Média
+
+& Média
+
+& Latência de rede e variabilidade temporal
+
+& Baixa para integração direta em loops de simulação síncronos. \\
+
+\hline
+
+Embedding Python em C++
+
+& Média
+
+& Média
+
+& Overhead do interpretador,
+contenção do GIL e complexidade de integração
+
+& Alta para lógica procedural e extensibilidade do sistema. \\
+
+\hline
+
+\end{tabular}
+\end{center}
+
+\section{Decisão Técnica}
+
+Com base nos resultados consolidados dos estudos, definiu-se uma arquitetura que contempla
+três paradigmas complementares de tomada de decisão no simulador.
+
+\begin{itemize}
+
+\item Modelos baseados em aprendizado de máquina (incluindo Reinforcement Learning),
+executados por meio de modelos exportados no formato ONNX;
+
+\item Estruturas de decisão baseadas em árvores de comportamento (Behavior Trees),
+mantidas por meio da biblioteca BehaviorTree.cpp já utilizada no projeto;
+
+\item Lógicas procedurais e comportamentos experimentais implementados por meio
+de scripts ou módulos Python integrados via embedding do interpretador Python em C++.
+
+\end{itemize}
+
+Nesse modelo arquitetural, o ONNX atua como contrato para integração de modelos de
+aprendizado de máquina, permitindo desacoplamento entre o ambiente de treinamento
+e o ambiente de execução do simulador.
+
+As Behavior Trees permanecem como mecanismo estruturado de composição de decisões,
+utilizando a infraestrutura já existente baseada em XML.
+
+Por fim, o embedding Python fornece um mecanismo de extensibilidade capaz de suportar
+lógicas procedurais ou experimentais que não se encaixem diretamente nas duas
+abordagens anteriores.
+
+O uso direto de runtimes nativas como LibTorch ou TensorFlow C++ API é considerado
+desnecessário para a arquitetura principal do sistema, sendo reservado apenas para
+cenários excepcionais em que a exportação para ONNX não seja viável.
+
+Com esta decisão, considera-se concluída a fase exploratória dos CARDS S0-3A a S0-3D,
+habilitando o início das implementações experimentais nas próximas sprints.
