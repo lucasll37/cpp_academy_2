@@ -1,0 +1,56 @@
+# Python dependencies for ML Inference System
+# Core packages - REQUIRED
+
+# ONNX (Core)
+onnx==1.16.1
+numpy>=1.24.0,<2.0.0
+protobuf>=3.20.2,<5.0.0
+
+# ONNX Runtime
+onnxruntime==1.23.2
+
+# gRPC e Protobuf
+grpcio>=1.54.0,<2.0.0
+grpcio-tools>=1.54.0,<2.0.0
+grpcio-reflection>=1.54.0,<2.0.0
+protobuf>=3.20.2,<5.0.0
+
+# ============================================
+# OPTIONAL: PyTorch (for model conversion)
+# ============================================
+# Uncomment to enable local PyTorch model conversion
+# This allows the create_test_models.py script to convert
+# PyTorch models locally instead of downloading pre-converted ones
+torch>=2.0.0
+torchvision>=0.15.0
+scikit-learn>=1.3.0
+skl2onnx>=1.16.0
+onnxscript>=0.5.7
+#
+# Note: PyTorch is ~800MB download for CPU, ~2GB for GPU
+# If you don't install it, the script will download pre-converted models instead
+
+# ============================================
+# OPTIONAL: TensorFlow (for model conversion)
+# ============================================
+# Uncomment if you need to convert TensorFlow/Keras models
+# Note: tf2onnx requires protobuf~=3.20, which may conflict
+# Uncomment both lines together if needed:
+# tensorflow>=2.13.0
+# tf2onnx>=1.16.0
+
+# ============================================
+# OPTIONAL: Scikit-learn (for model conversion)
+# ============================================
+# Uncomment if you need to convert scikit-learn models
+# scikit-learn>=1.3.0
+# skl2onnx>=1.16.0
+
+# ============================================
+# OPTIONAL: Model Visualization
+# ============================================
+# Uncomment to enable model visualization in browser
+# netron>=7.0.0
+
+# Opcional: GPU support
+# onnxruntime-gpu==1.23.2  # Descomente para usar GPU

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DefaultPropertiesCollection LoadingOrder="1.0">
+	<DefaultProperties Id="Watercraft.Frigate.F12" Base="Watercraft.Frigate">
+		<Criteria>
+			<Name>HazardSource</Name>
+		</Criteria>
+		<Properties>
+			<ShortName>HS</ShortName>
+			<LongName>Hazard Source</LongName>
+			<FullName>Hazard Source (HS)</FullName>
+			<Shape>hazard_source.obj</Shape>
+			<EngagementRange>1852</EngagementRange>
+		</Properties>
+	</DefaultProperties>
+</DefaultPropertiesCollection>
+
+

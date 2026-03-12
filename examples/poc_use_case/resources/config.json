@@ -1,0 +1,345 @@
+{
+    "identifier": "AsaTutorial",
+    "version": "0.1",
+    "description": "AsaTutorial description",
+    "embedded": false,
+    "components": [
+        {
+            "identifier": "HazardSource@AsaTutorial",
+            "label": "Hazard Source",
+            "description": "HazardSource description",
+            "className": "asa::tutorial::HazardSource",
+            "parentClasses": [
+                "asa::models::AsaShip"
+            ],
+            "tags": [
+                "Sea",
+                "Ship"
+            ],
+            "clearance": "public",
+            "embedded": false,
+            "icon": {
+                "default": "Hazard Source",
+                "options": [
+                    {
+                        "label": "Hazard Source",
+                        "url": "/AsaTutorial/HazardSource/HazardSource.svg"
+                    }
+                ]
+            },
+            "subcomponents": {},
+            "attributes": {
+                "ws_name": {
+                    "label": "Name",
+                    "type": "string",
+                    "default": "Hazard_Source"
+                },
+                "ws_lat": {
+                    "label": "Latitude (deg)",
+                    "type": "double",
+                    "min": -90,
+                    "max": 90,
+                    "default": 0
+                },
+                "ws_lon": {
+                    "label": "Longitude (deg)",
+                    "type": "double",
+                    "min": -180,
+                    "max": 180,
+                    "default": 0
+                },
+                "minSafeDist": {
+                    "label": "Minimum safe distance (nm)",
+                    "type": "double",
+                    "min": 0.1,
+                    "max": 999.9,
+                    "default": 1.0
+                }
+            }
+        },
+        {
+            "identifier": "Hydrodynamics@AsaTutorial",
+            "label": "Hydrodynamics",
+            "description": "Hydrodynamics description",
+            "className": "asa::tutorial::Hydrodynamics",
+            "parentClasses": [
+                "mixr::models::DynamicsModel"
+            ],
+            "tags": [],
+            "clearance": "public",
+            "embedded": false,
+            "icon": {
+                "default": "",
+                "options": []
+            },
+            "subcomponents": {},
+            "attributes": {
+                "turnRate": {
+                    "label": "Turn rate (deg/s)",
+                    "type": "double",
+                    "min": 0.1,
+                    "max": 720.0,
+                    "default": 3.0
+                }
+            }
+        },
+        {
+            "identifier": "Scanner@AsaTutorial",
+            "label": "Scanner",
+            "description": "Scanner description",
+            "className": "asa::tutorial::Scanner",
+            "parentClasses": [
+                "mixr::models::Gimbal"
+            ],
+            "tags": [],
+            "clearance": "public",
+            "embedded": false,
+            "icon": {
+                "default": "",
+                "options": []
+            },
+            "subcomponents": {},
+            "attributes": {
+                "maxAngle": {
+                    "label": "Max. angle of scan (deg)",
+                    "type": "double",
+                    "min": 0.0,
+                    "max": 180.0,
+                    "default": 180.0
+                },
+                "maxRange": {
+                    "label": "Max. range (nm)",
+                    "type": "double",
+                    "min": 0.0,
+                    "max": 999.9,
+                    "default": 50.0
+                }
+            }
+        },
+        {
+            "identifier": "Ship@AsaTutorial",
+            "label": "Ship Tutorial",
+            "description": "Ship description",
+            "className": "asa::tutorial::Ship",
+            "parentClasses": [
+                "asa::models::AsaShip"
+            ],
+            "tags": [
+                "Sea",
+                "Ship"
+            ],
+            "clearance": "public",
+            "embedded": false,
+            "icon": {
+                "default": "Ship",
+                "options": [
+                    {
+                        "label": "Ship",
+                        "url": "/AsaTutorial/Ship/Ship.svg"
+                    }
+                ]
+            },
+            "subcomponents": {
+                "dynamicsModel": {
+                    "label": "Dynamics",
+                    "allowedIdentifiers": [
+                        "Hydrodynamics@AsaTutorial"
+                    ],
+                    "allowedClasses": [],
+                    "min": 1,
+                    "max": 1,
+                    "default": "Hydrodynamics@AsaTutorial"
+                },
+                "scanner": {
+                    "label": "Scanner",
+                    "allowedIdentifiers": [
+                        "Scanner@AsaTutorial"
+                    ],
+                    "allowedClasses": [],
+                    "min": 1,
+                    "max": 1,
+                    "default": "Scanner@AsaTutorial"
+                },
+                "agent": {
+                    "label": "Agent",
+                    "allowedIdentifiers": [
+                        "ShipAgent@AsaTutorial"
+                    ],
+                    "allowedClasses": [],
+                    "min": 1,
+                    "max": 1,
+                    "default": "ShipAgent@AsaTutorial"
+                },
+                "navSys": {
+                    "label": "Navigation System",
+                    "allowedIdentifiers": [
+                        "ShipNav@AsaTutorial"
+                    ],
+                    "allowedClasses": [],
+                    "min": 1,
+                    "max": 1,
+                    "default": "ShipNav@AsaTutorial"
+                }
+            },
+            "attributes": {
+                "ws_name": {
+                    "label": "Name",
+                    "type": "string",
+                    "default": "Ship_Tutorial"
+                },
+                "side": {
+                    "label": "Team",
+                    "type": "select",
+                    "default": "blue",
+                    "options": [
+                        {
+                            "label": "Blue",
+                            "value": "blue"
+                        },
+                        {
+                            "label": "Red",
+                            "value": "red"
+                        },
+                        {
+                            "label": "Gray",
+                            "value": "gray"
+                        },
+                        {
+                            "label": "White",
+                            "value": "white"
+                        },
+                        {
+                            "label": "Yellow",
+                            "value": "yellow"
+                        },
+                        {
+                            "label": "Cyan",
+                            "value": "cyan"
+                        }
+                    ]
+                },
+                "ws_lat": {
+                    "label": "Latitude (deg)",
+                    "type": "double",
+                    "min": -90,
+                    "max": 90,
+                    "default": 0
+                },
+                "ws_lon": {
+                    "label": "Longitude (deg)",
+                    "type": "double",
+                    "min": -180,
+                    "max": 180,
+                    "default": 0
+                },
+                "initHeading": {
+                    "label": "Heading (deg)",
+                    "type": "double",
+                    "min": -180,
+                    "max": 180,
+                    "default": 0
+                },
+                "initSpdKts": {
+                    "label": "Airspeed (kt)",
+                    "type": "double",
+                    "min": 1,
+                    "max": 50,
+                    "default": 20
+                },
+                "startTime": {
+                    "label": "Start time (s)",
+                    "type": "double",
+                    "min": 0.0,
+                    "max": 3600,
+                    "default": 5.0
+                },
+                "navigationTime": {
+                    "label": "Navigation time (s)",
+                    "type": "double",
+                    "min": 60,
+                    "max": 86400,
+                    "default": 3600
+                }
+            }
+        },
+        {
+            "identifier": "ShipAgent@AsaTutorial",
+            "label": "Ship Agent",
+            "description": "ShipAgent description",
+            "className": "asa::tutorial::ShipAgent",
+            "parentClasses": [
+                "asa::models::AsaAgent"
+            ],
+            "tags": [],
+            "clearance": "public",
+            "embedded": false,
+            "icon": {
+                "default": "",
+                "options": []
+            },
+            "subcomponents": {},
+            "attributes": {}
+        },
+        {
+            "identifier": "ShipNav@AsaTutorial",
+            "label": "Ship Navigation System",
+            "description": "ShipNav description",
+            "className": "mixr::models::Navigation",
+            "parentClasses": [
+                "mixr::models::System"
+            ],
+            "tags": [],
+            "clearance": "public",
+            "embedded": true,
+            "icon": {
+                "default": "",
+                "options": []
+            },
+            "subcomponents": {
+                "steerpoints": {
+                    "label": "Steerpoints",
+                    "allowedIdentifiers": [
+                        "Steerpoint@AsaTutorial"
+                    ],
+                    "allowedClasses": [],
+                    "min": 1,
+                    "default": "Steerpoint@AsaTutorial"
+                }
+            },
+            "attributes": {}
+        },
+        {
+            "identifier": "Steerpoint@AsaTutorial",
+            "label": "Steerpoint",
+            "description": "Steerpoint description",
+            "className": "mixr::models::Steerpoint",
+            "parentClasses": [
+                "mixr::base::Component"
+            ],
+            "tags": [],
+            "clearance": "public",
+            "embedded": true,
+            "icon": {
+                "default": "",
+                "options": []
+            },
+            "subcomponents": {},
+            "attributes": {
+                "latitude": {
+                    "label": "Latitude (deg)",
+                    "type": "double",
+                    "min": -90,
+                    "max": 90,
+                    "default": 0
+                },
+                "longitude": {
+                    "label": "Longitude (deg)",
+                    "type": "double",
+                    "min": -180,
+                    "max": 180,
+                    "default": 0
+                }
+            }
+        }
+    ]
+}

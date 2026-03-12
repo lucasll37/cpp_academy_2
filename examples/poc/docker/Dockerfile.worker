@@ -1,0 +1,212 @@
+# ============================================
+# Multi-stage Dockerfile for Worker Node
+# Build flow: conan install → python-install → meson setup → meson compile → meson install
+# ============================================
+#
+# USAGE:
+#   CPU Version:
+#     docker build -f docker/Dockerfile.worker --target runtime-cpu -t worker:cpu .
+#   
+#   GPU Version:
+#     docker build -f docker/Dockerfile.worker --target runtime-gpu -t worker:gpu .
+#
+# ============================================
+
+# ============================================
+# Stage 1: Build Environment
+# ============================================
+FROM ubuntu:24.04 AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Build arguments — matching Makefile variable conventions
+# Conan uses Python-style capitalized booleans: Debug/Release
+# Meson uses lowercase: debug/release
+ARG CONAN_BUILD_TYPE=Release
+ARG MESON_BUILDTYPE=release
+ARG ENABLE_GPU=False
+
+RUN apt-get update && apt-get install -y \
+    cmake \
+    build-essential \
+    git \
+    wget \
+    curl \
+    pkg-config \
+    file \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Meson, Ninja, and Conan — same toolchain as local dev
+RUN pip3 install --no-cache-dir --break-system-packages \
+    "meson>=1.0.0" \
+    "ninja>=1.11.0" \
+    "conan>=2.0.0"
+
+# Configure Conan profile
+RUN conan profile detect --force
+
+# ============================================
+# Stage 2: Conan Dependencies
+# ============================================
+FROM builder AS conan-deps
+
+# Same layout as Makefile
+# PWD  = /app
+# BUILD_DIR = /app/build
+# DIST_DIR  = /app/dist
+WORKDIR /app
+
+# Copy only conan config first (layer caching)
+COPY conanfile.py .
+COPY meson.build .
+COPY meson_options.txt .
+
+# Conan install — generates PkgConfigDeps (.pc files) and MesonToolchain (.ini)
+RUN mkdir -p build && \
+    conan install ./ \
+    --build=missing \
+    --settings=build_type=${CONAN_BUILD_TYPE} \
+    -o enable_gpu=${ENABLE_GPU}
+
+# ============================================
+# Stage 3: Build Application
+# Mirrors: make python-install + make configure + make build + make install
+# ============================================
+FROM conan-deps AS app-builder
+
+ARG MESON_BUILDTYPE
+ARG ENABLE_GPU
+
+# Copy remaining source (proto, cpp, python, pkg-config template)
+COPY asa-poc-miia.pc.in .
+COPY proto/ ./proto/
+COPY cpp/ ./cpp/
+COPY python/requirements.txt ./python/requirements.txt
+
+
+RUN python3.12 -m venv python/.venv && \
+    python/.venv/bin/pip install --upgrade pip && \
+    python/.venv/bin/pip install -r python/requirements.txt
+
+# Create Meson build directory and compile
+# O .venv em /app/python/.venv já existe — meson.build encontra o numpy
+RUN meson setup \
+    --native-file build/conan_meson_native.ini \
+    --backend ninja \
+    --buildtype ${MESON_BUILDTYPE} \
+    --prefix=/app/dist \
+    --libdir=/app/dist/lib \
+    -Dpkg_config_path=/app/dist/lib/pkgconfig:/app/build \
+    -Denable_gpu=${ENABLE_GPU} \
+    build/meson-build \
+    .
+
+# make build → meson compile -C $(BUILD_DIR)
+RUN meson compile -C build/meson-build -j$(nproc)
+
+# make install → meson install -C $(BUILD_DIR)
+RUN meson install -C build/meson-build
+
+# ============================================
+# Stage 4: Collect Runtime Libraries
+# Extracts shared libs that the binary needs from Conan cache
+# so the runtime image stays minimal
+# ============================================
+FROM app-builder AS lib-collector
+
+RUN mkdir -p /runtime-libs && \
+    ldd /app/dist/bin/AsaMiia | \
+    grep "=> /" | \
+    awk '{print $3}' | \
+    while read lib; do \
+        case "$lib" in \
+            /lib/x86_64-linux-gnu/libc.so* | \
+            /lib/x86_64-linux-gnu/libm.so* | \
+            /lib/x86_64-linux-gnu/libdl.so* | \
+            /lib/x86_64-linux-gnu/libpthread.so* | \
+            /lib/x86_64-linux-gnu/librt.so* | \
+            /lib/x86_64-linux-gnu/libgcc_s.so* | \
+            /lib/x86_64-linux-gnu/ld-linux*) \
+                ;; \
+            *) \
+                cp -L "$lib" /runtime-libs/ 2>/dev/null || true ;; \
+        esac; \
+    done && \
+    echo "=== Runtime libs collected ===" && \
+    ls -lh /runtime-libs/
+
+# ============================================
+# Stage 5: Runtime Image (GPU)
+# Mirrors: docker run --gpus all -p 50052:50052
+# ============================================
+FROM nvidia/cuda:12.0.0-runtime-ubuntu22.04 AS runtime-gpu
+
+RUN apt-get update && apt-get install -y \
+    libstdc++6 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Same directory layout as local dist + runtime needs
+RUN mkdir -p /app/bin /app/lib /app/models /app/models_cache /etc/ml-inference
+
+# Copy from DIST_DIR
+COPY --from=app-builder /app/dist/bin/AsaMiia /app/bin/
+COPY --from=lib-collector /runtime-libs/ /app/lib/
+
+# Non-root user
+RUN useradd -m -s /bin/bash mluser && \
+    chown -R mluser:mluser /app /app/models /app/models_cache /etc/ml-inference
+
+WORKDIR /app
+USER mluser
+
+EXPOSE 50052
+
+ENV LD_LIBRARY_PATH=/app/lib:/usr/local/lib:${LD_LIBRARY_PATH:-}
+ENV ENABLE_GPU=True
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD /app/bin/AsaMiia --help > /dev/null || exit 1
+
+ENTRYPOINT ["/app/bin/AsaMiia"]
+CMD ["--address", "0.0.0.0:50052", "--gpu", "--threads", "8"]
+
+# ============================================
+# Stage 6: Runtime Image (CPU)
+# Mirrors: docker run -p 50052:50052
+# ============================================
+FROM ubuntu:24.04 AS runtime-cpu
+
+RUN apt-get update && apt-get install -y \
+    libstdc++6 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /app/bin /app/lib /app/models /app/models_cache /etc/ml-inference
+
+COPY --from=app-builder /app/dist/bin/AsaMiia /app/bin/
+COPY --from=lib-collector /runtime-libs/ /app/lib/
+
+RUN useradd -m -s /bin/bash mluser && \
+    chown -R mluser:mluser /app /app/models /app/models_cache /etc/ml-inference
+
+WORKDIR /app
+USER mluser
+
+EXPOSE 50052
+
+ENV LD_LIBRARY_PATH=/app/lib:/usr/local/lib:${LD_LIBRARY_PATH:-}
+ENV ENABLE_GPU=False
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD /app/bin/AsaMiia --help > /dev/null || exit 1
+
+ENTRYPOINT ["/app/bin/AsaMiia"]
+CMD ["--address", "0.0.0.0:50052", "--threads", "8"]

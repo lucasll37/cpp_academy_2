@@ -1,0 +1,55 @@
+# Unwanted folders
+build
+cmake-build-*
+dist
+extern
+out
+bin
+
+# Dotted folders
+.cache
+
+# IDE folders
+.idea
+
+# build config
+CMakeUserPresets.json
+compile_commands.json
+conan.lock
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+!hazard_source.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app

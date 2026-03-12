@@ -1,0 +1,9 @@
+prefix=@prefix@
+includedir=${prefix}/include
+libdir=@libdir@
+
+Name: asa-tutorial
+Description: @description@
+Version: @version@
+Libs: -L${libdir} -lAsaTutorial
+Cflags: -I${includedir}
