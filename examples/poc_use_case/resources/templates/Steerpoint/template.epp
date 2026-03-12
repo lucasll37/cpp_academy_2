@@ -1,0 +1,4 @@
+( Steerpoint
+    latitude:  $self.latitude$
+    longitude: $self.longitude$
+)

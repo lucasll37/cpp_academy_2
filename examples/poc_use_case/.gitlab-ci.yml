@@ -1,0 +1,45 @@
+# Current base image for compilation
+image: hub.asa.dcta.mil.br/asa/base:latest
+
+stages:
+  - build
+  - deploy
+
+# Cmake build and install in debug mode
+build-debug:
+  stage: build
+  tags:
+    # only linux is supported
+    - linux
+  before_script:
+    - conan remote login -p $ASA_CONAN_AGENT_PASSWORD asa-libs gitlab
+  script:
+    - bash ./scripts/build.sh $(nproc) Debug
+
+# Cmake build and install in release mode
+build-release:
+  stage: build
+  tags:
+    # only linux is supported
+    - linux
+  before_script:
+    - conan remote login -p $ASA_CONAN_AGENT_PASSWORD asa-libs gitlab
+  script:
+    - bash ./scripts/build.sh $(nproc) Release
+
+# Create and publish conan package
+deploy-conan:
+  stage: deploy
+  tags:
+    # only linux is supported
+    - linux
+  dependencies:
+    - build-debug
+    - build-release
+  when: on_success
+  only:
+    - tags
+  before_script:
+    - conan remote login -p $ASA_CONAN_AGENT_PASSWORD asa-libs gitlab
+  script:
+    - bash ./scripts/deploy.sh

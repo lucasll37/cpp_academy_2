@@ -1,0 +1,58 @@
+set -x
+set -e
+
+#
+# sanity check: number of arguments
+#
+
+if [[ $# -ne 2 ]]; then
+    echo "Expected exactly 2 parameters: NUM_JOBS and BUILD_TYPE" >&2
+    exit 1
+fi
+
+#
+# set NUM_JOBS
+#
+
+NUM_JOBS=$1
+echo "Building with $1 parallel jobs"
+
+#
+# set BUILD_TYPE
+#
+
+BUILD_TYPE=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+echo "Building in type $BUILD_TYPE"
+
+#
+# setting up the task
+#
+
+echo "Cleaning dist folder"
+rm -rf ./dist/ && mkdir ./dist/
+
+echo "Cleaning build folder"
+rm -rf ./build/ && mkdir ./build/
+
+#
+# starting the task
+#
+
+echo "Installing conan dependencies"
+conan install ./ --build=missing --profile="asa-$BUILD_TYPE"
+
+meson setup \
+    --backend ninja \
+    --buildtype "$BUILD_TYPE" \
+    --prefix=$(pwd)/dist \
+    --libdir=$(pwd)/dist/lib \
+    -Dpkg_config_path=$(pwd)/build \
+    ./build/ .
+
+meson install -C ./build
+
+#
+# closing the task
+#
+
+echo "Task ended successfully!"

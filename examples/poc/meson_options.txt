@@ -1,0 +1,15 @@
+# ============================================
+# Opções de Build — AsaMiia
+# ============================================
+
+option('enable_gpu',
+    type: 'boolean',
+    value: false,
+    description: 'Habilita suporte a GPU (CUDA) no ONNX Runtime',
+)
+
+option('enable_worker_tests',
+    type: 'boolean',
+    value: false,
+    description: 'Habilita testes unitários que dependem diretamente de worker_lib (engine, registry). Desativado por padrão pois requer modelos em disco (make create-models).',
+)

@@ -1,0 +1,283 @@
+{
+	"name": "tutorial",
+	"attributes": {},
+	"station": {
+		"identifier": "AsaStation@AsaExtensions",
+		"attributes": {
+			"duration": 4800,
+			"enableTracerNetwork": false,
+			"enableTracerCSV": false
+		},
+		"subcomponents": {
+			"worldmodel": [
+				{
+					"identifier": "AsaWorldModel@AsaModels",
+					"attributes": {
+						"seed": 1,
+						"day": 1,
+						"month": 1,
+						"year": 2000,
+						"simulationTime": 43200,
+						"ws_lat": -24.7881899,
+						"ws_lon": -43.14997862,
+						"refRange": 150,
+						"enableTerrain": "//",
+						"tempMslCelsius": 15,
+						"pressMslHPa": 1013.25
+					},
+					"subcomponents": {
+						"zones": [],
+						"pois": [],
+						"players": [
+							{
+								"identifier": "HazardSource@AsaTutorial",
+								"attributes": {
+									"ws_name": "HS01",
+									"ws_lat": -23.63180832,
+									"ws_lon": -45.27434042,
+									"minSafeDist": 1.0
+								},
+								"subcomponents": {}
+							},
+							{
+								"identifier": "HazardSource@AsaTutorial",
+								"attributes": {
+									"ws_name": "HS02",
+									"ws_lat": -23.63286836,
+									"ws_lon": -45.20274309,
+									"minSafeDist": 1.0
+								},
+								"subcomponents": {}
+							},
+							{
+								"identifier": "HazardSource@AsaTutorial",
+								"attributes": {
+									"ws_name": "HS03",
+									"ws_lat": -23.68998402,
+									"ws_lon": -45.2007222,
+									"minSafeDist": 1.0
+								},
+								"subcomponents": {}
+							},
+							{
+								"identifier": "HazardSource@AsaTutorial",
+								"attributes": {
+									"ws_name": "HS04",
+									"ws_lat": -23.69236357,
+									"ws_lon": -45.27607261,
+									"minSafeDist": 1.0
+								},
+								"subcomponents": {}
+							},
+							{
+								"identifier": "HazardSource@AsaTutorial",
+								"attributes": {
+									"ws_name": "HS05",
+									"ws_lat": -23.66060873,
+									"ws_lon": -45.23940785,
+									"minSafeDist": 1.0
+								},
+								"subcomponents": {}
+							},
+							{
+								"identifier": "Ship@AsaTutorial",
+								"attributes": {
+									"ws_name": "BullShip",
+									"side": "blue",
+									"ws_lat": -23.65873997,
+									"ws_lon": -45.36759015,
+									"initHeading": 0,
+									"initSpdKts": 20,
+									"startTime": 0,
+									"navigationTime": 4800
+								},
+								"subcomponents": {
+									"dynamicsModel": [
+										{
+											"identifier": "Hydrodynamics@AsaTutorial",
+											"attributes": {
+												"turnRate": 3.0
+											},
+											"subcomponents": {}
+										}
+									],
+									"scanner": [
+										{
+											"identifier": "Scanner@AsaTutorial",
+											"attributes": {
+												"maxAngle": 180.0,
+												"maxRange": 50.0
+											},
+											"subcomponents": {}
+										}
+									],
+									"agent": [
+										{
+											"identifier": "ShipAgent@AsaTutorial",
+											"attributes": {},
+											"subcomponents": {}
+										}
+									],
+									"navSys": [
+										{
+											"identifier": "ShipNav@AsaTutorial",
+											"attributes": {},
+											"subcomponents": {
+												"steerpoints": [
+													{
+														"identifier": "Steerpoint@AsaTutorial",
+														"attributes": {
+															"latitude": -23.65921034,
+															"longitude": -45.31496444
+														},
+														"subcomponents": {}
+													},
+													{
+														"identifier": "Steerpoint@AsaTutorial",
+														"attributes": {
+															"latitude": -23.60829268,
+															"longitude": -45.23558001
+														},
+														"subcomponents": {}
+													},
+													{
+														"identifier": "Steerpoint@AsaTutorial",
+														"attributes": {
+															"latitude": -23.66188941,
+															"longitude": -45.16712004
+														},
+														"subcomponents": {}
+													},
+													{
+														"identifier": "Steerpoint@AsaTutorial",
+														"attributes": {
+															"latitude": -23.7172402,
+															"longitude": -45.23339512
+														},
+														"subcomponents": {}
+													}
+												]
+											}
+										}
+									]
+								}
+							}
+						],
+						"monitors": [],
+						"wezRepo": []
+					},
+					"alias": {}
+				}
+			],
+			"recorders": [
+				{
+					"identifier": "AsaTacViewRecorder@AsaExtensions",
+					"attributes": {
+						"ip": "\"127.0.0.1\"",
+						"port": "\"1234\"",
+						"realTimeOn": true,
+						"saveFileOn": false
+					},
+					"subcomponents": {
+						"asaBasicMsgs": [
+							{
+								"identifier": "AsaBasicMsg3@AsaExtensions",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaBasicMsg4@AsaExtensions",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaBasicMsg5@AsaExtensions",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaBasicMsg6@AsaExtensions",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaBasicMsg7@AsaExtensions",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaBasicMsg8@AsaExtensions",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaBasicMsg9@AsaExtensions",
+								"attributes": {}
+							}
+						],
+						"asaCustomMsgs": [
+							{
+								"identifier": "AsaCustomMsg1@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg2@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg3@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg4@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg5@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg6@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg7@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg8@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg12@AsaModels",
+								"attributes": {}
+							},
+							{
+								"identifier": "AsaCustomMsg16@AsaModels",
+								"attributes": {}
+							}
+						],
+						"converters": [
+							{
+								"identifier": "AsaModelsTacView@AsaModels",
+								"attributes": {}
+							}
+						]
+					}
+				},
+				{
+					"identifier": "AsaEventReporter@AsaExtensions",
+					"attributes": {},
+					"subcomponents": {
+						"asaBasicMsgs": [
+							{
+								"identifier": "AsaBasicMsg0@AsaExtensions",
+								"attributes": {}
+							}
+						],
+						"asaCustomMsgs": [
+							{
+								"identifier": "AsaCustomMsg0@AsaExtensions",
+								"attributes": {}
+							}
+						]
+					}
+				}
+			]
+		}
+	}
+}

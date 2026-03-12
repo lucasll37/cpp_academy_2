@@ -1,0 +1,11 @@
+( Navigation
+    route: ( Route 
+        to: 1
+        autoSequence:    true
+        autoSeqDistance: ( NauticalMiles 0.2 )
+
+        components: {
+            $components.steerpoints$            
+        }
+    )
+)

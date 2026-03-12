@@ -1,0 +1,23 @@
+$self.ws_name$: ( AsaTutorial/HazardSource
+    id:              $counter.id$
+    mode:            ACTIVE
+    type:            HazardSource
+    
+    initLatitude:     ( Degrees $self.ws_lat$ )
+    initLongitude:    ( Degrees $self.ws_lon$ )
+    initHeading:      0.0
+    initAlt:          0.0
+    initVelocity:     0.0
+    
+    positionFreeze:  true 
+    altitudeFreeze:  true
+    attitudeFreeze:  true
+    crashOverride:   true
+    killOverride:    true
+    killRemoval:     false
+    enableNetOutput: true
+    dataLogTime:     ( Seconds 1.0 ) 
+    useCoordSys:     WORLD
+
+    minSafeDist:     ( NauticalMiles $self.minSafeDist$ )
+)

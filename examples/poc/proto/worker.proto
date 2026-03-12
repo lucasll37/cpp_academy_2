@@ -1,0 +1,218 @@
+syntax = "proto3";
+
+package mlinference.worker;
+
+import "common.proto";
+
+// ============================================
+// Worker Service
+// ============================================
+
+service WorkerService {
+
+    // --- Inference ---
+    rpc Predict       (PredictRequest)       returns (PredictResponse);
+    rpc BatchPredict  (BatchPredictRequest)  returns (BatchPredictResponse);
+    rpc PredictStream (stream PredictRequest) returns (stream PredictResponse);
+
+    // --- Model lifecycle ---
+    rpc LoadModel     (LoadModelRequest)     returns (LoadModelResponse);
+    rpc UnloadModel   (UnloadModelRequest)   returns (UnloadModelResponse);
+
+    // --- Model introspection ---
+    rpc ListModels    (ListModelsRequest)    returns (ListModelsResponse);
+    rpc GetModelInfo  (GetModelInfoRequest)  returns (GetModelInfoResponse);
+    rpc ValidateModel (ValidateModelRequest) returns (ValidateModelResponse);
+    rpc WarmupModel   (WarmupModelRequest)   returns (WarmupModelResponse);
+
+    // --- Worker observability ---
+    rpc GetStatus     (GetStatusRequest)     returns (GetStatusResponse);
+    rpc GetMetrics    (GetMetricsRequest)    returns (GetMetricsResponse);
+    rpc HealthCheck   (HealthCheckRequest)   returns (HealthCheckResponse);
+
+    // --- File discovery ---
+    rpc ListAvailableModels (ListAvailableModelsRequest) returns (ListAvailableModelsResponse);
+}
+
+// ============================================
+// Inference
+// ============================================
+
+message PredictRequest {
+    string model_id                               = 1;
+    map<string, mlinference.common.Tensor> inputs = 2;
+    map<string, string> metadata                  = 3;
+}
+
+message PredictResponse {
+    bool success                                    = 1;
+    map<string, mlinference.common.Tensor> outputs  = 2;
+    double inference_time_ms                        = 3;
+    string error_message                            = 4;
+    map<string, string> metadata                    = 5;
+}
+
+message BatchPredictRequest {
+    string model_id                  = 1;
+    repeated PredictRequest requests = 2;
+}
+
+message BatchPredictResponse {
+    bool success                       = 1;
+    repeated PredictResponse responses = 2;
+    double total_time_ms               = 3;
+    string error_message               = 4;
+}
+
+// ============================================
+// Model Lifecycle
+// ============================================
+
+message LoadModelRequest {
+    string model_id   = 1;
+    string model_path = 2;
+    string version    = 3;
+
+    // Optional: force a specific backend instead of auto-detection by extension
+    mlinference.common.BackendType force_backend = 4;
+
+    // Optional: arbitrary config passed to the backend (e.g. Python class name)
+    map<string, string> backend_config = 5;
+}
+
+message LoadModelResponse {
+    bool success                            = 1;
+    mlinference.common.ModelInfo model_info = 2;
+    string error_message                    = 3;
+}
+
+message UnloadModelRequest {
+    string model_id = 1;
+}
+
+message UnloadModelResponse {
+    bool success   = 1;
+    string message = 2;
+}
+
+// ============================================
+// Model Introspection
+// ============================================
+
+message ListModelsRequest {}
+
+message ListModelsResponse {
+    repeated mlinference.common.ModelInfo models = 1;
+}
+
+message GetModelInfoRequest {
+    string model_id = 1;
+}
+
+message GetModelInfoResponse {
+    bool success                            = 1;
+    mlinference.common.ModelInfo model_info = 2;
+    ModelRuntimeMetrics metrics             = 3;
+    string error_message                    = 4;
+}
+
+// Dry-run validation: checks if a model file is loadable without
+// actually allocating runtime resources.
+message ValidateModelRequest {
+    string model_path                            = 1;
+    mlinference.common.BackendType force_backend = 2;
+}
+
+message ValidateModelResponse {
+    bool valid                             = 1;
+    mlinference.common.BackendType backend = 2; // Detected backend
+    repeated string warnings               = 3;
+    string error_message                   = 4;
+
+    // Schema preview (if parseable without full load)
+    repeated mlinference.common.TensorSpec inputs  = 5;
+    repeated mlinference.common.TensorSpec outputs = 6;
+}
+
+// Run N dummy inferences to warm up JIT / caches.
+message WarmupModelRequest {
+    string model_id  = 1;
+    uint32 num_runs  = 2; // How many warmup iterations (default: 5)
+}
+
+message WarmupModelResponse {
+    bool success          = 1;
+    uint32 runs_completed = 2;
+    double avg_time_ms    = 3;
+    double min_time_ms    = 4;
+    double max_time_ms    = 5;
+    string error_message  = 6;
+}
+
+// ============================================
+// Per-model runtime metrics
+// ============================================
+
+message ModelRuntimeMetrics {
+    uint64 total_inferences        = 1;
+    uint64 failed_inferences       = 2;
+    double avg_inference_time_ms   = 3;
+    double min_inference_time_ms   = 4;
+    double max_inference_time_ms   = 5;
+    double p95_inference_time_ms   = 6;
+    double total_inference_time_ms = 7;
+    int64  last_used_at_unix       = 8;
+    int64  loaded_at_unix          = 9;
+    double p99_inference_time_ms   = 10;  // 99th percentile (nearest-rank)
+}
+
+// ============================================
+// Worker Observability
+// ============================================
+
+message GetStatusRequest {}
+
+message GetStatusResponse {
+    string worker_id                                   = 1;
+    mlinference.common.WorkerStatus status             = 2;
+    mlinference.common.WorkerCapabilities capabilities = 3;
+    mlinference.common.WorkerMetrics metrics           = 4;
+    repeated string loaded_model_ids                   = 5;
+}
+
+message GetMetricsRequest {}
+
+message GetMetricsResponse {
+    mlinference.common.WorkerMetrics worker_metrics    = 1;
+    map<string, ModelRuntimeMetrics> per_model_metrics = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    bool healthy   = 1;
+    string message = 2;
+}
+
+// ============================================
+// File Discovery
+// ============================================
+
+message ListAvailableModelsRequest {
+    string directory = 1; // Optional: override server's default models dir
+}
+
+message AvailableModel {
+    string filename                        = 1;
+    string path                            = 2;
+    string extension                       = 3;
+    mlinference.common.BackendType backend = 4;
+    int64  file_size_bytes                 = 5;
+    bool   is_loaded                       = 6;
+    string loaded_as                       = 7; // model_id if loaded
+}
+
+message ListAvailableModelsResponse {
+    repeated AvailableModel models = 1;
+    string directory               = 2; // The directory that was scanned
+}
