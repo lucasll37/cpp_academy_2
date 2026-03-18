@@ -1,0 +1,88 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{setspace} % Spacing between the lines.
+\usepackage{mathptmx} % Setting the font family to the Times New Roman.
+\usepackage{geometry} % Margins definition package.
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\geometry{a4paper, left=2cm, right=2cm, bottom=4cm, top=3cm} % Margins definition.
+\setstretch{1.5} % Defining the spacing to 1.5.
+\setlength{\parindent}{0pt}
+\pagestyle{fancy}
+\usepackage{graphicx} 
+\usepackage{microtype}
+\setlength{\emergencystretch}{2em}
+
+% ============================================================
+% Estilo de código — padrão do projeto (listings)
+% Adicionar no preâmbulo do main.tex ANTES do \begin{document}:
+%   \usepackage{listings}
+%   \usepackage{xcolor}   (já incluso no template)
+%   \input{content/listings_style}
+% Compilar normalmente: pdflatex main.tex
+%
+% NOTA: \setstretch{1} dentro do basicstyle neutraliza o
+% espaçamento 1.5 do template, mantendo o código compacto.
+% ============================================================
+ 
+\usepackage{listings}
+ 
+\lstdefinestyle{vscode}{
+  language=Python,
+  basicstyle=\setstretch{1}\ttfamily\footnotesize,
+  keywordstyle=\color{red},
+  stringstyle=\color{blue},
+  commentstyle=\color{gray!35},
+  extendedchars=true,
+  showspaces=false,
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  backgroundcolor=\color{green!10},
+  breakautoindent=true,
+  captionpos=b,
+  xleftmargin=0pt,
+}
+ 
+\lstset{style=vscode}
+ 
+% Barra de titulo acima do bloco de codigo
+% Uso: \vscodefile{nome_do_arquivo.cpp}
+%      \begin{lstlisting}[style=vscode] ... \end{lstlisting}
+\newcommand{\vscodefile}[1]{%
+    \vspace{6pt}%
+    \noindent\texttt{\small\textbf{#1}}\\[-4pt]%
+    \noindent\rule{\linewidth}{0.4pt}%
+    \vspace{-6pt}%
+}
+
+\input{commands}
+
+\def\projectname{MIIA - Mecanismos de Interoperabilidade entre Modelos de Inteligência Artificial e Agentes Autônomos em Simuladores Construtivos}
+\def\title{Relatório de Prova de Conceito (PoC)}
+\def\companyname{Instituto de Estudos Avançados (IEAv)}
+\def\version{1.0}
+\def\datereview{18/03/2026}
+\def\documentid{Documento n\textsuperscript{o} MIIA-REL-5b74de04}
+
+\begin{document}
+
+\input{content/cover}
+
+\newpage
+
+\input{content/revision}
+
+\newpage
+
+\renewcommand{\contentsname}{\centering\huge\textbf{Sumário}}
+\tableofcontents
+
+\newpage
+
+\input{content/doc}
+
+\end{document}
