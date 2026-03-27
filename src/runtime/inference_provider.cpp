@@ -6,16 +6,17 @@ std::string InferenceProvider::infer(
     const std::string& type,
     const std::string& input
 ) {
-    // Minimal sanity checks — this is the "receptionist"
+    // Validação básica de entrada (responsabilidade da "fachada")
     if (type.empty()) {
-        return "Invalid model type";
+        return "Tipo de modelo inválido";
     }
 
     if (input.empty()) {
-        return "Empty input";
+        return "Entrada vazia";
     }
 
-    // Delegate to the "technical boss"
+    // Delega a execução ao Orchestrator,
+    // que cuidará da escolha do runtime e execução.
     return orchestrator_.execute(type, input);
 }
 
