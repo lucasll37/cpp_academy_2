@@ -1,15 +1,15 @@
 #pragma once
 
 #include "miia/runtime/inference_orchestrator.hpp"
-#include "miia/runtime/iruntime.hpp"
-#include <memory>
+#include <string>
 
 namespace miia::runtime {
 
 class InferenceProvider {
 public:
-    void set_runtime(std::shared_ptr<IRuntime> runtime);
-    std::string infer(const std::string& input);
+    // Public API: user-facing entry point
+    std::string infer(const std::string& type,
+                      const std::string& input);
 
 private:
     InferenceOrchestrator orchestrator_;

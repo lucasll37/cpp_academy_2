@@ -2,12 +2,21 @@
 
 namespace miia::runtime {
 
-void InferenceProvider::set_runtime(std::shared_ptr<IRuntime> runtime) {
-    orchestrator_.set_runtime(std::move(runtime));
-}
+std::string InferenceProvider::infer(
+    const std::string& type,
+    const std::string& input
+) {
+    // Minimal sanity checks — this is the "receptionist"
+    if (type.empty()) {
+        return "Invalid model type";
+    }
 
-std::string InferenceProvider::infer(const std::string& input) {
-    return orchestrator_.execute(input);
+    if (input.empty()) {
+        return "Empty input";
+    }
+
+    // Delegate to the "technical boss"
+    return orchestrator_.execute(type, input);
 }
 
 }
