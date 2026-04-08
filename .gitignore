@@ -64,3 +64,6 @@ build/
 # Configs locais IDE
 .vscode/
 .idea/
+
+# Configurações locais do CMake
+CMakeUserPresets.json
