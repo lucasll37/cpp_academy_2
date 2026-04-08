@@ -64,6 +64,8 @@ gtest_dep = dependency('gtest',
     required: true,
 )
 
+aws_s3_dep = dependency('aws-sdk-cpp-s3', required: true)
+
 # ============================================
 # protoc e grpc_cpp_plugin
 # Resolução a partir dos bindir de cada pacote,

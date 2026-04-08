@@ -13,7 +13,29 @@ class MLInferenceRecipe(ConanFile):
     settings = "arch", "build_type", "compiler", "os"
     
     options = {"enable_gpu": [True, False]}
-    default_options = {"enable_gpu": False}
+    
+    default_options = {
+        "enable_gpu": False,
+ 
+        # ----------------------------------------------------------------
+        # aws-sdk-cpp: habilita APENAS o componente "s3".
+        #
+        # Conan 2.x requer o padrão "package/*:option" em default_options.
+        # Por padrão o recipe ativa vários componentes de alto nível que
+        # arrastam xorg/system e outras dependências desnecessárias.
+        # Desabilitamos tudo explicitamente e habilitamos só "s3".
+        # ----------------------------------------------------------------
+        "aws-sdk-cpp/*:s3":                  True,
+        "aws-sdk-cpp/*:access-management":   False,
+        "aws-sdk-cpp/*:identity-management": False,
+        "aws-sdk-cpp/*:monitoring":          False,
+        "aws-sdk-cpp/*:queues":              False,
+        "aws-sdk-cpp/*:s3-encryption":       False,
+        "aws-sdk-cpp/*:transfer":            False,
+        "aws-sdk-cpp/*:text-to-speech":      False,
+        "aws-sdk-cpp/*:shared":              False,
+        "aws-sdk-cpp/*:min_size":            True,
+    }
     
     exports_sources = "meson*", "cpp/*", "scripts/*", "proto/*", "conanfile.py", "asa-poc-miia.pc.in"
     
@@ -29,6 +51,7 @@ class MLInferenceRecipe(ConanFile):
         self.requires("re2/20230301", override=True)
         self.requires("onnxruntime/1.18.1")
         self.requires("gtest/1.14.0")
+        self.requires("aws-sdk-cpp/1.11.692")
 
     def generate(self):
         pc = PkgConfigDeps(self)
