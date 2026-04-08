@@ -74,6 +74,7 @@ worker_lib = static_library('asa_miia_worker_lib',
         'src/onnx_backend.cpp',
         'src/model_backend.cpp',
         'src/python_backend.cpp',
+        'src/s3_model_source.cpp',
     ),
     include_directories: worker_inc,
     dependencies: [
@@ -82,6 +83,7 @@ worker_lib = static_library('asa_miia_worker_lib',
         onnxruntime_dep,
         python3_dep,
         python_extra_dep,
+        aws_s3_dep
     ],
     install: false,
 )
@@ -96,6 +98,7 @@ worker_lib_dep = declare_dependency(
         onnxruntime_dep,
         python3_dep,
         python_extra_dep,
+        aws_s3_dep
     ],
 )
 

@@ -102,6 +102,7 @@ tmp/
 *.crt
 .env
 .env.local
+.env.example
 secrets/
 
 # Testing

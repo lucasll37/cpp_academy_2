@@ -1,0 +1,66 @@
+services:
+
+  minio-chown:
+    image: alpine:latest
+    container_name: aistor-chown
+    command: chown -R ${MINIO_UID:-1000}:${MINIO_GID:-1000} /mnt/data
+    volumes:
+      - ${MINIO_DATA_DIR:-./minio-data}:/mnt/data
+
+  minio:
+    image: quay.io/minio/aistor/minio:latest
+    container_name: aistor-server
+    user: "${MINIO_UID:-1000}:${MINIO_GID:-1000}"
+    command: >
+      minio server /mnt/data
+      --license /minio.license
+      --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ${MINIO_DATA_DIR:-./minio-data}:/mnt/data
+      - ./minio.license:/minio.license:ro
+    depends_on:
+      minio-chown:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  minio-init:
+    image: quay.io/minio/aistor/mc:latest
+    container_name: aistor-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./init:/init
+    entrypoint: >
+      /bin/sh -c "
+        echo '>>> Configurando alias...' &&
+        mc alias set local http://aistor-server:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+
+        echo '>>> Criando buckets estruturais...' &&
+        mc mb --ignore-existing local/shared   &&
+        mc mb --ignore-existing local/readonly &&
+        mc mb --ignore-existing local/users    &&
+
+        echo '>>> Registrando policies...' &&
+        mc admin policy create local policy-shared   /init/policy-shared.json   || true &&
+        mc admin policy create local policy-readonly /init/policy-readonly.json || true &&
+        mc admin policy create local policy-personal /init/policy-personal.json || true &&
+
+        echo '>>> Pronto!'
+      "
+    restart: on-failure

@@ -4,10 +4,13 @@
 
 .DEFAULT_GOAL := help
 
+
+
 # Custom variables
 PWD := $(shell pwd)
 BUILD_DIR := ./build
 DIST_DIR := $(PWD)/../dist
+ENV_FILE ?= ./.env
 
 # Build configuration
 BUILD_TYPE := Debug
@@ -74,6 +77,21 @@ clean: ## Clean all generated build files in the project.
 # Additional targets for development
 run-worker: ## Run the worker server.
 	$(BUILD_DIR)/cpp/worker/AsaMiia --address 0.0.0.0:50052 --threads 8
+
+run-worker-s3: ## Run worker com MinIO local
+	@test -f "$(ENV_FILE)" || { echo "ENV_FILE não encontrado: $(ENV_FILE)"; exit 1; }
+	@set -a && . $(ENV_FILE) && set +a && \
+	AWS_ACCESS_KEY_ID=$$ACCESS_KEY_ID \
+	AWS_SECRET_ACCESS_KEY=$$SECRET_ACCESS_KEY \
+	AWS_DEFAULT_REGION=$$S3_REGION \
+	$(BUILD_DIR)/cpp/worker/AsaMiia \
+		--address 0.0.0.0:50052 \
+		--threads 8 \
+		--s3-bucket $$S3_BUCKET \
+		--s3-prefix $$S3_PREFIX \
+		--s3-region $$S3_REGION \
+		--s3-endpoint $$S3_ENDPOINT \
+		--s3-path-style
 
 run-client: ## Run the client example.
 	$(BUILD_DIR)/cpp/client/AsaMiiaClient localhost:50052
