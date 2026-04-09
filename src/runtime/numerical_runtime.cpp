@@ -2,8 +2,12 @@
 
 namespace miia::runtime {
 
-std::string NumericalRuntime::run(const std::string& input) {
-    return "Numerical: " + input;
+PredictionResult NumericalRuntime::run(const std::unordered_map<std::string, std::vector<float>>& inputs) {
+    PredictionResult runtime_result;
+
+    //Implementação do NumericalRuntime (ONNX Runtime)
+
+    return runtime_result;
 }
 
 }

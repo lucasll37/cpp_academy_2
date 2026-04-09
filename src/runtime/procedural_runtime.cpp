@@ -49,9 +49,13 @@ bool ProceduralRuntime::load_model() {
     // Vamos procurar dentro do módulo uma classe com método "predict"
     py::object cls;
 
-    // Percorre todos os itens do módulo (__dict__)
-    for (auto item : mod.attr("__dict__")) {
-        py::object val = item.second;
+    // Obtém o __dict__ do módulo como um dict Python explícito
+    py::dict dict = mod.attr("__dict__");
+
+    // Percorre todos os itens (chave, valor)
+    for (auto item : dict) {
+        // item.first e item.second são py::handle → precisamos converter
+        py::object val = py::reinterpret_borrow<py::object>(item.second);
 
         // Verifica:
         // - é uma classe
@@ -79,28 +83,44 @@ bool ProceduralRuntime::load_model() {
     return true;
 }
 
-std::map<std::string, std::vector<float>>
-ProceduralRuntime::run(const std::map<std::string, std::vector<float>>& input) {
+PredictionResult ProceduralRuntime::run(const std::unordered_map<std::string, std::vector<float>>& inputs) {
+
+    PredictionResult runtime_result;
 
     // Garante que o modelo está carregado
-    if (!load_model()) return {};
-
-    // Cria um dicionário Python
-    py::dict py_inputs;
-
-    // Converte C++ -> Python automaticamente
-    for (const auto& [k, v] : input) {
-        // pybind11 converte std::vector<float> -> list automaticamente
-        py_inputs[py::str(k)] = v;
+    if (!load_model()) {
+        runtime_result.error_message = "Erro ao carregar modelo";
+        return runtime_result;
     }
 
-    // Chama o método predict do modelo
-    // equivalente a: result = predict(inputs)
-    py::object result = predict_(py_inputs);
+    try {
+        // Cria um dicionário Python
+        py::dict py_inputs;
 
-    // Converte Python -> C++ automaticamente
-    // (dict[str, list[float]] -> map<string, vector<float>>)
-    return result.cast<std::map<std::string, std::vector<float>>>();
+        // Converte C++ -> Python automaticamente
+        for (const auto& [k, v] : inputs) {
+            py_inputs[py::str(k)] = v;
+        }
+
+        // Chama o método predict do modelo
+        py::object result = predict_(py_inputs);
+
+        // Converte Python -> C++
+        runtime_result.outputs =
+            result.cast<std::unordered_map<std::string, std::vector<float>>>();
+
+    } catch (const py::error_already_set& e) {
+        // Erro vindo do Python
+        runtime_result.error_message = e.what();
+    } catch (const std::exception& e) {
+        // Qualquer outro erro C++
+        runtime_result.error_message = e.what();
+    } catch (...) {
+        // Porque sempre existe algo pior
+        runtime_result.error_message = "Erro desconhecido durante execução do modelo";
+    }
+
+    return runtime_result;
 }
 
 }

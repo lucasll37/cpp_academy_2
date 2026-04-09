@@ -6,7 +6,7 @@ namespace miia::runtime {
 
 class NumericalRuntime : public IRuntime {
 public:
-    std::string run(const std::string& input) override;
+    PredictionResult run(const std::unordered_map<std::string, std::vector<float>>& inputs) override;
 };
 
 }

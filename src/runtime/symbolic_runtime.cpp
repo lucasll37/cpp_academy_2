@@ -2,8 +2,12 @@
 
 namespace miia::runtime {
 
-std::string SymbolicRuntime::run(const std::string& input) {
-    return "Symbolic: " + input;
+PredictionResult SymbolicRuntime::run(const std::unordered_map<std::string, std::vector<float>>& inputs) {
+    PredictionResult runtime_result;
+
+    //Implementação do SymbolicRuntime (BehaviorTree)
+
+    return runtime_result;
 }
 
 }

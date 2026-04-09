@@ -24,9 +24,7 @@ public:
     ~ProceduralRuntime();
 
     // Executa o modelo:
-    // entrada e saída são dicionários string -> lista de floats
-    std::map<std::string, std::vector<float>> run(
-        const std::map<std::string, std::vector<float>>& input);
+    PredictionResult run(const std::unordered_map<std::string, std::vector<float>>& inputs) override;
 
 private:
     // Responsável por carregar o modelo Python (lazy loading)

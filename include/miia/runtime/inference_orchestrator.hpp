@@ -14,8 +14,7 @@ namespace miia::runtime {
 class InferenceOrchestrator {
 public:
     // Executa uma inferência com base no tipo do runtime
-    std::string execute(const std::string& type,
-                        const std::string& input);
+    PredictionResult execute(const PredictionRequest& request);
 
 private:
     // Estrutura interna que encapsula um runtime
@@ -26,7 +25,10 @@ private:
     };
 
     // Retorna um runtime existente ou cria um novo (lazy initialization)
-    std::shared_ptr<RuntimeEntry> get_or_create(const std::string& type);
+    std::shared_ptr<RuntimeEntry> get_or_create(const std::string& type, const std::string& model_id);
+
+    //Resolver o caminho do modelo baseado no id recebido na requisição
+    std::string resolve_model_path(const std::string model_id);
 
     // Mapa de runtimes por tipo
     std::unordered_map<std::string, std::shared_ptr<RuntimeEntry>> runtimes_;

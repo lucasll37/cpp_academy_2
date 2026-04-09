@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include "miia/runtime/prediction_contract.hpp"
 
 namespace miia::runtime {
 
@@ -8,7 +8,7 @@ class IRuntime {
 public:
     virtual ~IRuntime() = default;
 
-    virtual std::string run(const std::string& input) = 0;
+    virtual PredictionResult run(const std::unordered_map<std::string, std::vector<float>>& inputs) = 0;
 };
 
 }
