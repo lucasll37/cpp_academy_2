@@ -18,3 +18,102 @@ sanity_main:
     - echo "Sanity check (main)"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
+#########################################
+# O código abaixo é um Github Workflow e 
+# deve ser "traduzido" para o formato do
+# Gitlab CI (Gitlab Runners)
+#########################################
+# # name: Coverage Pipeline             # Define o nome do workflow que aparece no menu do GitHub Actions.
+# 
+# # on:                                 # Bloco que especifica os eventos ou gatilhos que acionam este workflow.
+# #   workflow_dispatch:                # Evento específico que permite rodar este pipeline manualmente através de um botão.
+# 
+# # jobs:                               # Agrupa todos os trabalhos (jobs) que serão executados neste pipeline.
+# #   coverage:                         # Identificador único do trabalho (neste caso, nomeado como 'coverage').
+# #     runs-on: ubuntu-24.04           # Define que o runner (a máquina virtual) usará o sistema operacional Ubuntu 24.04.
+# 
+# #     steps:                          # Inicia a lista sequencial de passos a serem executados dentro do job 'coverage'.
+# #       - name: Checkout              # Dá um nome descritivo ao passo de clonagem do código.
+# #         uses: actions/checkout@v4   # Invoca a Action oficial do GitHub (versão 4) para baixar o código para a máquina virtual.
+# 
+# #       # 1) Python 3.12              # Comentário original: Cabeçalho informando a instalação do Python.
+# #       - name: Install Python 3.12   # Dá um nome descritivo ao passo de instalação do Python.
+# #         run: |                      # O símbolo '|' permite a escrita de comandos de terminal em múltiplas linhas.
+# #           echo "🔧 Installing Python 3.12..." # Imprime uma mensagem de início da instalação no log.
+# #           sudo apt-get update       # Atualiza as listas de pacotes dos repositórios do sistema operacional Ubuntu.
+# #           sudo apt-get install -y python3.12 python3.12-dev python3.12-venv # Instala o Python 3.12, arquivos de desenvolvimento e ambiente virtual (-y pula confirmação).
+# #           python3.12 --version      # Verifica e imprime no log a versão instalada para garantir que o processo foi bem-sucedido.
+# 
+# #       # 2) Conan + NumPy (global)   # Comentário original: Cabeçalho informando a instalação de pacotes Python e Conan.
+# #       - name: Install Python deps   # Dá um nome descritivo ao passo de instalação de dependências.
+# #         run: |                      # O símbolo '|' inicia bloco de comandos em múltiplas linhas.
+# #           echo "🔧 Installing pip + Conan + NumPy..." # Imprime mensagem informando quais ferramentas serão instaladas.
+# #           python3.12 -m ensurepip --upgrade || true # Garante que o pip existe no sistema; se falhar, o '|| true' previne que o pipeline quebre.
+# #           python3.12 -m pip install --upgrade pip --break-system-packages # Atualiza o pip globalmente (a flag previne o erro de instalação fora de venv no Ubuntu recente).
+# #           python3.12 -m pip install conan numpy --break-system-packages # Instala os pacotes Conan (C++) e NumPy (Python) globalmente.
+# #           echo "✅ Conan: $(conan --version)" # Imprime a versão do Conan para confirmar a instalação.
+# #           echo "✅ NumPy: $(python3.12 -c 'import numpy; print(numpy.__version__)')" # Executa um script Python curto para imprimir a versão do NumPy.
+# 
+# #           conan --version           # Executa o comando de versão do Conan (redundante com a linha anterior).
+# #           python3.12 -c "import numpy; print('NumPy:', numpy.__version__)" # Executa o comando de versão do NumPy (redundante com a linha anterior).
+# 
+# #       # 3) System tools + Doxygen   # Comentário original: Cabeçalho para instalação de ferramentas de build do sistema.
+# #       - name: Install build tools   # Dá um nome descritivo ao passo de instalação de ferramentas.
+# #         run: |                      # O símbolo '|' inicia bloco de comandos em múltiplas linhas.
+# #           echo "🔧 Installing build tools..." # Imprime mensagem informando que as ferramentas de build serão instaladas.
+# #           sudo apt-get update       # Atualiza os pacotes do sistema novamente (redundante, pois já foi feito no passo do Python).
+# #           sudo apt-get install -y \ # Inicia o comando de instalação via apt-get; a barra '\' quebra o comando em múltiplas linhas visuais.
+# #             make \                  # Instala a ferramenta de automação Make.
+# #             cmake \                 # Instala o sistema gerador de build CMake.
+# #             meson \                 # Instala o sistema de build Meson.
+# #             ninja-build \           # Instala o sistema de build Ninja, focado em velocidade.
+# #             lcov \                  # Instala o LCOV, ferramenta de análise visual de cobertura de código.
+# #             graphviz \              # Instala o Graphviz, necessário para desenhar gráficos/diagramas no Doxygen.
+# #             doxygen \               # Instala o Doxygen, gerador de documentação de código.
+# #             clang-format-18 \       # Instala a versão 18 do formatador de código C/C++ da LLVM.
+# #             clang-tidy-18           # Instala a versão 18 do linter/analisador estático C/C++ da LLVM.
+# 
+# #           echo "======================================" # Imprime uma barra divisória visual no log.
+# #           echo "✅ Installed tools:" # Imprime um cabeçalho indicando que as versões seguirão.
+# #           make --version | head -n 1 # Imprime a versão do Make pegando apenas a primeira linha da resposta.
+# #           cmake --version | head -n 1 # Imprime a versão do CMake pegando apenas a primeira linha da resposta.
+# #           meson --version           # Imprime a versão instalada do Meson.
+# #           ninja --version           # Imprime a versão instalada do Ninja.
+# #           lcov --version            # Imprime a versão instalada do LCOV.
+# #           dot -V                    # Imprime a versão do Graphviz usando o comando base 'dot'.
+# #           doxygen --version         # Imprime a versão instalada do Doxygen.
+# #           clang-format-18 --version # Imprime a versão instalada do Clang-Format.
+# #           clang-tidy-18 --version   # Imprime a versão instalada do Clang-Tidy.
+# #           echo "======================================" # Imprime barra divisória fechando o bloco de log.
+# 
+# #       # 4) act (opcional)           # Comentário original: Cabeçalho indicando a instalação do 'act'.
+# #       - name: Install act           # Dá um nome descritivo ao passo de instalação do 'act'.
+# #         run: |                      # O símbolo '|' inicia bloco de comandos em múltiplas linhas.
+# #           echo "🔧 Installing act..." # Imprime mensagem informando a instalação do act.
+# #           curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash -s -- --install-dir ./bin # Baixa via curl e executa script bash que instala o executável no diretório ./bin local.
+# #           export PATH=$PATH:./bin   # Adiciona a pasta ./bin recém-criada ao PATH do sistema temporariamente para o comando funcionar.
+# #           echo "✅ act installed: $(act --version || echo 'version not found')" # Imprime a versão para atestar a instalação ou mensagem de erro.
+# #           echo "🐳 Running pipeline with act (ubuntu-24.04 full image)..." # Imprime mensagem antes de disparar o act.
+# #           act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:full-24.04 # Dispara a execução do act informando qual imagem Docker pesada ele deve usar como base.
+# #           echo "✅ act finished"      # Imprime mensagem de que a execução do act finalizou.
+# 
+# #       # Configurar Conan            # Comentário original: Cabeçalho indicando passo de configuração do Conan.
+# #       - name: Configure Conan       # Dá um nome descritivo ao passo.
+# #         run: |                      # O símbolo '|' inicia bloco de comandos em múltiplas linhas.
+# #           echo "⚙️ Configuring Conan..." # Imprime mensagem sobre a configuração no log.
+# #           conan profile detect --force # Pede ao Conan para autodetectar e criar (sobrescrevendo, se necessário) o perfil do sistema (GCC, arch, etc).
+# 
+# #       # Cria modelos ilustrativos   # Comentário original: Cabeçalho indicando passo para criar modelos de exemplo.
+# #       - name: Create illustrative models # Dá um nome descritivo ao passo.
+# #         run: |                      # O símbolo '|' inicia bloco de comandos em múltiplas linhas.
+# #           echo "🎨 Creating illustrative models..." # Imprime mensagem do início da tarefa.
+# #           make create-models        # Executa o alvo (target) 'create-models' que foi definido no Makefile do repositório.
+# #           echo "✅ Models created:"   # Imprime mensagem de confirmação de sucesso.
+# #           ls -la models             # Lista os arquivos dentro do diretório 'models' para comprovação no log.
+# 
+# #       # Rodar cobertura             # Comentário original: Cabeçalho indicando o passo final de análise de cobertura.
+# #       - name: Run coverage          # Dá um nome descritivo ao passo.
+# #         run: |                      # O símbolo '|' inicia bloco de comandos em múltiplas linhas.
+# #           echo "🚀 Running make coverage..." # Imprime mensagem informando que a cobertura será iniciada.
+# #           make coverage             # Executa o alvo 'coverage' definido no Makefile, que deve compilar o código e rodar testes/LCOV.
