@@ -1,7 +1,0 @@
-( AsaTutorial/Scanner
-    playerOfInterestTypes:      { "ship" }
-    maxPlayersOfInterest:       30
-    maxAngle2PlayersOfInterest: ( Degrees $self.maxAngle$ )
-    maxRange2PlayersOfInterest: ( NauticalMiles $self.maxRange$ )
-    checkHorizon:               false
-)

@@ -1,7 +1,0 @@
-# Credenciais reais — NUNCA versionar
-.env
-.env.example
-minio.license
-
-# Dados do MinIO
-minio-data/

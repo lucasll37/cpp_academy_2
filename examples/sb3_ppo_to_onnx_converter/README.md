@@ -1,1 +1,0 @@
-# BVR Air Combat Model

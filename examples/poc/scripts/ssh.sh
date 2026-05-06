@@ -1,1 +1,0 @@
-ssh -i "./tmp/ubuntu-aws.pem" ubuntu@ec2-18-205-25-72.compute-1.amazonaws.com
