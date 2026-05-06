@@ -1,15 +1,61 @@
 # ======================
-# Environments
+# Environments & Virtualenvs
 # ======================
-
-# Virtualenv
-.venv/
-venv/
 env/
 ENV/
+venv/
+.venv/
 
-# Environment files
-.env
+# ======================
+# Build Directories & Tools
+# ======================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ======================
+# C++ & CMake
+# ======================
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CMakeUserPresets.json
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.pyc
+*.pyo
+.Python
+*.egg
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ======================
+# Node/Web
+# ======================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+/web/dist/
+/web/build/
 
 # ======================
 # LaTeX
@@ -27,7 +73,6 @@ ENV/
 *.log
 *.lot
 *.nav
-*.out
 *.snm
 *.synctex.gz
 *.toc
@@ -37,33 +82,88 @@ ENV/
 *.upa
 *.upb
 
-# Arquivos temporários de editores
+# ======================
+# Generated Protobuf Files
+# ======================
+*_pb2.py
+*_pb2_grpc.py
+*.pb.cc
+*.pb.h
+generated/
+
+# ======================
+# Data, Models & Databases
+# ======================
+data/
+/models/
+models_cache/
+*.pt
+*.pth
+*.h5
+*.pb
+*.db
+*.sqlite
+*.sqlite3
+
+# ======================
+# Jupyter
+# ======================
+.ipynb_checkpoints/
+*.ipynb
+
+# ======================
+# Testing & Coverage
+# ======================
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+coverage/
+.nyc_output/
+
+# ======================
+# Documentation
+# ======================
+docs/_build/
+docs/doxygen/
+site/
+
+# ======================
+# IDEs, Editors & OS Files
+# ======================
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ======================
+# Temporary Files & Logs
+# ======================
+tmp/
 *.tmp
+*.temp
 *.bak
 *.sav
 *.swp
+*.swo
 *~
+logs/
 
 # ======================
-# Python
+# Secrets & Configuration
 # ======================
-__pycache__/
-*.py[cod]
-*.pyd
-*.pyc
-*.pyo
-*.so
-*.dll
+*.pem
+*.key
+*.crt
+.env
+.env.local
+secrets/
+*_config.yaml
+!*_config.yaml.example
 
-# Diretórios de ferramentas
-.eggs/
-dist/
-build/
-*.egg-info/
-
-# Configs locais IDE
-.vscode/
-.idea/
-
-# Configurações locais do CMake
-CMakeUserPresets.json
+# ======================
+# Infrastructure & Monitoring
+# ======================
+.dockerignore
+prometheus-data/
+grafana-data/
