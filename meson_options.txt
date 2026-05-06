@@ -1,0 +1,21 @@
+# ============================================
+# Opções de Build — AsaMiia
+# ============================================
+
+option('enable_gpu',
+    type: 'boolean',
+    value: false,
+    description: 'Habilita suporte a GPU (CUDA) no ONNX Runtime',
+)
+
+option('enable_docs',
+    type: 'boolean',
+    value: true,
+    description: 'Build documentation'
+)
+
+option('build_tests',
+    type: 'boolean',
+    value: true,
+    description: 'Build tests'
+)

@@ -1,0 +1,254 @@
+# =============================================================================
+# .clang-tidy — AsaMiia / poc-miia
+#
+# Lido automaticamente por clang-tidy, run-clang-tidy e pela integração do
+# VS Code (extensão clangd / clang-tidy). Não duplicar checks no Makefile.
+#
+# COMO USAR:
+#   make tidy            → analisa core/ inteiro
+#   make tidy-fix        → aplica fixes automáticos
+#   make tidy-file FILE= → analisa um arquivo específico
+#
+# PERFIS DISPONÍVEIS (descomente apenas um bloco "Checks:" de cada vez):
+#   [1] PERMISSIVO  — ativo agora  — só bugs reais e undefined behavior
+#   [2] MODERADO    — comentado    — adiciona modernize e performance
+#   [3] ESTRITO     — comentado    — tudo acima + readability e concurrency
+#
+# REFERÊNCIA DE CHECKS:
+#   https://clang.llvm.org/extra/clang-tidy/checks/list.html
+# =============================================================================
+
+
+# =============================================================================
+# [1] PERFIL PERMISSIVO — ATIVO
+#
+# Foco: bugs reais, undefined behavior e erros de uso da STL.
+# Zero falsos positivos em código legado ou gerado (protobuf, gRPC).
+# Bom ponto de partida antes de apertar as regras progressivamente.
+# =============================================================================
+
+Checks: >
+  -*,
+  clang-analyzer-core.*,
+  clang-analyzer-cplusplus.*,
+  clang-analyzer-unix.*,
+  bugprone-use-after-move,
+  bugprone-dangling-handle,
+  bugprone-infinite-loop,
+  bugprone-assert-side-effect,
+  bugprone-integer-division
+
+
+# =============================================================================
+# [2] PERFIL MODERADO — COMENTADO
+#
+# Acrescenta ao perfil permissivo:
+#   - modernize: adoção de idiomas C++17 (nullptr, override, range-for, etc.)
+#   - performance: cópias desnecessárias, move semântico, reservas de vetor
+#   - bugprone extra: parâmetros suspeitos, narrowing, branches redundantes
+#
+# Ativar após zerar os avisos do perfil permissivo.
+# =============================================================================
+
+# Checks: >
+#   -*,
+#   clang-analyzer-core.*,
+#   clang-analyzer-cplusplus.*,
+#   clang-analyzer-unix.*,
+#   bugprone-use-after-move,
+#   bugprone-dangling-handle,
+#   bugprone-infinite-loop,
+#   bugprone-assert-side-effect,
+#   bugprone-integer-division,
+#   bugprone-narrowing-conversions,
+#   bugprone-suspicious-semicolon,
+#   bugprone-branch-clone,
+#   modernize-use-nullptr,
+#   modernize-use-override,
+#   modernize-use-default-member-init,
+#   modernize-use-emplace,
+#   modernize-loop-convert,
+#   modernize-avoid-bind,
+#   performance-unnecessary-copy-initialization,
+#   performance-move-const-arg,
+#   performance-for-range-copy,
+#   performance-inefficient-vector-operation,
+#   performance-inefficient-string-concatenation
+
+
+# =============================================================================
+# [3] PERFIL ESTRITO — COMENTADO
+#
+# Acrescenta ao perfil moderado:
+#   - readability: nomes, simplificações, clareza do código
+#   - concurrency: uso incorreto de mutex, acessos sem lock
+#   - cppcoreguidelines: subconjunto das Core Guidelines do C++
+#   - misc: padrões variados não cobertos acima
+#
+# Ativar como meta de qualidade para PRs em produção.
+# Esperar número maior de falsos positivos — revisar com critério.
+# =============================================================================
+
+# Checks: >
+#   -*,
+#   clang-analyzer-core.*,
+#   clang-analyzer-cplusplus.*,
+#   clang-analyzer-unix.*,
+#   bugprone-*,
+#   modernize-use-nullptr,
+#   modernize-use-override,
+#   modernize-use-default-member-init,
+#   modernize-use-emplace,
+#   modernize-loop-convert,
+#   modernize-avoid-bind,
+#   modernize-make-unique,
+#   modernize-make-shared,
+#   performance-*,
+#   readability-const-return-type,
+#   readability-redundant-smartptr-get,
+#   readability-redundant-member-init,
+#   readability-simplify-boolean-expr,
+#   readability-delete-null-pointer,
+#   readability-qualified-auto,
+#   concurrency-mt-unsafe,
+#   cppcoreguidelines-no-malloc,
+#   cppcoreguidelines-pro-type-member-init,
+#   cppcoreguidelines-slicing,
+#   misc-unused-parameters,
+#   misc-redundant-expression,
+#   misc-throw-by-value-catch-by-reference
+
+
+# =============================================================================
+# Checks que NUNCA devem ser ativados neste projeto
+#
+# Listados aqui como documentação das decisões de exclusão.
+# =============================================================================
+
+# modernize-use-trailing-return-type
+#   → Estilo controverso; o código existente usa a sintaxe clássica.
+#
+# readability-magic-numbers
+#   → Muito ruidoso em código de inferência e testes numéricos.
+#
+# cppcoreguidelines-avoid-magic-numbers
+#   → Mesmo motivo acima (alias do anterior).
+#
+# google-*
+#   → Projeto não adota o Google Style Guide.
+#
+# llvm-*
+#   → Específico para o codebase do LLVM, não aplicável aqui.
+#
+# fuchsia-*
+#   → Específico para o sistema operacional Fuchsia.
+#
+# altera-*
+#   → Específico para FPGAs (OpenCL/HLS). Sem relevância.
+#
+# abseil-*
+#   → Específico para projetos que adotam as Abseil Guidelines.
+#
+# android-*
+#   → Específico para o NDK Android.
+#
+# objc-*
+#   → Específico para Objective-C.
+#
+# bugprone-easily-swappable-parameters
+#   → Extremamente ruidoso em APIs com múltiplos parâmetros do mesmo tipo
+#     (ex.: OnnxBackend, WorkerServer). Custo/benefício desfavorável.
+#
+# readability-identifier-length
+#   → Proíbe nomes curtos como 'i', 'ms', 'r'. Incompatível com o estilo atual.
+#
+# modernize-use-nodiscard
+#   → Útil mas invasivo — requer anotação manual em centenas de funções.
+#
+# cppcoreguidelines-owning-memory
+#   → Requer uso de gsl::owner<T>; dependência externa desnecessária.
+#
+# hicpp-*
+#   → Subconjunto redundante com cppcoreguidelines-*; ativa duplicatas.
+#
+# clang-analyzer-osx.*
+#   → Diagnósticos específicos de macOS/Cocoa. Projeto roda em Linux.
+
+
+# =============================================================================
+# WarningsAsErrors
+#
+# Lista de checks que devem tratar warnings como erros (-Werror equivalente).
+# String vazia = nenhum check é erro (padrão para perfil permissivo).
+# Para o perfil estrito, considerar:
+#   WarningsAsErrors: 'bugprone-use-after-move,clang-analyzer-core.NullDereference'
+# =============================================================================
+
+WarningsAsErrors: ''
+
+
+# =============================================================================
+# HeaderFilterRegex
+#
+# Quais headers têm seus avisos reportados.
+# Restringe ao código do projeto — exclui Conan, system, protobuf gerado.
+#
+# Apenas headers dentro de core/ são analisados.
+# Headers de /home/lucas/.conan2/*, /usr/include/*, build/proto/* são ignorados.
+# =============================================================================
+
+HeaderFilterRegex: '^.*/core/.*\.hpp$'
+
+
+# =============================================================================
+# FormatStyle
+#
+# Controla se clang-tidy reformata os trechos que corrige automaticamente
+# com -fix. 'file' usa o .clang-format do projeto, se existir.
+# 'none' não reformata nada — recomendado até o .clang-format estar definido.
+# =============================================================================
+
+FormatStyle: none
+
+
+# =============================================================================
+# CheckOptions
+#
+# Configurações finas por check. Só têm efeito quando o check está ativo.
+# Documentadas aqui mesmo que o check esteja no perfil comentado,
+# para não perder o contexto ao mudar de perfil.
+# =============================================================================
+
+CheckOptions:
+
+  # modernize-loop-convert: nível mínimo de segurança para converter for-loops.
+  # 'safe'   → só converte quando o compilador garante equivalência.
+  # 'risky'  → converte mesmo em casos com ponteiros/iteradores.
+  - key:   modernize-loop-convert.MinConfidence
+    value: safe
+
+  # modernize-use-default-member-init: preferir inicialização inline
+  # somente para membros simples (não structs complexas).
+  - key:   modernize-use-default-member-init.UseAssignment
+    value: '0'
+
+  # performance-for-range-copy: avisa sobre cópias em range-for apenas
+  # quando o tipo tem tamanho acima deste limiar (bytes).
+  # 16 bytes = evita alertas para tipos pequenos como int, float, ponteiros.
+  - key:   performance-for-range-copy.WarnOnAllAutoCopies
+    value: '0'
+  - key:   performance-for-range-copy.AllowedTypes
+    value: ''
+
+  # readability-qualified-auto: exige 'auto*' em vez de 'auto' para ponteiros.
+  - key:   readability-qualified-auto.AddConstToQualified
+    value: '1'
+
+  # bugprone-assert-side-effect: lista de funções consideradas sem efeito
+  # colateral para evitar falsos positivos com funções de log.
+  - key:   bugprone-assert-side-effect.AssertMacros
+    value: 'assert'
+
+  # misc-unused-parameters: não avisar em funções marcadas com (void)param.
+  - key:   misc-unused-parameters.StrictMode
+    value: '0'

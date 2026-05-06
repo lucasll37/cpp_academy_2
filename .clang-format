@@ -1,0 +1,403 @@
+# =============================================================================
+# .clang-format — AsaMiia / poc-miia
+#
+# Lido automaticamente por clang-format, clang-tidy (quando FormatStyle: file)
+# e pelas extensões do VS Code (clangd, C/C++).
+#
+# COMO USAR (via Makefile):
+#   make format          → formata core/ inteiro in-place
+#   make format-check    → verifica sem modificar (útil no CI)
+#   make format-file FILE=core/inference/src/onnx_backend.cpp
+#
+# REFERÊNCIA COMPLETA:
+#   https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+#
+# ESTILO BASE: LLVM, ajustado para corresponder ao código existente do projeto.
+#   - 4 espaços de indentação (não tab)
+#   - Chaves estilo Attach (abertura na mesma linha)
+#   - Alinhamento de membros consecutivos com espaço
+#   - ColumnLimit 100 (linhas longas de log justificam limite maior)
+#   - IncludeCategories para ordenar includes no estilo do projeto
+# =============================================================================
+
+# Versão mínima do clang-format compatível com estas opções.
+# Aumentar se opções novas forem adicionadas.
+# clang-format --version  para verificar a versão instalada.
+
+# --- Base ---
+# Ponto de partida. Todas as opções abaixo sobrescrevem os defaults do LLVM.
+BasedOnStyle: LLVM
+
+
+# =============================================================================
+# INDENTAÇÃO E ESPAÇAMENTO
+# =============================================================================
+
+# Tamanho da indentação em espaços. Padrão do projeto: 4.
+IndentWidth: 4
+
+# Tamanho visual do tab (para arquivos que misturem tabs e espaços).
+# O projeto usa exclusivamente espaços, mas este valor afeta o alinhamento
+# de comentários e strings que contenham \t.
+TabWidth: 4
+
+# Nunca usar tab — sempre espaços.
+UseTab: Never
+
+# Indentação de blocos case dentro de switch.
+# false → case alinhado com switch (padrão observado no código).
+IndentCaseLabels: false
+
+# Indentação do bloco de um case (o código dentro do case).
+# false → sem indentação extra além do case em si.
+IndentCaseBlocks: false
+
+# Indentação de namespaces aninhados.
+# false → sem indentação extra para namespace (padrão do projeto).
+NamespaceIndentation: None
+
+# Indentação de listas de inicialização de construtores.
+# Cada membro em nova linha recebe IndentWidth de indentação.
+# (Não confundir com ConstructorInitializerIndentWidth abaixo.)
+# ConstructorInitializerIndentWidth: 4  # já coberto pela opção abaixo
+
+# Indentação da lista de inicialização do construtor (: member_(...)).
+ConstructorInitializerIndentWidth: 4
+
+# Indentação de continuação de linha (quando uma expressão quebra).
+# Ex.: chamada de função com argumentos em múltiplas linhas.
+ContinuationIndentWidth: 4
+
+# Indentação de blocos lambda.
+LambdaBodyIndentation: Signature
+
+
+# =============================================================================
+# LIMITE DE COLUNA E QUEBRA DE LINHA
+# =============================================================================
+
+# Limite de colunas. O projeto tem linhas de log longas justificadas;
+# 100 é um equilíbrio razoável. Aumentar para 120 se necessário.
+ColumnLimit: 100
+
+# Permite linhas longas para strings literais (não quebra strings).
+# Útil para mensagens de log com formato fixo.
+# (Habilitado implicitamente: o clang-format não quebra strings.)
+
+# Permite que linhas de comentário ultrapassem o limite em casos de URLs.
+# false → respeita o limite mesmo em URLs dentro de comentários.
+# true  → não quebra linhas de comentário que contenham URLs longas.
+# Preferência do projeto: true (URLs de referência são comuns no código).
+# Nota: disponível a partir do clang-format 13.
+# ReflowComments: true  # descomente se quiser reformatar comentários
+
+# Número máximo de parâmetros em uma única linha antes de quebrar.
+# 0 → sem limite (deixa o ColumnLimit decidir).
+# BinPackParameters: false  # descomente para sempre colocar um param por linha
+
+
+# =============================================================================
+# CHAVES E BLOCOS
+# =============================================================================
+
+# Estilo de colocação de chaves.
+# Attach → chave de abertura na mesma linha (K&R / Java style).
+# Allman → chave em linha própria.
+# O código existente usa Attach para funções e if/else/for.
+BreakBeforeBraces: Attach
+
+# Chaves obrigatórias em blocos de controle de fluxo (if, for, while).
+# Always → sempre exige chaves, mesmo para blocos de uma linha.
+# MultiLine → só exige chaves quando o corpo ocupa múltiplas linhas.
+# O projeto usa chaves para blocos de múltiplas linhas, omite para onliners.
+# InsertBraces: Never  # descomente se quiser remover chaves em onliners
+
+# Permitir if/for/while em uma única linha (sem chaves).
+# true → clang-format pode colapsar blocos curtos em uma linha.
+# false → nunca colapsa (mantém a quebra de linha).
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+
+# Funções inline curtas podem ficar em uma linha.
+# Inline → permite apenas funções definidas dentro de classes.
+# All    → permite qualquer função curta.
+# None   → nunca coloca em uma linha.
+AllowShortFunctionsOnASingleLine: Inline
+
+# Lambdas curtas em uma linha.
+AllowShortLambdasOnASingleLine: Inline
+
+# Enums curtos em uma linha.
+AllowShortEnumsOnASingleLine: false
+
+
+# =============================================================================
+# ESPAÇOS
+# =============================================================================
+
+# Espaço antes de parêntese de função.
+# false → sem espaço: foo(arg)  (padrão do projeto)
+# true  → com espaço: foo (arg)
+SpaceBeforeParens: ControlStatements
+
+# Espaço dentro de parênteses de expressões.
+# false → sem espaço: (a + b)  (padrão)
+SpacesInParentheses: false
+
+# Espaço dentro de colchetes de acesso a arrays.
+SpacesInSquareBrackets: false
+
+# Espaço antes de colchetes de array.
+SpaceBeforeSquareBrackets: false
+
+# Espaço em listas de inicialização: { valor }
+# true → { valor }  (mais legível para inicializações)
+# false → {valor}
+SpacesInContainerLiterals: false
+
+# Espaço antes dos dois-pontos em range-for.
+# true → for (auto& x : vec)
+SpaceBeforeRangeBasedForLoopColon: true
+
+# Espaço após cast C-style: (int) x  vs  (int)x
+SpaceAfterCStyleCast: false
+
+# Espaço após keyword 'template'.
+# false → template<typename T>
+SpaceAfterTemplateKeyword: false
+
+# Espaço antes de operador de atribuição.
+SpaceBeforeAssignmentOperators: true
+
+# Espaço em comentários inline (// comment).
+# Número mínimo de espaços entre código e comentário de linha.
+SpacesBeforeTrailingComments: 2
+
+# Espaços dentro de <> de templates.
+# false → vector<int>  (padrão)
+SpacesInAngles: Never
+
+
+# =============================================================================
+# ALINHAMENTO
+# =============================================================================
+
+# Alinhamento de atribuições consecutivas.
+# Ex.:
+#   int    x   = 1;
+#   double foo = 2.0;
+# Cuidado: pode ser ruidoso em diffs. O projeto usa alinhamento em structs.
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false  # não alinha através de linhas em branco
+  AcrossComments: false    # não alinha através de comentários
+  AlignCompound: false     # não alinha += -= etc.
+
+# Alinhamento de declarações consecutivas (tipo + nome).
+# Ex.:
+#   int         count  = 0;
+#   std::string name   = "";
+AlignConsecutiveDeclarations:
+  Enabled: false  # desativado — muito invasivo em código existente
+
+# Alinhamento de macros #define consecutivas.
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+# Alinhamento de bit fields consecutivos.
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+# Alinhamento de operadores binários em quebras de linha.
+# NonAssignment → alinha operadores como +, -, &&, ||
+# None          → sem alinhamento
+AlignOperands: Align
+
+# Alinhamento de comentários de trailing (// ao final de linha).
+# true → alinha comentários em colunas verticais dentro de um bloco.
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 1
+
+
+# =============================================================================
+# INCLUDES
+# =============================================================================
+
+# Ordenar e agrupar #include automaticamente.
+# true → reorganiza includes segundo as categorias abaixo.
+SortIncludes: CaseSensitive
+
+# Reordenar includes dentro de cada categoria.
+IncludeBlocks: Regroup
+
+# Categorias de includes — define a ordem dos grupos.
+# Priority menor → aparece primeiro.
+# O padrão do projeto (observado nos .cpp):
+#   1. Header próprio do arquivo (ex.: inference_engine.hpp para inference_engine.cpp)
+#   2. Headers internos do projeto (core/*)
+#   3. Headers gerados (proto/*.pb.h)
+#   4. Dependências externas (grpc, onnx, Python)
+#   5. STL e sistema
+IncludeCategories:
+  # 1. Header associado ao .cpp (sem diretório — ex.: #include "onnx_backend.hpp")
+  - Regex:    '^"[^/]+'
+    Priority: 1
+
+  # 2. Headers internos do projeto
+  - Regex:    '^"(inference|client|server|utils)/'
+    Priority: 2
+
+  # 3. Headers gerados pelo protoc
+  - Regex:    '^"proto/'
+    Priority: 3
+  - Regex:    '\.pb\.h"$'
+    Priority: 3
+
+  # 4. Dependências externas (Conan / sistema de inferência)
+  - Regex:    '^<(grpc|grpcpp|google/protobuf|onnxruntime|Python|numpy)'
+    Priority: 4
+
+  # 5. STL e POSIX
+  - Regex:    '^<'
+    Priority: 5
+
+
+# =============================================================================
+# QUEBRAS DE LINHA ESPECÍFICAS
+# =============================================================================
+
+# Quebrar antes de operadores binários em expressões longas.
+# None        → sem quebra especial
+# NonAssignment → quebra antes de +, -, &&, ||, etc.
+# All         → quebra antes de todos os operadores
+BreakBeforeBinaryOperators: NonAssignment
+
+# Quebrar lista de inicialização do construtor.
+# BeforeComma → vírgula vai para o início da próxima linha
+# AfterColon  → quebra após o : inicial
+BreakConstructorInitializers: BeforeComma
+
+# Quebrar herança de classe.
+# BeforeComma → class Foo\n    : public Bar
+BreakInheritanceList: BeforeComma
+
+# Permitir que argumentos de template fiquem em uma linha.
+# false → mantém em uma linha se couber
+AlwaysBreakTemplateDeclarations: MultiLine
+
+# Forçar quebra após tipo de retorno de função.
+# None       → deixa o clang-format decidir (padrão — respeita ColumnLimit)
+# All        → sempre quebra
+# AllDefinitions → quebra apenas em definições (não em declarações)
+AlwaysBreakAfterReturnType: None
+
+# Quebrar strings literais longas.
+# false → não quebra strings (preserva strings de log)
+BreakStringLiterals: false
+
+
+# =============================================================================
+# PONTEIROS E REFERÊNCIAS
+# =============================================================================
+
+# Posição de * e & em declarações.
+# Left   → int* p;   (tipo-lado)
+# Right  → int *p;   (nome-lado)
+# Middle → int * p;  (centro)
+# O projeto usa Left: int* ptr, const std::string& ref.
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+
+# =============================================================================
+# NAMESPACES
+# =============================================================================
+
+# Comentário automático no fechamento de namespace.
+# true → adiciona // namespace mlinference ao fechar
+# false → não adiciona (o projeto já tem esses comentários manualmente)
+FixNamespaceComments: true
+
+# Colapsar namespaces aninhados em uma linha.
+# true → namespace a { namespace b { ... } }  →  namespace a::b { ... }
+# Apenas disponível a partir do C++17 (que o projeto usa).
+CompactNamespaces: false
+
+
+# =============================================================================
+# COMENTÁRIOS
+# =============================================================================
+
+# Reformatar comentários de bloco /* */.
+# false → preserva a formatação manual dos comentários (recomendado —
+#         o projeto tem banners ===... que não devem ser alterados).
+ReflowComments: false
+
+
+# =============================================================================
+# EMPTY LINES
+# =============================================================================
+
+# Número máximo de linhas em branco consecutivas dentro de uma função.
+MaxEmptyLinesToKeep: 1
+
+# Linhas em branco antes e depois de blocos de acesso (public/private/protected).
+EmptyLineBeforeAccessModifier: LogicalBlock
+EmptyLineAfterAccessModifier: Never
+
+# Manter linha em branco ao inicio de bloco.
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+
+# =============================================================================
+# TRAILING COMMA E TRAILING WHITESPACE
+# =============================================================================
+
+# Inserir vírgula final em listas de argumentos/parâmetros ao quebrar linhas.
+# None         → não insere (padrão — menos invasivo)
+# Wrapped      → insere apenas quando a lista já está quebrada
+InsertTrailingCommas: None
+
+# Remover ponto-e-vírgula redundante após definições de classe/função.
+# (Disponível a partir do clang-format 16.)
+# RemoveSemicolon: false
+
+
+# =============================================================================
+# OUTROS
+# =============================================================================
+
+# Ordenar usando-declarações.
+# true → ordena 'using namespace X' e 'using X::Y' alfabeticamente.
+SortUsingDeclarations: true
+
+# Forçar chaves em inicializações de lista agregada.
+# false → permite tanto Foo{1, 2} quanto Foo({1, 2}).
+Cpp11BracedListStyle: true
+
+# Espaço dentro de chaves de inicialização: {1, 2} vs { 1, 2 }.
+SpacesInBracedLists: false
+
+# Penalidade para quebrar comentários — valor alto = tenta não quebrar.
+PenaltyBreakComment: 300
+
+# Penalidade para quebrar antes do primeiro argumento de chamada de função.
+PenaltyBreakBeforeFirstCallParameter: 100
+
+# Penalidade para quebrar string literal.
+PenaltyBreakString: 1000
+
+# Penalidade para quebrar após operador de atribuição.
+PenaltyBreakAssignment: 200
+
+# Penalidade para retorno de tipo em nova linha.
+PenaltyReturnTypeOnItsOwnLine: 200
+
+# Penalidade por caractere que excede o ColumnLimit.
+PenaltyExcessCharacter: 10
