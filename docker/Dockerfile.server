@@ -1,0 +1,234 @@
+# ============================================
+# Multi-stage Dockerfile for Worker Node
+# Build flow: conan install → python-install → meson setup → meson compile → meson install
+# ============================================
+#
+# USAGE:
+#   CPU Version:
+#     docker build -f docker/Dockerfile.worker --target runtime-cpu -t worker:cpu .
+#
+#   GPU Version:
+#     docker build -f docker/Dockerfile.worker --target runtime-gpu -t worker:gpu .
+#
+# ============================================
+
+# ============================================
+# Stage 1: Build Environment
+# ============================================
+FROM ubuntu:24.04 AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CONAN_BUILD_TYPE=Release
+ARG MESON_BUILDTYPE=release
+ARG ENABLE_GPU=False
+
+RUN apt-get update && apt-get install -y \
+    cmake \
+    build-essential \
+    git \
+    wget \
+    curl \
+    pkg-config \
+    file \
+    python3 \
+    python3-pip \
+    python3-venv \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Meson, Ninja, and Conan — same toolchain as local dev
+RUN pip3 install --no-cache-dir --break-system-packages \
+    "meson>=1.0.0" \
+    "ninja>=1.11.0" \
+    "conan>=2.0.0"
+
+# Configure Conan profile
+RUN conan profile detect --force
+
+# ============================================
+# Stage 2: Conan Dependencies
+# ============================================
+FROM builder AS conan-deps
+
+# ARGs must be redeclared in each stage — values flow via --build-arg
+ARG CONAN_BUILD_TYPE=Release
+ARG ENABLE_GPU=False
+
+# O cache ~/.conan2/ não é herdado do stage builder — recriar o perfil
+RUN conan profile detect --force
+
+WORKDIR /app
+
+# Copy only conan config first (layer caching)
+COPY conanfile.py .
+COPY meson.build .
+COPY meson_options.txt .
+
+# apt-get update necessário — listas de pacotes não são herdadas entre stages
+RUN apt-get update
+
+# Conan install — generates PkgConfigDeps (.pc files) and MesonToolchain (.ini)
+# -c tools.system.package_manager:mode=install  → permite apt install em system_requirements()
+# -c tools.system.package_manager:sudo=False    → sem sudo dentro do container (root)
+RUN mkdir -p build && \
+    conan install ./ \
+    --build=missing \
+    --settings=build_type=${CONAN_BUILD_TYPE} \
+    -o enable_gpu=${ENABLE_GPU} \
+    -c tools.system.package_manager:mode=install \
+    -c tools.system.package_manager:sudo=False
+
+# ============================================
+# Stage 3: Build Application
+# Mirrors: make python-install + make configure + make build + make install
+# ============================================
+FROM conan-deps AS app-builder
+
+# ARGs must be redeclared in each stage
+ARG MESON_BUILDTYPE=release
+ARG ENABLE_GPU=False
+
+COPY asa-poc-miia.pc.in .
+COPY proto/ ./proto/
+COPY core/ ./core/
+COPY tests/ ./tests/
+COPY python/ ./python/
+
+# Venv em models/ — mesmo caminho que inject_venv_from_model_dir() espera
+RUN mkdir -p models && \
+    python3.12 -m venv models/.venv && \
+    models/.venv/bin/pip install --upgrade pip && \
+    models/.venv/bin/pip install -r python/requirements.txt
+
+# miia_model.py precisa estar em models/ para o backend e os testes
+RUN cp python/models/miia_model.py models/miia_model.py
+
+RUN meson setup \
+    --native-file build/conan_meson_native.ini \
+    --backend ninja \
+    --buildtype ${MESON_BUILDTYPE} \
+    --prefix=/app/dist \
+    --libdir=/app/dist/lib \
+    -Dpkg_config_path=/app/dist/lib/pkgconfig:/app/build \
+    -Denable_gpu=${ENABLE_GPU} \
+    -Denable_docs=false \
+    build/meson-build \
+    .
+
+RUN meson compile -C build/meson-build -j$(nproc)
+RUN meson install -C build/meson-build
+
+# Roda testes unitários — falha aqui aborta o build
+ENV MODELS_DIR=/app/models
+ENV VIRTUAL_ENV=/app/models/.venv
+RUN meson test -C build/meson-build \
+    --suite unit \
+    --print-errorlogs \
+    --test-args="--gtest_color=no --gtest_print_time=1"
+
+# ============================================
+# Stage 4: Collect Runtime Libraries
+# Extracts shared libs that the binary needs from Conan cache
+# so the runtime image stays minimal
+# ============================================
+FROM app-builder AS lib-collector
+
+RUN mkdir -p /runtime-libs && \
+    ldd /app/dist/bin/AsaMiia | \
+    grep "=> /" | \
+    awk '{print $3}' | \
+    while read lib; do \
+        case "$lib" in \
+            /lib/x86_64-linux-gnu/libc.so*      | \
+            /lib/x86_64-linux-gnu/libm.so*      | \
+            /lib/x86_64-linux-gnu/libdl.so*     | \
+            /lib/x86_64-linux-gnu/libpthread.so*| \
+            /lib/x86_64-linux-gnu/librt.so*     | \
+            /lib/x86_64-linux-gnu/libgcc_s.so*  | \
+            /lib/x86_64-linux-gnu/ld-linux*) \
+                ;; \
+            *) \
+                cp -L "$lib" /runtime-libs/ 2>/dev/null || true ;; \
+        esac; \
+    done && \
+    echo "=== Runtime libs collected ===" && \
+    ls -lh /runtime-libs/
+
+# ============================================
+# Stage 5: Runtime Image (GPU)
+# ============================================
+FROM nvidia/cuda:12.0.0-runtime-ubuntu22.04 AS runtime-gpu
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    libstdc++6 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /app/bin /app/lib /app/models /app/models_cache /etc/ml-inference
+
+COPY --from=app-builder /app/dist/bin/AsaMiia /app/bin/
+COPY --from=lib-collector /runtime-libs/ /app/lib/
+COPY --from=app-builder /app/models/ /app/models/
+
+RUN useradd -m -s /bin/bash mluser && \
+    chown -R mluser:mluser /app /app/models /app/models_cache /etc/ml-inference
+
+WORKDIR /app
+USER mluser
+
+EXPOSE 50052
+
+# LD_LIBRARY_PATH sem expansão de variável não-definida — evita UndefinedVar
+ENV LD_LIBRARY_PATH=/app/lib:/usr/local/lib
+ENV ENABLE_GPU=True
+ENV MODELS_DIR=/app/models
+ENV VIRTUAL_ENV=/app/models/.venv
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD /app/bin/AsaMiia --help > /dev/null || exit 1
+
+ENTRYPOINT ["/app/bin/AsaMiia"]
+CMD ["--address", "0.0.0.0:50052", "--models-dir", "/app/models", "--gpu", "--threads", "8"]
+
+# ============================================
+# Stage 6: Runtime Image (CPU)
+# ============================================
+FROM ubuntu:24.04 AS runtime-cpu
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    libstdc++6 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /app/bin /app/lib /app/models /app/models_cache /etc/ml-inference
+
+COPY --from=app-builder /app/dist/bin/AsaMiia /app/bin/
+COPY --from=lib-collector /runtime-libs/ /app/lib/
+COPY --from=app-builder /app/models/ /app/models/
+
+RUN useradd -m -s /bin/bash mluser && \
+    chown -R mluser:mluser /app /app/models /app/models_cache /etc/ml-inference
+
+WORKDIR /app
+USER mluser
+
+EXPOSE 50052
+
+# LD_LIBRARY_PATH sem expansão de variável não-definida — evita UndefinedVar
+ENV LD_LIBRARY_PATH=/app/lib:/usr/local/lib
+ENV ENABLE_GPU=False
+ENV MODELS_DIR=/app/models
+ENV VIRTUAL_ENV=/app/models/.venv
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD /app/bin/AsaMiia --help > /dev/null || exit 1
+
+ENTRYPOINT ["/app/bin/AsaMiia"]
+CMD ["--address", "0.0.0.0:50052", "--models-dir", "/app/models", "--threads", "8"]
