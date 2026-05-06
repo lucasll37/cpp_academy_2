@@ -3,7 +3,7 @@
   <h1>
     <a href="https://www.asa.dcta.mil.br">
       <img
-        src="./docs/img/miia-1024x768.png"
+        src="./docs/images/logo/miia-1024x768.png"
         alt="MIIA"
         width="500"
       >
