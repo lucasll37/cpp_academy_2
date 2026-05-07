@@ -26,13 +26,13 @@ class MLInferenceRecipe(ConanFile):
     
     def system_requirements(self):
         apt = Apt(self)
-        apt.update()
+        # apt.update() # requer sudo
         apt.install(["python3.12", "python3.12-dev", "python3.12-venv"]) # "python3-numpy"
         apt.install(["lcov"])
         apt.install(["graphviz"])
         apt.install(["clang-format-18", "clang-tidy-18"])
 
-    # def build_requirements(self):
+    # def build_requirements(self): # requer source ./build/conanbuild.sh
     #     self.tool_requires("doxygen/1.9.4")
     #     self.tool_requires("cmake/3.24.4")  
     #     self.tool_requires("meson/1.3.2")
