@@ -48,7 +48,7 @@ PROJECT_NAME           = "MIIA"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 1.0.0
+PROJECT_NUMBER         = 0.1.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewers a
@@ -993,7 +993,7 @@ WARN_LOGFILE           =
 
 INPUT                  = core/
 INPUT                 += python/models/miia_model.py
-INPUT                 += docs/doxygen/images/
+INPUT                 += docs/images/
 INPUT                 += docs/logo/
 INPUT                 += docs/doxygen/MAINPAGE.md
 
@@ -1100,7 +1100,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = docs/doxygen/images
+IMAGE_PATH             = docs/images
 
 # The INPUT_FILTER tag can be used to specify a program that Doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1426,7 +1426,7 @@ HTML_EXTRA_FILES       = docs/doxygen/styles/doxygen-awesome-darkmode-toggle.js 
                          docs/doxygen/styles/doxygen-awesome-paragraph-link.js \
                          docs/doxygen/styles/doxygen-awesome-interactive-toc.js \
                          docs/doxygen/styles/doxygen-awesome-tabs.js \
-                         docs/doxygen/images
+                         docs/images
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.

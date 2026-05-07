@@ -1,4 +1,4 @@
-.PHONY: clean configure build install package help configure-coverage coverage coverage-open
+.PHONY: clean configure build install package help coverage coverage-open
 .PHONY: run-server run-client test test-unit test-integration test-verbose
 .PHONY: docs docs-open docs-clean
 .PHONY: python-env python-install create-models python-clean
@@ -16,7 +16,6 @@ NINJA_JOBS := $(shell expr $$(nproc) / 2)
 
 # Build configuration
 BUILD_TYPE := Debug
-CONAN_BUILD_TYPE := Debug
 
 # Documentation configuration
 DOCS_DIR := docs/doxygen/generated
@@ -29,8 +28,6 @@ PYTHON_BIN := $(PYTHON_VENV)/bin/python
 PIP_BIN := $(PYTHON_VENV)/bin/pip
 PYTHON_VERSION := python3.12
 
-COVERAGE_DIR := $(BUILD_DIR)/coverage-report
-
 # Docker configuration
 DOCKER_WORKER_IMAGE := ml-inference-server
 DOCKER_TAG := latest
@@ -38,6 +35,8 @@ DOCKER_TAG := latest
 # Browser configuration for opening documentation
 BROWSER := explorer.exe
 
+# Coverage configuration
+COVERAGE_DIR := $(BUILD_DIR)/coverage-report
 
 # Clang configuration
 FORMAT_SOURCES := $(shell find core tests -name '*.cpp' -o -name '*.hpp')
@@ -51,24 +50,31 @@ YELLOW := \033[1;33m
 BLUE := \033[0;34m
 NC := \033[0m # No Color
 
+
 # ============================================
 # C++ Build Targets
 # ============================================
+
+clean: ## Clean all generated build files in the project.
+	rm -rf $(BUILD_DIR)/
+	rm -rf ./subprojects/packagecache
 
 configure: ## Configure the project for building.
 	mkdir -p $(BUILD_DIR)/
 	conan install ./ \
 		--build=missing \
-		--settings=build_type=$(CONAN_BUILD_TYPE) \
-		--remote=conancenter \
+		--settings=build_type=$(BUILD_TYPE) \
 		-c tools.system.package_manager:mode=install \
 		-c tools.system.package_manager:sudo=True
 
 	meson setup --reconfigure \
 		--backend ninja \
 		--buildtype debug \
+		--buildtype $(shell echo $(BUILD_TYPE) | tr '[:upper:]' '[:lower:]') \
+		--native-file $(BUILD_DIR)/conan_meson_native.ini \
 		--prefix=$(DIST_DIR) \
 		--libdir=$(DIST_DIR)/lib \
+		-Db_coverage=true \
 		-Dpkg_config_path=$(DIST_DIR)/lib/pkgconfig:$(BUILD_DIR) \
 		$(BUILD_DIR)/ .
 
@@ -91,35 +97,40 @@ package: ## Package the project using conan.
 		--settings=compiler.cppstd=17 \
 		--settings=build_type=Release
 
-clean: ## Clean all generated build files in the project.
-	rm -rf $(BUILD_DIR)/
-	rm -rf ./subprojects/packagecache
 
-all: clean configure build install package ## Clean Configure, build, install and package the project.
+# ============================================
+# Execution Targets
+# ============================================
 
-configure-coverage: ## Configura build com instrumentação de cobertura
-	mkdir -p $(BUILD_DIR)/
-	conan install ./ \
-		--build=missing \
-		--settings=build_type=$(CONAN_BUILD_TYPE) \
-		--remote=conancenter \
-		-c tools.system.package_manager:mode=install \
-		-c tools.system.package_manager:sudo=True
+run-server: ## Run the server.
+	$(BUILD_DIR)/core/server/AsaMiia --address 0.0.0.0:50052 --models-dir ./models --threads 8
 
-	meson setup --reconfigure \
-		--native-file $(BUILD_DIR)/conan_meson_native.ini \
-		--backend ninja \
-		--buildtype debug \
-		-Db_coverage=true \
-		-Dpkg_config_path=$(BUILD_DIR) \
-		$(BUILD_DIR)/ .
+run-client: ## Run the client example. --address localhost:50052
+	$(BUILD_DIR)/core/client/AsaMiiaClient --models-dir ./models --address localhost:50052
 
-coverage: clean configure-coverage build ## Gera relatório de cobertura de testes
-	-meson test -C $(BUILD_DIR) \
-		--print-errorlogs \
-		--verbose \
-		--test-args '--gtest_output=json:test_results.json --gtest_print_time=1 --gtest_color=yes'
 
+# ============================================
+# Tests Targets
+# ============================================
+
+test: build ## Run all tests.
+	meson test -C $(BUILD_DIR) --test-args '--gtest_output=json:test_results.json --gtest_print_time=1 --gtest_color=yes'
+
+test-unit: build ## Run only unit tests (sem worker).
+	meson test -C $(BUILD_DIR) --suite unit --test-args '--gtest_output=json:test_results.json --gtest_print_time=1 --gtest_color=yes'
+
+test-integration: build ## Run integration tests (requer worker rodando).
+	meson test -C $(BUILD_DIR) --suite integration --test-args '--gtest_output=json:test_results.json --gtest_print_time=1 --gtest_color=yes'
+
+test-verbose: build ## Run tests com output detalhado.
+	meson test -C $(BUILD_DIR) --verbose --print-errorlogs --test-args '--gtest_output=json:test_results.json --gtest_print_time=1 --gtest_color=yes'
+
+
+# ============================================
+# Coverage Targets
+# ============================================
+
+coverage: test ## Gera relatório de cobertura de testes
 	geninfo ./build \
 		--output-filename ./build/coverage.info \
 		--ignore-errors mismatch,mismatch \
@@ -147,34 +158,6 @@ coverage: clean configure-coverage build ## Gera relatório de cobertura de test
 coverage-open: ## Abre relatório de cobertura no browser
 	-@$(BROWSER) $$(wslpath -w $(COVERAGE_DIR)/index.html) > /dev/null 2>&1 || true
 
-# ============================================
-# Execution Targets
-# ============================================
-
-run-server: ## Run the server.
-	$(BUILD_DIR)/core/server/AsaMiia --address 0.0.0.0:50052 --models-dir ./models --threads 8
-
-run-client: ## Run the client example. --address localhost:50052
-	$(BUILD_DIR)/core/client/AsaMiiaClient --models-dir ./models --address localhost:50052
-
-# ============================================
-# Tests Targets
-# ============================================
-
-# test: build ## Run all tests.
-# 	meson test -C $(BUILD_DIR)
-
-test: build ## Run all tests.
-	meson test -C $(BUILD_DIR) --test-args="--gtest_color=yes --gtest_print_time=1"
-
-test-unit: build ## Run only unit tests (sem worker).
-	meson test -C $(BUILD_DIR) --suite unit --test-args="--gtest_color=yes --gtest_print_time=1"
-
-test-integration: build ## Run integration tests (requer worker rodando).
-	meson test -C $(BUILD_DIR) --suite integration --test-args="--gtest_color=yes --gtest_print_time=1"
-
-test-verbose: build ## Run tests com output detalhado.
-	meson test -C $(BUILD_DIR) --verbose --print-errorlogs --test-args="--gtest_color=yes --gtest_print_time=1" 
 
 # ============================================
 # Documentation Targets
@@ -194,6 +177,7 @@ docs-open: ## Abre documentação no browser
 docs-clean: ## Remove documentação gerada
 	@rm -rf $(DOCS_DIR)
 	@echo "$(GREEN)✓ Documentation cleaned$(NC)"
+
 
 # ============================================
 # Python Environment Targets
@@ -278,6 +262,7 @@ python-clean: ## Remove Python virtual environment
 	@find $(PYTHON_DIR) -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@echo "$(GREEN)✓ Python environment cleaned$(NC)"
 
+
 # ============================================
 # Docker Build Targets
 # ============================================
@@ -349,11 +334,10 @@ format-diff: ## Mostra o diff do que seria formatado sem aplicar
 	@test -n "$(FILE)" || (echo "uso: make format-diff FILE=<arquivo>" && exit 1)
 	clang-format $(FILE) | diff $(FILE) - || true
 
+
 # ============================================
 # Misc Targets
 # ============================================
-action: ## Run GitHub Action workflow locally with act (requires act installed)
-	@act workflow_dispatch -W .github/workflows/dev_pipeline.yml
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
