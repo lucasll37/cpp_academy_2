@@ -19,10 +19,8 @@ BUILD_TYPE := Debug
 CONAN_BUILD_TYPE := Debug
 
 # Documentation configuration
-DOCS_DIR := docs/doxygen
-DOXYFILE := docs/Doxyfile
-DOXYGEN_AWESOME_DIR := docs/doxygen-awesome-css
-DOXYGEN_AWESOME_VERSION := v2.4.1
+DOCS_DIR := docs/doxygen/generated
+DOXYFILE := docs/doxygen/Doxyfile
 
 # Python environment configuration
 PYTHON_DIR := models

@@ -98,7 +98,7 @@ subdir('core/utils')
 # Documentação
 # ============================================
 if get_option('enable_docs')
-    subdir('docs')
+    subdir('docs/doxygen')
 endif
 
 # ============================================

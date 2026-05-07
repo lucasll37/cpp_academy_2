@@ -1,8 +1,8 @@
-# AsaPocMiia {#mainpage}
+# Mecanismos de Interoperabilidade entre Modelos de Inteligência Artificial e Agentes Autônomos em Simuladores Construtivos (MIIA) {#mainpage}
 
-<!-- **AsaPocMiia** é um sistema de inferência de modelos desenvolvido como prova de conceito no âmbito do projeto **MIIA** (*Mecanismos de Interoperabilidade entre Modelos de Inteligência Artificial e Agentes Autônomos em Simuladores Construtivos*), conduzido pelo **Instituto de Estudos Avançados (IEAv)**. O objetivo é integrar modelos de ML ao ambiente de simulação construtiva **ASA/MIXR**, permitindo que agentes autônomos deleguem decisões de raciocínio a modelos treinados.
+MIIA (Mecanismos de Interoperabilidade entre Modelos de Inteligência Artificial e Agentes Autônomos em Simuladores Construtivos) é um sistema de inferência de modelos desenvolvido no âmbito do projeto ASA, conduzido pelo Instituto de Estudos Avançados. Seu objetivo é integrar modelos de comportamento ao ambiente de simulação construtiva ASA/MIXR, permitindo que agentes autônomos deleguem decisões de raciocínio a modelos previamente criados.
 
-O sistema expõe uma API C++ unificada que abstrai dois mecanismos de transporte (in-process e gRPC) e dois backends de execução (Python via CPython embutido e ONNX via ONNX Runtime), totalizando quatro modos de operação intercambiáveis sem alteração no código do cliente. -->
+O sistema fornece uma API C++ unificada que abstrai dois mecanismos de transporte (in-process e gRPC) e dois backends de execução (Python via CPython embutido e ONNX via ONNX Runtime), totalizando quatro modos de operação intercambiáveis sem necessidade de alterações no código do cliente.
 
 ---
 
