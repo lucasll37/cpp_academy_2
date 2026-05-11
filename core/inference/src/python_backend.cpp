@@ -570,16 +570,53 @@ PyObject* PythonBackend::find_model_class(const std::string& /*path*/) {
         int is_sub = PyObject_IsSubclass(value, base_class);
 
         if (is_sub == 1 && value != base_class) {
-            LOG_DEBUG("python_backend") << "[find_model_class] ENCONTRADO: subclasse '" << type_name << "'";
-            found_cls = value;
-            Py_INCREF(found_cls);
-            break;
+            PyObject* abstract_methods = PyObject_GetAttrString(value, "__abstractmethods__");
+            bool is_concrete = false;
+            if (abstract_methods == nullptr) {
+                PyErr_Clear();
+                is_concrete = true;
+            } else {
+                Py_ssize_t n = PySet_Size(abstract_methods);
+                if (n == -1) { PyErr_Clear(); n = 0; }
+                is_concrete = (n == 0);
+                Py_DECREF(abstract_methods);
+            }
+
+            if (is_concrete) {
+                LOG_DEBUG("python_backend") << "[find_model_class] ENCONTRADO (concreta): '" << type_name << "'";
+                found_cls = value;
+                Py_INCREF(found_cls);
+                break;
+            }
+            LOG_DEBUG("python_backend") << "[find_model_class] ignorando abstrata '" << type_name
+                << "' (__abstractmethods__ não vazio)";
         }
         if (is_sub == -1) {
             LOG_DEBUG("python_backend") << "[find_model_class] PyObject_IsSubclass retornou -1 para '" << type_name << "'; limpando erro";
             PyErr_Clear();
         }
     }
+    
+    // while (PyDict_Next(module_dict, &pos, &key, &value)) {
+    //     if (!PyType_Check(value)) continue;
+    //     checked_types++;
+
+    //     const char* type_name = PyUnicode_Check(key) ? PyUnicode_AsUTF8(key) : "<non-string>";
+    //     LOG_DEBUG("python_backend") << "[find_model_class] verificando tipo '" << type_name << "'";
+
+    //     int is_sub = PyObject_IsSubclass(value, base_class);
+
+    //     if (is_sub == 1 && value != base_class) {
+    //         LOG_DEBUG("python_backend") << "[find_model_class] ENCONTRADO: subclasse '" << type_name << "'";
+    //         found_cls = value;
+    //         Py_INCREF(found_cls);
+    //         break;
+    //     }
+    //     if (is_sub == -1) {
+    //         LOG_DEBUG("python_backend") << "[find_model_class] PyObject_IsSubclass retornou -1 para '" << type_name << "'; limpando erro";
+    //         PyErr_Clear();
+    //     }
+    // }
 
     LOG_DEBUG("python_backend") << "[find_model_class] varredura concluída; tipos_verificados=" << checked_types
          << " found_cls=" << (void*)found_cls;
