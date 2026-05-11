@@ -13,7 +13,7 @@ O sistema fornece uma API C++ unificada que abstrai dois mecanismos de transport
 ```bash
 sudo apt install \
     build-essential python3.12 python3.12-dev \
-    python3.12-venv python3-numpy lcov graphviz
+    python3.12-venv python3-numpy lcov graphviz clangd clang-format clang-tidy
 ```
 
 ```bash

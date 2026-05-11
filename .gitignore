@@ -132,7 +132,6 @@ site/
 # IDEs, Editors & OS Files
 # ======================
 .idea/
-.vscode/
 .DS_Store
 Thumbs.db
 
