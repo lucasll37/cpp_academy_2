@@ -1,0 +1,407 @@
+{
+  "sim": {
+    "valid": true,
+    "phase": 0.0,
+    "exec_time": 120.0,
+    "sim_time": 36000.0
+  },
+  "ownship": {
+    "valid": true,
+    "latitude": -23.0,
+    "longitude": -46.0,
+    "altitude": 6000.0,
+    "ground_speed": 220.0,
+    "ground_track": 45.0,
+    "heading": 45.0,
+    "pitch": 3.0,
+    "roll": 0.0,
+    "terrain_elev": 800.0,
+    "damage": 0.0,
+    "pos_ecef": [
+      4000000.0,
+      -4000000.0,
+      2000000.0
+    ],
+    "vel_ecef": [
+      100.0,
+      100.0,
+      0.0
+    ],
+    "vel_body": [
+      220.0,
+      0.0,
+      0.0
+    ],
+    "accel_ecef": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "accel_body": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "euler_ned": [
+      0.0,
+      0.05,
+      0.785
+    ],
+    "euler_ecef": [
+      0.0,
+      0.05,
+      0.785
+    ],
+    "ang_vel_body": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "ang_vel_ecef": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "game_area": {
+    "valid": true,
+    "boundary_dist": 50000.0,
+    "brg_to_center": 225.0
+  },
+  "territory": {
+    "valid": true,
+    "boundary_dist": 80000.0,
+    "brg_to_center": 270.0
+  },
+  "faor": {
+    "valid": true,
+    "boundary_dist": 20000.0,
+    "brg_to_center": 90.0,
+    "active": true
+  },
+  "inventory": {
+    "valid": true,
+    "fuel_remaining": 4000.0,
+    "fuel_safe_amount": 1500.0,
+    "num_missiles": 4.0,
+    "num_bombs": 0.0
+  },
+  "shared": {
+    "valid": true,
+    "hold": {
+      "num_acft": 0.0,
+      "my_idx": -1.0,
+      "ref_exec_time": -1.0,
+      "ref_time_length": -1.0,
+      "start_time": -1.0
+    },
+    "cap": {
+      "active": true,
+      "engagement_marker": false,
+      "start_time": 60.0,
+      "latitude": -22.9,
+      "longitude": -45.9,
+      "heading": 90.0,
+      "commit_dist": 37040.0,
+      "flow_cycle_end": false
+    },
+    "gnd_atk_start_time": -1.0,
+    "abort_gnd_atk": false,
+    "formation": {
+      "leader_fly_to": 3.0,
+      "form_sign": 1.0,
+      "rel_azimuth": 120.0,
+      "rel_dist": 1852.0,
+      "rel_alt": -300.0,
+      "is_joined": true,
+      "leader_id": 101.0,
+      "aircraft": [
+        {
+          "rank": 1.0,
+          "player_id": 101.0,
+          "latitude": -22.95,
+          "longitude": -45.95,
+          "altitude": 6100.0,
+          "heading": 45.0,
+          "airspeed": 220.0,
+          "is_engaged": false,
+          "is_defending": false,
+          "is_joined": true,
+          "wing_id": -1.0
+        },
+        {
+          "rank": 2.0,
+          "player_id": 102.0,
+          "latitude": -23.0,
+          "longitude": -46.0,
+          "altitude": 6000.0,
+          "heading": 45.0,
+          "airspeed": 220.0,
+          "is_engaged": false,
+          "is_defending": false,
+          "is_joined": true,
+          "wing_id": -1.0
+        }
+      ]
+    },
+    "tgt_assign": [
+      {
+        "own_id": 102.0,
+        "tgt_id": 201.0,
+        "timer": 5.0,
+        "engaged": false
+      }
+    ],
+    "tgt_assign_enabled_id": 101.0,
+    "tgt_shot": []
+  },
+  "nav": {
+    "valid": true,
+    "fly_to_idx": 3.0,
+    "fly_to_lat": -22.5,
+    "fly_to_lon": -45.5,
+    "fly_to_elev": 850.0,
+    "fly_to_cmd_alt": 6000.0,
+    "fly_to_cmd_speed": 220.0,
+    "fly_to_bearing": 48.0,
+    "fly_to_distance": 55000.0,
+    "fly_to_ttg": 250.0,
+    "auto_seq": true,
+    "hold": {
+      "has_hold": false,
+      "leg_heading": 0.0,
+      "leg_time": 0.0,
+      "duration": 0.0,
+      "counter_clockwise": false
+    },
+    "terrain": {
+      "tf_leg": false,
+      "height_above_terrain": -1.0
+    },
+    "winding": {
+      "has_winding": false,
+      "timeout": 0.0,
+      "angle": 0.0,
+      "spd_factor": 1.0
+    }
+  },
+  "terrain_data": {
+    "valid": true,
+    "points": [
+      {
+        "elev": 800.0,
+        "valid": true
+      },
+      {
+        "elev": 805.0,
+        "valid": true
+      },
+      {
+        "elev": 810.0,
+        "valid": true
+      },
+      {
+        "elev": 815.0,
+        "valid": true
+      },
+      {
+        "elev": 820.0,
+        "valid": true
+      },
+      {
+        "elev": 825.0,
+        "valid": true
+      },
+      {
+        "elev": 830.0,
+        "valid": true
+      },
+      {
+        "elev": 835.0,
+        "valid": true
+      },
+      {
+        "elev": 840.0,
+        "valid": true
+      },
+      {
+        "elev": 845.0,
+        "valid": true
+      },
+      {
+        "elev": 850.0,
+        "valid": true
+      }
+    ]
+  },
+  "radar": {
+    "valid": true,
+    "mode": 1.0
+  },
+  "air_tracks": [
+    {
+      "valid": true,
+      "iff_code": "foe",
+      "type": 3.0,
+      "player_id": 201.0,
+      "latitude": -22.3,
+      "longitude": -45.2,
+      "altitude": 5500.0,
+      "rel_azimuth": 25.0,
+      "true_azimuth": 70.0,
+      "elevation": -2.0,
+      "range": 45000.0,
+      "gnd_range": 44900.0,
+      "gnd_track": 210.0,
+      "gnd_speed": 230.0,
+      "age": 0.5,
+      "wez_max_o2t_true": 35000.0,
+      "wez_nez_o2t_true": 18000.0,
+      "wez_max_t2o_true": 30000.0,
+      "wez_nez_t2o_true": 15000.0,
+      "wez_max_t2o_pred": 28000.0,
+      "wez_nez_t2o_pred": 14000.0,
+      "wez_pred_dist_corr": 500.0,
+      "wez_nez_o2t_pred": 17000.0,
+      "has_spike": false,
+      "emitter_class": "fighter",
+      "emitter_mode": "scan",
+      "pos_ecef": [
+        4010000.0,
+        -3990000.0,
+        2010000.0
+      ],
+      "vel_ecef": [
+        -150.0,
+        -150.0,
+        0.0
+      ]
+    }
+  ],
+  "gnd_atk": {
+    "valid": false,
+    "assigned_alt": -1.0,
+    "miss_dist": 1000000.0,
+    "toss_range": -1.0,
+    "tgt_ete": -1.0,
+    "next_stpt": -1.0
+  },
+  "events": {
+    "end_of_rdr_scan": false,
+    "seeker_active": false,
+    "missile_detonated": false,
+    "timeout_tgt_id": 0.0,
+    "mission_accomplished": false,
+    "outer_msl_warn_taz": []
+  },
+  "radio": {
+    "has_msg": false,
+    "voice_time_length": 0.0,
+    "voice_content": "",
+    "sender_name": ""
+  },
+  "bt_blackboard": {
+    "has_bingo_fuel": false,
+    "has_prox_warning": false,
+    "taz_prox_warning": 0.0,
+    "rwr_has_rear_spike": false,
+    "taz_rwr_rear_spike": 0.0,
+    "rwr_msl_warning": false,
+    "taz_rwr_msl_warning": 0.0,
+    "has_wingman": false,
+    "wing_target": {
+      "valid": false
+    },
+    "has_nez_warning": false,
+    "taz_nez_warning": 0.0,
+    "has_wez_warning": true,
+    "hp_threat": {
+      "valid": true,
+      "iff_code": "foe",
+      "type": 3.0,
+      "player_id": 201.0,
+      "latitude": -22.3,
+      "longitude": -45.2,
+      "altitude": 5500.0,
+      "rel_azimuth": 25.0,
+      "true_azimuth": 70.0,
+      "elevation": -2.0,
+      "range": 45000.0,
+      "gnd_range": 44900.0,
+      "gnd_track": 210.0,
+      "gnd_speed": 230.0,
+      "age": 0.5,
+      "wez_max_o2t_true": 35000.0,
+      "wez_nez_o2t_true": 18000.0,
+      "wez_max_t2o_true": 30000.0,
+      "wez_nez_t2o_true": 15000.0,
+      "wez_max_t2o_pred": 28000.0,
+      "wez_nez_t2o_pred": 14000.0,
+      "wez_pred_dist_corr": 500.0,
+      "wez_nez_o2t_pred": 17000.0,
+      "has_spike": false,
+      "emitter_class": "fighter",
+      "emitter_mode": "scan",
+      "pos_ecef": [
+        4010000.0,
+        -3990000.0,
+        2010000.0
+      ],
+      "vel_ecef": [
+        -150.0,
+        -150.0,
+        0.0
+      ]
+    },
+    "threat_score": 0.65,
+    "is_defending": false,
+    "hp_target": {
+      "valid": true,
+      "iff_code": "foe",
+      "type": 3.0,
+      "player_id": 201.0,
+      "latitude": -22.3,
+      "longitude": -45.2,
+      "altitude": 5500.0,
+      "rel_azimuth": 25.0,
+      "true_azimuth": 70.0,
+      "elevation": -2.0,
+      "range": 45000.0,
+      "gnd_range": 44900.0,
+      "gnd_track": 210.0,
+      "gnd_speed": 230.0,
+      "age": 0.5,
+      "wez_max_o2t_true": 35000.0,
+      "wez_nez_o2t_true": 18000.0,
+      "wez_max_t2o_true": 30000.0,
+      "wez_nez_t2o_true": 15000.0,
+      "wez_max_t2o_pred": 28000.0,
+      "wez_nez_t2o_pred": 14000.0,
+      "wez_pred_dist_corr": 500.0,
+      "wez_nez_o2t_pred": 17000.0,
+      "has_spike": false,
+      "emitter_class": "fighter",
+      "emitter_mode": "scan",
+      "pos_ecef": [
+        4010000.0,
+        -3990000.0,
+        2010000.0
+      ],
+      "vel_ecef": [
+        -150.0,
+        -150.0,
+        0.0
+      ]
+    },
+    "hp_tgt_inside_territory": false,
+    "hp_tgt_inside_faor": true,
+    "shot_distance": 32000.0,
+    "crank_side_after_shot": 0.0,
+    "has_opportunity_shot": false,
+    "opportunity_shot_dist": 0.0,
+    "hp_target_engaged": false,
+    "is_uplink_active": false,
+    "gnd_atk_accomplished": false,
+    "alt_safety_check": true
+  }
+}
