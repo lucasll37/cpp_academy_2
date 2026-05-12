@@ -2,7 +2,7 @@
 # =============================================================================
 # scripts/worker_docker.sh
 #
-# Constrói a imagem Docker do worker AsaMiia (CPU ou GPU).
+# Constrói a imagem Docker do server MiiaServer (CPU ou GPU).
 #
 # Uso:
 #   ./scripts/worker_docker.sh --cpu --tag latest
@@ -126,7 +126,7 @@ fi
 # Build
 # ---------------------------------------------------------------------------
 info "========================================"
-info "  AsaMiia Docker Build"
+info "  MiiaServer Docker Build"
 info "  Modo:       ${MODE^^}"
 info "  Target:     $TARGET"
 info "  Imagem:     $FULL_TAG"

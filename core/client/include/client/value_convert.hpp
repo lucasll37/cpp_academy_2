@@ -5,7 +5,7 @@
 ///
 /// @details
 /// Este header define as quatro funções de conversão que formam a fronteira
-/// *wire* do sistema AsaMiia:
+/// *wire* do sistema Miia:
 ///
 /// | Função               | Direção                                       |
 /// |----------------------|-----------------------------------------------|
@@ -25,7 +25,7 @@
 ///   serializa outputs antes de responder.
 ///
 /// @note Este header **não faz parte da API pública** exposta via
-///       `libasa_miia_client`.  Deve ser incluído apenas nas translation
+///       `libmiia_client`.  Deve ser incluído apenas nas translation
 ///       units que precisam da conversão (backends gRPC e servidor).
 ///
 /// ### Compatibilidade com protobuf v4 + GCC 13

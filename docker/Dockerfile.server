@@ -91,7 +91,7 @@ FROM conan-deps AS app-builder
 ARG MESON_BUILDTYPE=release
 ARG ENABLE_GPU=False
 
-COPY asa-poc-miia.pc.in .
+COPY miia.pc.in .
 COPY proto/ ./proto/
 COPY core/ ./core/
 COPY tests/ ./tests/
@@ -137,7 +137,7 @@ RUN meson test -C build/meson-build \
 FROM app-builder AS lib-collector
 
 RUN mkdir -p /runtime-libs && \
-    ldd /app/dist/bin/AsaMiia | \
+    ldd /app/dist/bin/MiiaServer | \
     grep "=> /" | \
     awk '{print $3}' | \
     while read lib; do \
@@ -171,7 +171,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p /app/bin /app/lib /app/models /app/models_cache /etc/ml-inference
 
-COPY --from=app-builder /app/dist/bin/AsaMiia /app/bin/
+COPY --from=app-builder /app/dist/bin/MiiaServer /app/bin/
 COPY --from=lib-collector /runtime-libs/ /app/lib/
 COPY --from=app-builder /app/models/ /app/models/
 
@@ -190,9 +190,9 @@ ENV MODELS_DIR=/app/models
 ENV VIRTUAL_ENV=/app/models/.venv
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD /app/bin/AsaMiia --help > /dev/null || exit 1
+    CMD /app/bin/MiiaServer --help > /dev/null || exit 1
 
-ENTRYPOINT ["/app/bin/AsaMiia"]
+ENTRYPOINT ["/app/bin/MiiaServer"]
 CMD ["--address", "0.0.0.0:50052", "--models-dir", "/app/models", "--gpu", "--threads", "8"]
 
 # ============================================
@@ -209,7 +209,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p /app/bin /app/lib /app/models /app/models_cache /etc/ml-inference
 
-COPY --from=app-builder /app/dist/bin/AsaMiia /app/bin/
+COPY --from=app-builder /app/dist/bin/MiiaServer /app/bin/
 COPY --from=lib-collector /runtime-libs/ /app/lib/
 COPY --from=app-builder /app/models/ /app/models/
 
@@ -228,7 +228,7 @@ ENV MODELS_DIR=/app/models
 ENV VIRTUAL_ENV=/app/models/.venv
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD /app/bin/AsaMiia --help > /dev/null || exit 1
+    CMD /app/bin/MiiaServer --help > /dev/null || exit 1
 
-ENTRYPOINT ["/app/bin/AsaMiia"]
+ENTRYPOINT ["/app/bin/MiiaServer"]
 CMD ["--address", "0.0.0.0:50052", "--models-dir", "/app/models", "--threads", "8"]

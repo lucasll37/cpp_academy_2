@@ -1,5 +1,5 @@
 // =============================================================================
-// grpc_client_backend.cpp — Backend gRPC do cliente AsaMiia
+// grpc_client_backend.cpp — Backend gRPC do cliente Miia
 //
 // Implementa IClientBackend via chamadas gRPC ao WorkerService.
 // Converte client::Object ↔ google.protobuf.Struct na fronteira.
@@ -722,7 +722,7 @@ ModelInfo GrpcClientBackend::proto_to_model_info(const common::ModelInfo& p) {
 }  // namespace mlinference
 
 // // =============================================================================
-// // grpc_client_backend.cpp — Backend gRPC do cliente AsaMiia
+// // grpc_client_backend.cpp — Backend gRPC do cliente Miia
 // //
 // // Implementa IClientBackend via chamadas gRPC ao WorkerService.
 // // Converte client::Object ↔ google.protobuf.Struct na fronteira.

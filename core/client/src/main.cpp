@@ -1,10 +1,10 @@
 // NOLINTBEGIN
 // =============================================================================
-// main.cpp — AsaMiia Interactive Client (TUI)
+// main.cpp — Miia Interactive Client (TUI)
 //
 // Uso:
-//   AsaMiiaClient [endereço]          ex: AsaMiiaClient localhost:50052
-//   AsaMiiaClient inprocess           modo in-process (sem worker separado)
+//   MiiaClient [endereço]          ex: MiiaClient localhost:50052
+//   MiiaClient inprocess           modo in-process (sem worker separado)
 // =============================================================================
 
 #include "client/inference_client.hpp"
@@ -1046,7 +1046,7 @@ int main(int argc, char* argv[]) {
     };
 
     while (true) {
-        int ch = list_selector("AsaMiia — Main Menu", menu_items,
+        int ch = list_selector("MiiaClient — Main Menu", menu_items,
                                "↑↓ navigate  ENTER select  Q quit");
 
         switch (ch) {

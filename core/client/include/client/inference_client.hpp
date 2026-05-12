@@ -1,10 +1,10 @@
 // =============================================================================
 /// @file   inference_client.hpp
-/// @brief  API pública do cliente AsaMiia para inferência de modelos de ML.
+/// @brief  API pública do cliente MiiaClient para inferência de modelos de ML.
 ///
 /// @details
 /// Este header define todos os tipos e a classe principal necessários para
-/// interagir com o servidor AsaMiia.  Dois modos de operação são suportados,
+/// interagir com o servidor MiiaServer.  Dois modos de operação são suportados,
 /// selecionados automaticamente pela string passada ao construtor de
 /// #InferenceClient:
 ///
@@ -60,7 +60,7 @@
 namespace mlinference {
 
 /// @namespace mlinference::client
-/// @brief     Contém todos os tipos e classes da API pública do cliente AsaMiia.
+/// @brief     Contém todos os tipos e classes da API pública do cliente MiiaClient.
 namespace client {
 
 // =============================================================================
@@ -494,7 +494,7 @@ class IClientBackend;
 // InferenceClient
 // =============================================================================
 
-/// @brief Cliente principal do AsaMiia para execução de inferência de modelos ML.
+/// @brief Cliente principal do MiiaClient para execução de inferência de modelos ML.
 ///
 /// @details
 /// `InferenceClient` é o ponto de entrada para todas as operações do sistema:

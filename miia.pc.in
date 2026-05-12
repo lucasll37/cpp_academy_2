@@ -2,9 +2,9 @@ prefix=@PREFIX@
 libdir=@LIBDIR@
 includedir=@INCLUDEDIR@
 
-Name: asa-poc-miia
+Name: miia
 Description: ASA's standard libraries.
 Version: @VERSION@
-Libs: -L${libdir} -lasa_miia_client
+Libs: -L${libdir} -lmiia_client
 Cflags: -I${includedir}
 Requires.private: protobuf grpc++ grpc++_reflection onnxruntime

@@ -1,5 +1,5 @@
 // =============================================================================
-// main.cpp — AsaMiia Worker entrypoint
+// main.cpp — Miia Server entrypoint
 // =============================================================================
 
 #include "server/worker_server.hpp"
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
     // ---- Banner ----
     std::cout
         << "========================================\n"
-        << "  AsaMiia Server\n"
+        << "  Miia Server\n"
         << "========================================\n"
         << "  Worker ID  : " << worker_id  << "\n"
         << "  Address    : " << address    << "\n"
@@ -120,6 +120,6 @@ int main(int argc, char* argv[]) {
 
     g_server->run();  // Blocking
 
-    std::cout << "[AsaMiia Server] Server stopped" << std::endl;
+    std::cout << "[Miia Server] Server stopped" << std::endl;
     return 0;
 }

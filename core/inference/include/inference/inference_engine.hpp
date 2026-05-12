@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   inference_engine.hpp
-/// @brief  Motor de inferência de alto nível do AsaMiia.
+/// @brief  Motor de inferência de alto nível do Miia.
 ///
 /// @details
 /// `InferenceEngine` é a fachada central que gerencia múltiplos modelos
@@ -77,7 +77,7 @@
 namespace mlinference {
 
 /// @namespace mlinference::inference
-/// @brief     Motor de inferência, backends e tipos internos do servidor AsaMiia.
+/// @brief     Motor de inferência, backends e tipos internos do servidor Miia.
 namespace inference {
 
 // =============================================================================

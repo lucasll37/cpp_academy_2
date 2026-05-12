@@ -6,7 +6,7 @@
 # portanto worker_lib_dep (que encapsula inference_inc) é necessário.
 # ============================================
 
-inference_client_lib = library('asa_miia_client',
+inference_client_lib = library('miia_client',
     files(
         'src/inference_client.cpp',
         'src/grpc_client_backend.cpp',
@@ -34,7 +34,7 @@ inference_client_dep = declare_dependency(
     ],
 )
 
-client_example = executable('AsaMiiaClient',
+client_example = executable('MiiaClient',
     files('src/main.cpp'),
     include_directories: [client_inc, utils_inc],
     dependencies:  [inference_client_dep],
@@ -45,5 +45,5 @@ client_example = executable('AsaMiiaClient',
 
 install_headers(
     'include/client/inference_client.hpp',
-    subdir: 'asa-poc-miia/client',
+    subdir: 'miia/client',
 )

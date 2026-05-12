@@ -5,11 +5,11 @@ from conan.tools.system.package_manager import Apt
 
 
 class MLInferenceRecipe(ConanFile):
-    name = "asa-poc-miia"
+    name = "miia"
     version = "1.0.0"
 
     license = "MIT"
-    url = "https://github.com/lucasll37/poc-miia"
+    url = "https://gitlab.asa.dcta.mil.br/asa/miia.git"
     description = "ML Inference System with gRPC and ONNX Runtime"
     settings = "arch", "build_type", "compiler", "os"
     
@@ -21,7 +21,7 @@ class MLInferenceRecipe(ConanFile):
         "build_tests": True
     }
     
-    exports_sources = "meson*", "core/*", "tests/*", "proto/*", "docs/*", "python/meson.build", "conanfile.py", "asa-poc-miia.pc.in"
+    exports_sources = "meson*", "core/*", "tests/*", "proto/*", "docs/*", "python/meson.build", "conanfile.py", "miia.pc.in"
     
     
     def system_requirements(self):
@@ -67,5 +67,5 @@ class MLInferenceRecipe(ConanFile):
         meson.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["asa_miia_client"]
+        self.cpp_info.libs = ["miia_client"]
         self.cpp_info.includedirs = ["include"]

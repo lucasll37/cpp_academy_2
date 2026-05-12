@@ -1,4 +1,5 @@
 install_headers(
     'include/utils/logger.hpp',
-    subdir: 'asa-poc-miia/utils',
+    'include/utils/value_printer.hpp',
+    subdir: 'miia/utils',
 )

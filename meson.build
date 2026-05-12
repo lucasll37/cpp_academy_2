@@ -1,4 +1,4 @@
-project('asa-poc-miia', 'cpp',
+project('miia', 'cpp',
     version: '1.0.0',
     license: 'Copyright © 2026 ASA. All rights reserved.',
     default_options: [
@@ -118,8 +118,8 @@ pkg_conf.set('INCLUDEDIR', get_option('prefix') / 'include')
 pkg_conf.set('VERSION',    meson.project_version())
 
 configure_file(
-    input:         'asa-poc-miia.pc.in',
-    output:        'asa-poc-miia.pc',
+    input:         'miia.pc.in',
+    output:        'miia.pc',
     configuration: pkg_conf,
     install:       true,
     install_dir:   get_option('libdir') / 'pkgconfig',
