@@ -18,7 +18,7 @@ namespace inference {
 // =============================================================================
 
 OnnxBackend::OnnxBackend(bool enable_gpu, uint32_t gpu_device, uint32_t num_threads)
-    : env_(ORT_LOGGING_LEVEL_WARNING, "AsaMiia")
+    : env_(ORT_LOGGING_LEVEL_WARNING, "Miia")
     , enable_gpu_(enable_gpu)
     , gpu_device_(gpu_device)
     , num_threads_(num_threads) {

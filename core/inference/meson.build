@@ -2,11 +2,11 @@
 # cpp/inference/meson.build
 #
 # Constrói a biblioteca estática com InferenceEngine e backends.
-# O executable AsaMiia fica em cpp/worker/meson.build.
+# O executable MiiaServer fica em cpp/server/meson.build.
 # inference_inc e client_inc vêm do escopo raiz.
 # ============================================
 
-worker_lib = static_library('asa_miia_worker_lib',
+worker_lib = static_library('miia_worker_lib',
     files(
         'src/inference_engine.cpp',
         'src/onnx_backend.cpp',

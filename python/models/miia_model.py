@@ -1,99 +1,28 @@
 """
-.. module:: miia_model
-   :synopsis: Interface base para modelos Python servidos pelo AsaMiia.
+pilot_model.py — Interface base para o agente AsaPilotBT.
 
-.. moduleauthor:: Lucas
+Este arquivo define:
 
-MiiaModel — Classe base abstrata para modelos Python do AsaMiia.
-================================================================
+- :class:`TensorSpec`, :class:`ModelSchema`, :class:`ValidationResult`,
+  :class:`WarmupResult` — tipos de dados do contrato de I/O.
+- :class:`MiiaModel` — classe base abstrata exigida pelo servidor AsaMiia.
+- :class:`PilotBTModel` — especialização abstrata para o agente AsaPilotBT.
 
-Todo arquivo ``.py`` colocado no diretório de modelos deve expor uma classe
-que herde de :class:`MiiaModel` e implemente os três métodos abstratos
-obrigatórios: :meth:`~MiiaModel.load`, :meth:`~MiiaModel.predict` e
-:meth:`~MiiaModel.get_schema`.
-
-O servidor AsaMiia realiza os seguintes passos ao carregar um modelo:
-
-1. Importa o módulo Python.
-2. Encontra a **primeira** classe que seja subclasse de :class:`MiiaModel`.
-3. Instancia a classe **sem argumentos** (``model = ModelClass()``).
-4. Chama :meth:`~MiiaModel.load` exatamente uma vez.
-5. Encaminha cada requisição ``Predict`` gRPC para :meth:`~MiiaModel.predict`.
-
-Formato dos inputs
-------------------
-O dicionário ``inputs`` passado a :meth:`~MiiaModel.predict` espelha o tipo
-``Object`` da API C++ (``mlinference::client::Object``).  Cada valor pode ser:
-
-- ``float``  — de ``mlinference::client::Value`` número
-- ``bool``
-- ``str``
-- ``list``              — de ``Value`` Array (pode ser aninhado)
-- ``dict[str, Any]``   — de ``Value`` Object (aninhamento arbitrário)
-- ``None``              — de ``Value`` Null
-
-Modelos com tensores planos convertem os valores diretamente para
-``np.ndarray``.  Modelos com inputs estruturados (dicts/listas aninhados)
-devem percorrer a estrutura e construir arrays conforme necessário.
-
-Exemplos
---------
-**Modelo com tensor plano (estilo ONNX):**
-
-.. code-block:: python
-
-    import numpy as np
-    from miia_model import MiiaModel, ModelSchema, TensorSpec
-
-    class ModeloLinear(MiiaModel):
-        def load(self) -> None:
-            self._pesos = np.array([2.0, 1.0, 0.5])
-
-        def predict(self, inputs: dict) -> dict:
-            x = np.array(inputs["entrada"], dtype=np.float32)
-            return {"saida": np.array([x @ self._pesos])}
-
-        def get_schema(self) -> ModelSchema:
-            return ModelSchema(
-                inputs=[TensorSpec("entrada", [1, 3], "float32")],
-                outputs=[TensorSpec("saida", [1], "float32")],
-                description="Modelo linear simples",
-                author="Lucas",
-            )
-
-**Modelo com input estruturado (navegação):**
-
-.. code-block:: python
-
-    import math, numpy as np
-    from miia_model import MiiaModel, ModelSchema, TensorSpec
-
-    class ModeloNavegacao(MiiaModel):
-        def load(self) -> None:
-            pass
-
-        def predict(self, inputs: dict) -> dict:
-            estado = inputs["state"]
-            rumo = float(estado["toHeading"])
-            return {"heading": np.array([[rumo]], dtype=np.float32)}
-
-        def get_schema(self) -> ModelSchema:
-            return ModelSchema(
-                inputs=[TensorSpec("state", [-1], "float32",
-                                   structured=True,
-                                   description="Estado estruturado do navio")],
-                outputs=[TensorSpec("heading", [1, 1], "float32",
-                                    description="Rumo comandado em graus")],
-            )
+**Não edite este arquivo.**  Implemente apenas ``pilotBT.py``.
 """
 
 from __future__ import annotations
 
 import time
+import pathlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
+from pathlib import Path
 
+import logging
+import datetime
+import json
 import numpy as np
 import numpy.typing as npt
 
@@ -102,14 +31,9 @@ import numpy.typing as npt
 # Estruturas de dados
 # =============================================================================
 
-
 @dataclass(frozen=True, slots=True)
 class TensorSpec:
     """Descreve uma porta de tensor (entrada ou saída) de um modelo.
-
-    Utilizada em :class:`ModelSchema` para declarar o contrato de I/O do
-    modelo.  O servidor serializa esta estrutura na mensagem protobuf
-    ``TensorSpec``, retornada pelo RPC ``GetModelInfo``.
 
     Parâmetros
     ----------
@@ -120,61 +44,34 @@ class TensorSpec:
         Especificação de forma.  Use ``-1`` para dimensões dinâmicas.
         Para inputs estruturados este campo é apenas informativo.
     dtype : str
-        String de dtype compatível com NumPy (ex.: ``"float32"``, ``"int64"``).
-        Padrão: ``"float32"``.
+        String de dtype compatível com NumPy (ex.: ``"float32"``).
     description : str
         Descrição legível exibida aos clientes via ``GetModelInfo``.
     min_value : float | None
-        Limite inferior opcional para valores de entrada (apenas portas
-        escalares/tensoriais).  Ignorado para portas estruturadas.
+        Limite inferior opcional (apenas portas escalares/tensoriais).
     max_value : float | None
-        Limite superior opcional para valores de entrada (apenas portas
-        escalares/tensoriais).  Ignorado para portas estruturadas.
+        Limite superior opcional (apenas portas escalares/tensoriais).
     structured : bool
-        Definir como ``True`` quando a porta transporta um ``dict``/``list``
-        aninhado em vez de um tensor numérico plano.
+        ``True`` quando a porta transporta um ``dict``/``list`` aninhado em
+        vez de um tensor numérico plano.  Quando ``True``:
 
-        Quando ``True``:
-
-        - A validação de shape/dtype é ignorada em
-          :meth:`MiiaModel.validate_inputs`.
-        - O warmup do C++ gera um ``Object{}`` vazio para esta porta em vez
-          de um array aleatório de floats.
-        - O campo ``TensorSpecData.structured`` é marcado no protobuf,
-          permitindo que clientes detectem inputs estruturados.
-
-    Exemplos
-    --------
-    Tensor plano::
-
-        TensorSpec("entrada", [1, 3], "float32", "Vetor de três features")
-
-    Dimensão de batch dinâmica::
-
-        TensorSpec("features", [-1, 128], "float32")
-
-    Input estruturado (estado de navegação)::
-
-        TensorSpec("state", [-1], "float32", structured=True,
-                   description="{ toHeading, latitude, longitude, hazards[] }")
+        - A validação de shape/dtype é ignorada em ``validate_inputs()``.
+        - O warmup do C++ gera um ``Object{}`` vazio para esta porta.
+        - O campo ``TensorSpecData.structured`` é marcado no protobuf.
     """
 
-    name: str
-    shape: list[int]
-    dtype: str = "float32"
-    description: str = ""
-    min_value: float | None = None
-    max_value: float | None = None
-    structured: bool = False
+    name:        str
+    shape:       list[int]
+    dtype:       str        = "float32"
+    description: str        = ""
+    min_value:   float|None = None
+    max_value:   float|None = None
+    structured:  bool       = False
 
 
 @dataclass(frozen=True, slots=True)
 class ModelSchema:
     """Descrição completa de I/O de um modelo.
-
-    Retornada por :meth:`MiiaModel.get_schema` e serializada na mensagem
-    protobuf ``ModelInfo`` pelo servidor.  Clientes recebem esta estrutura
-    via o RPC ``GetModelInfo``.
 
     Parâmetros
     ----------
@@ -187,27 +84,14 @@ class ModelSchema:
     author : str
         Autor ou equipe responsável pelo modelo.
     tags : dict[str, str]
-        Metadados arbitrários em chave-valor (ex.:
-        ``{"type": "navigation", "algorithm": "potential_field"}``).
-
-    Exemplos
-    --------
-    .. code-block:: python
-
-        ModelSchema(
-            inputs=[TensorSpec("state", [-1], "float32", structured=True)],
-            outputs=[TensorSpec("heading", [1, 1], "float32")],
-            description="Navegação por campo potencial",
-            author="ASA",
-            tags={"type": "navigation"},
-        )
+        Metadados arbitrários em chave-valor.
     """
 
-    inputs: list[TensorSpec]
-    outputs: list[TensorSpec]
-    description: str = ""
-    author: str = ""
-    tags: dict[str, str] = field(default_factory=dict)
+    inputs:      list[TensorSpec]
+    outputs:     list[TensorSpec]
+    description: str            = ""
+    author:      str            = ""
+    tags:        dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -219,11 +103,10 @@ class ValidationResult:
     valid : bool
         ``True`` se todos os inputs passaram na validação.
     errors : list[str]
-        Mensagens de erro legíveis, uma por verificação que falhou.
-        Vazio quando ``valid`` é ``True``.
+        Mensagens de erro legíveis.  Vazio quando ``valid`` é ``True``.
     """
 
-    valid: bool
+    valid:  bool      = True
     errors: list[str] = field(default_factory=list)
 
 
@@ -234,55 +117,46 @@ class WarmupResult:
     Parâmetros
     ----------
     runs_completed : int
-        Número de inferências de aquecimento efetivamente executadas.
+        Número de inferências de aquecimento executadas.
     avg_time_ms : float
-        Tempo médio de inferência entre todas as execuções, em milissegundos.
+        Tempo médio entre todas as execuções [ms].
     min_time_ms : float
-        Menor tempo de inferência observado, em milissegundos.
+        Menor tempo observado [ms].
     max_time_ms : float
-        Maior tempo de inferência observado, em milissegundos.
+        Maior tempo observado [ms].
     """
 
-    runs_completed: int = 0
-    avg_time_ms: float = 0.0
-    min_time_ms: float = 0.0
-    max_time_ms: float = 0.0
+    runs_completed: int   = 0
+    avg_time_ms:    float = 0.0
+    min_time_ms:    float = 0.0
+    max_time_ms:    float = 0.0
 
 
 # =============================================================================
-# Classe base abstrata
+# Classe base abstrata — contrato com o servidor
 # =============================================================================
-
 
 class MiiaModel(ABC):
     """Classe base abstrata que todo modelo Python do AsaMiia deve herdar.
 
-    Os três métodos abstratos — :meth:`load`, :meth:`predict` e
-    :meth:`get_schema` — são **obrigatórios**.  Os demais métodos possuem
-    implementações padrão que podem ser sobrescritas para comportamento mais
-    rico.
+    O servidor realiza exatamente esta sequência ao carregar um arquivo
+    ``.py``:
 
-    Regras impostas pelo servidor
-    -----------------------------
-    - A classe deve ser instanciável **sem argumentos** (``__init__`` não pode
-      ter parâmetros obrigatórios além de ``self``).
-    - Apenas a **primeira** subclasse de :class:`MiiaModel` encontrada no
-      módulo é utilizada.  Evite definir múltiplas subclasses em um único
-      arquivo.
-    - Não utilize ``sys.exit()`` ou ``os._exit()`` — isso encerra todo o
-      processo do worker.
-    - Não utilize ``print()`` — use o logger ``asalog`` ou o módulo
-      ``logging`` do Python para não poluir o stdout do servidor.
+    1. Importa o módulo.
+    2. Encontra a primeira classe **concreta** (não abstrata) que seja
+       subclasse de :class:`MiiaModel`.
+    3. Instancia sem argumentos: ``model = ModelClass()``.
+    4. Chama :meth:`load` uma única vez.
+    5. Encaminha cada requisição ``Predict`` gRPC para :meth:`predict`.
 
-    Segurança de concorrência
-    -------------------------
-    O servidor serializa todas as chamadas a uma única instância de modelo
-    via o mutex do ``InferenceEngine``.  Os modelos **não** precisam ser
-    thread-safe.
-
-    Ver também
-    ----------
-    :class:`TensorSpec`, :class:`ModelSchema`, :class:`WarmupResult`
+    Regras
+    ------
+    - ``__init__`` não pode ter parâmetros obrigatórios além de ``self``.
+    - Não use ``print()`` — use ``logging`` para não poluir o stdout do
+      servidor.
+    - Não use ``sys.exit()`` ou ``os._exit()``.
+    - O servidor serializa chamadas via mutex — modelos não precisam ser
+      thread-safe.
     """
 
     # -------------------------------------------------------------------------
@@ -291,17 +165,12 @@ class MiiaModel(ABC):
 
     @abstractmethod
     def load(self) -> None:
-        """Inicializa o modelo (carrega pesos, constrói grafo, abre arquivos, etc.).
+        """Inicializa o modelo.
 
-        Chamado **exatamente uma vez** pelo servidor logo após a instanciação,
-        antes de qualquer chamada a :meth:`predict`.
+        Chamado uma vez antes de qualquer :meth:`predict`.  Use para carregar
+        pesos, construir grafos ou abrir arquivos externos.
 
-        Levanta
-        -------
-        Exception
-            Qualquer exceção sinaliza que o modelo não pode ser carregado.
-            O servidor registra o erro e reporta ``load_model() = false``
-            ao cliente.
+        Qualquer exceção sinaliza falha de carregamento ao cliente.
         """
         ...
 
@@ -312,35 +181,19 @@ class MiiaModel(ABC):
         Parâmetros
         ----------
         inputs : dict[str, Any]
-            Mapeamento de nome do tensor/campo → valor, espelhando o
-            ``client::Object`` do C++.  Tipos possíveis de valor:
-
-            - ``float``           — número escalar
-            - ``bool``
-            - ``str``
-            - ``list``            — array (pode ser aninhado)
-            - ``dict[str, Any]``  — objeto aninhado
-            - ``None``            — valor nulo
-
-            Para modelos com tensores planos, converta para ``np.ndarray``
-            diretamente.  Para modelos com inputs estruturados, percorra o
-            dict/list aninhado conforme necessário.
+            Mapeamento nome → valor espelhando o ``client::Object`` do C++.
+            Tipos possíveis: ``float``, ``bool``, ``str``, ``list``,
+            ``dict[str, Any]``, ``None``.
 
         Retorna
         -------
         dict[str, np.ndarray]
-            Mapeamento de nome do tensor de saída → array NumPy.  Cada
-            array é convertido de volta para ``client::Value`` pelo servidor:
+            Mapeamento nome → array NumPy.
+            Shape ``[1]`` ou ``[1, 1]`` é convertido para escalar pelo
+            servidor; qualquer outro shape vira ``Array``.
 
-            - Shape ``[1]`` ou ``[1, 1]`` → escalar (``double`` único).
-            - Qualquer outro shape → ``Array`` de números.
-
-        Levanta
-        -------
-        Exception
-            Qualquer exceção não capturada é registrada como traceback Python
-            completo e retornada em ``PredictionResult.error_message`` com
-            ``success = false``.
+        Qualquer exceção não capturada é retornada em
+        ``PredictionResult.error_message`` com ``success = false``.
         """
         ...
 
@@ -348,168 +201,73 @@ class MiiaModel(ABC):
     def get_schema(self) -> ModelSchema:
         """Retorna o schema de I/O do modelo.
 
-        Chamado pelo servidor para popular ``ModelInfo`` e durante a
-        validação — em alguns casos antes de :meth:`load` ser chamado.
-        Deve, portanto, ser chamável tanto **antes** quanto **depois** de
-        :meth:`load`.
-
-        Retorna
-        -------
-        ModelSchema
-            Descrição completa das entradas, saídas e metadados do modelo.
+        Deve ser chamável tanto antes quanto depois de :meth:`load`.
         """
         ...
-
-    # -------------------------------------------------------------------------
-    # Métodos opcionais
-    # -------------------------------------------------------------------------
 
     def unload(self) -> None:
         """Libera recursos mantidos pelo modelo.
 
-        Chamado quando o modelo é descarregado do servidor.  Sobrescreva
-        este método se o modelo mantiver memória GPU, descritores de arquivo,
-        conexões de rede ou outros recursos que devem ser explicitamente
-        liberados.
-
-        A implementação padrão não faz nada.
+        Chamado quando o modelo é descarregado.  Sobrescreva se mantiver
+        memória GPU, descritores de arquivo ou conexões de rede.
         """
 
     def validate_inputs(self, inputs: dict[str, Any]) -> ValidationResult:
-        """Verifica se ``inputs`` satisfazem o schema do modelo.
+        """Verifica se ``inputs`` satisfazem o schema.
 
-        A implementação padrão realiza as seguintes verificações:
+        A implementação padrão verifica presença de chaves, shapes e
+        intervalos para portas não-estruturadas.  Portas com
+        ``structured=True`` ignoram as verificações de shape/dtype.
 
-        1. Todos os nomes de entrada esperados (do :meth:`get_schema`) estão
-           presentes.
-        2. Nenhum nome de entrada inesperado foi fornecido.
-        3. Para portas não estruturadas: o valor pode ser convertido para
-           ``spec.dtype`` e o shape resultante corresponde a ``spec.shape``
-           (dimensões ``-1`` são aceitas como curinga).
-        4. Para portas não estruturadas com ``min_value`` / ``max_value``
-           definidos: todos os valores estão dentro do intervalo declarado.
-
-        Portas estruturadas (``TensorSpec.structured = True``) ignoram as
-        verificações 3–4.  Sobrescreva este método para adicionar validações
-        específicas do domínio para tais inputs.
-
-        Parâmetros
-        ----------
-        inputs : dict[str, Any]
-            O mesmo dicionário que seria passado a :meth:`predict`.
-
-        Retorna
-        -------
-        ValidationResult
-            ``valid = True`` se todas as verificações passaram;
-            ``errors`` lista as falhas.
+        Sobrescreva para adicionar validações específicas do domínio.
         """
         schema = self.get_schema()
         errors: list[str] = []
 
-        expected_names = {s.name for s in schema.inputs}
-        provided_names = set(inputs.keys())
+        expected = {s.name for s in schema.inputs}
+        provided = set(inputs.keys())
 
-        for missing in expected_names - provided_names:
+        for missing in expected - provided:
             errors.append(f"Input ausente: {missing}")
-
-        for extra in provided_names - expected_names:
+        for extra in provided - expected:
             errors.append(f"Input inesperado: {extra}")
 
         for spec in schema.inputs:
-            if spec.name not in inputs:
+            if spec.name not in inputs or spec.structured:
                 continue
-
-            # Ignora verificação de shape/dtype para portas estruturadas.
-            if spec.structured:
-                continue
-
             raw = inputs[spec.name]
-
-            # Aceita tanto np.ndarray quanto list/float simples.
             try:
                 arr = np.asarray(raw, dtype=spec.dtype)
             except (ValueError, TypeError) as exc:
-                errors.append(
-                    f"{spec.name}: não é possível converter para {spec.dtype}: {exc}"
-                )
+                errors.append(f"{spec.name}: não é possível converter para {spec.dtype}: {exc}")
                 continue
 
             if len(arr.shape) != len(spec.shape):
-                errors.append(
-                    f"{spec.name}: esperado {len(spec.shape)} dims, "
-                    f"obtido {len(arr.shape)}"
-                )
+                errors.append(f"{spec.name}: esperado {len(spec.shape)} dims, obtido {len(arr.shape)}")
             else:
-                for i, (actual, expected) in enumerate(
-                    zip(arr.shape, spec.shape)
-                ):
-                    if expected != -1 and actual != expected:
-                        errors.append(
-                            f"{spec.name}: dim {i} esperado {expected}, "
-                            f"obtido {actual}"
-                        )
+                for i, (actual, expected_dim) in enumerate(zip(arr.shape, spec.shape)):
+                    if expected_dim != -1 and actual != expected_dim:
+                        errors.append(f"{spec.name}: dim {i} esperado {expected_dim}, obtido {actual}")
 
             if spec.min_value is not None and float(np.min(arr)) < spec.min_value:
-                errors.append(
-                    f"{spec.name}: valores abaixo do mínimo {spec.min_value}"
-                )
+                errors.append(f"{spec.name}: valores abaixo do mínimo {spec.min_value}")
             if spec.max_value is not None and float(np.max(arr)) > spec.max_value:
-                errors.append(
-                    f"{spec.name}: valores acima do máximo {spec.max_value}"
-                )
+                errors.append(f"{spec.name}: valores acima do máximo {spec.max_value}")
 
         return ValidationResult(valid=len(errors) == 0, errors=errors)
 
     def warmup(self, n: int = 5) -> WarmupResult:
-        """Executa *n* inferências sintéticas para aquecer caches JIT e pré-alocar memória.
+        """Executa *n* inferências sintéticas para aquecer caches JIT.
 
-        A implementação padrão gera arrays ``np.ndarray`` aleatórios a partir
-        do schema (usando ``np.random.rand``).  Para modelos estruturados
-        (``TensorSpec.structured = True``) um ``dict`` vazio é utilizado —
-        sobrescreva este método para fornecer um input representativo.
-
-        Parâmetros
-        ----------
-        n : int
-            Número de execuções de aquecimento.  Padrão: 5.
-
-        Retorna
-        -------
-        WarmupResult
-            Estatísticas das execuções de aquecimento.
-
-        Notas
-        -----
-        O ``PythonBackend`` delega ao warmup padrão do C++
-        (``ModelBackend::warmup()``), que **não** chama este método Python
-        diretamente.  Sobrescreva :meth:`warmup` quando precisar de lógica
-        de aquecimento no lado Python — por exemplo, para modelos com inputs
-        estruturados cujo input não pode ser gerado automaticamente pelo C++.
-
-        Exemplos
-        --------
-        .. code-block:: python
-
-            def warmup(self, n: int = 5) -> WarmupResult:
-                dummy = {"state": {"toHeading": 45.0, "hazards": []}}
-                times = []
-                for _ in range(n):
-                    t0 = time.perf_counter()
-                    self.predict(dummy)
-                    times.append((time.perf_counter() - t0) * 1000.0)
-                return WarmupResult(
-                    runs_completed=len(times),
-                    avg_time_ms=sum(times) / len(times),
-                    min_time_ms=min(times),
-                    max_time_ms=max(times),
-                )
+        A implementação padrão gera arrays aleatórios para portas não-
+        estruturadas e dicts vazios para portas estruturadas.  Sobrescreva
+        quando precisar de inputs representativos.
         """
         schema = self.get_schema()
         dummy: dict[str, Any] = {}
         for spec in schema.inputs:
             if spec.structured:
-                dummy[spec.name] = {}  # dict vazio — sobrescreva para warmup real
+                dummy[spec.name] = {}
             else:
                 shape = [d if d != -1 else 1 for d in spec.shape]
                 dummy[spec.name] = np.random.rand(*shape).astype(spec.dtype)
@@ -518,8 +276,7 @@ class MiiaModel(ABC):
         for _ in range(n):
             t0 = time.perf_counter()
             self.predict(dummy)
-            elapsed_ms = (time.perf_counter() - t0) * 1000.0
-            times.append(elapsed_ms)
+            times.append((time.perf_counter() - t0) * 1000.0)
 
         return WarmupResult(
             runs_completed=len(times),
@@ -529,30 +286,386 @@ class MiiaModel(ABC):
         )
 
     def memory_usage_bytes(self) -> int:
-        """Estima o uso de memória do modelo em bytes.
+        """Retorna o uso estimado de memória em bytes.  Padrão: ``0``."""
+        return 0
 
-        Sobrescreva para fornecer um valor preciso (ex.: tamanho dos arrays
-        de pesos).  O padrão retorna ``0``, que o servidor reporta como está
-        em ``ModelInfo.memory_usage_bytes``.
+    def __repr__(self) -> str:
+        schema = self.get_schema()
+        return (
+            f"<{self.__class__.__name__} "
+            f"inputs={len(schema.inputs)} outputs={len(schema.outputs)} "
+            f"desc={schema.description!r}>"
+        )
 
-        Retorna
-        -------
-        int
-            Uso estimado de memória em bytes.
+
+# =============================================================================
+# Base especializada para o agente AsaPilotBT
+# =============================================================================
+
+class PilotBTModel(MiiaModel):
+    """Base concreta para o agente AsaPilotBT.
+
+    Implementa tudo que é comum a qualquer piloto autônomo neste ambiente:
+    entradas fixas do agente, warmup com input representativo e input de
+    exemplo.
+
+    Métodos obrigatórios para subclasses
+    -------------------------------------
+    - :meth:`predict` — lógica de decisão; retorna ``dict[str, np.ndarray]``
+      com as chaves que o modelo produz.
+    - :meth:`get_schema` — declara as saídas via :meth:`output_spec` e
+      :meth:`_base_schema`.  As entradas já estão fixas em :attr:`_INPUTS`.
+
+    Opcionalmente, sobrescreva :meth:`load` para carregar pesos ou inicializar
+    recursos externos.
+
+    Hierarquia
+    ----------
+    .. code-block:: text
+
+        MiiaModel          (contrato com o servidor)
+            └── PilotBTModel   (este arquivo — não editar)
+                    └── PilotBT    (pilotBT.py — implemente aqui)
+
+    Atenção
+    -------
+    O servidor localiza a **primeira classe concreta** (não abstrata) que
+    herde de :class:`MiiaModel` no módulo importado.  Como ``PilotBTModel``
+    ainda possui métodos abstratos, ela é ignorada automaticamente —
+    apenas ``PilotBT`` é instanciada.
+    """
+    
+    def __init__(self, log_path: str = "./logs/pilotBT.log"):
+        super().__init__()
+        
+        self._log_path = log_path
+        self._logger   = None   # lazy — criado na primeira chamada a self.log()
+        self._sim_time = 0.0    # atualizado no início de predict()
+        
+    def _get_logger(self) -> logging.Logger:
+        if self._logger is None:
+            logger = logging.getLogger(str(id(self)))   # isolado por instância
+            logger.setLevel(logging.DEBUG)
+            logger.propagate = False               # não vaza pro logger raiz
+            pathlib.Path(self._log_path).parent.mkdir(parents=True, exist_ok=True)
+            handler = logging.FileHandler(self._log_path, encoding="utf-8")
+            handler.setFormatter(logging.Formatter("%(message)s"))
+            logger.addHandler(handler)
+            self._logger = logger
+        return self._logger
+
+
+    def log(self, *args) -> None:
+        """Escreve no arquivo de log com prefixo de tempo automático.
+
+        Uso idêntico ao print():
+            self.log("alt:", alt, "hdg:", hdg)
+            self.log(f"foe range={tgt_rng:.0f}m")
         """
+        msg = " ".join(str(a) for a in args)
+        # ts  = datetime.datetime.utcnow().isoformat(timespec="milliseconds")
+        # self._get_logger().debug(f"[{ts} | t={self._sim_time:.1f}s] {msg}")
+        self._get_logger().debug(msg)
+            
+
+    # -------------------------------------------------------------------------
+    # Implementações padrão de load / unload / memory
+    # -------------------------------------------------------------------------
+
+    def load(self) -> None:
+        """Implementação vazia.
+
+        Sobrescreva se precisar carregar pesos, inicializar uma rede neural
+        ou abrir arquivos externos.
+        """
+
+    def unload(self) -> None:
+        """Implementação vazia.
+
+        Sobrescreva se mantiver recursos externos que precisam ser liberados
+        (memória GPU, conexões, descritores de arquivo).
+        """
+
+    def memory_usage_bytes(self) -> int:
+        """Retorna ``0``.  Sobrescreva para reportar o uso real."""
         return 0
 
     # -------------------------------------------------------------------------
-    # Representação
+    # predict — ainda abstrato
     # -------------------------------------------------------------------------
 
-    def __repr__(self) -> str:
-        """Retorna uma representação textual concisa da instância do modelo."""
-        schema = self.get_schema()
-        n_in = len(schema.inputs)
-        n_out = len(schema.outputs)
-        return (
-            f"<{self.__class__.__name__} "
-            f"inputs={n_in} outputs={n_out} "
-            f"desc={schema.description!r}>"
+    @abstractmethod
+    def predict(self, inputs: dict[str, Any]) -> dict[str, npt.NDArray[Any]]:
+        """Executa a lógica de decisão do piloto.
+
+        Este é o **único método obrigatório** para subclasses de
+        :class:`PilotBTModel`.
+
+        Parâmetros
+        ----------
+        inputs : dict[str, Any]
+            Estado completo do agente produzido por
+            ``AsaPilotBT::prepareState()``.  Consulte :meth:`make_dummy_input`
+            para a estrutura completa com valores realistas.
+
+        Retorna
+        -------
+        dict[str, np.ndarray]
+        """
+        ...
+
+    # -------------------------------------------------------------------------
+    # Schema
+    # -------------------------------------------------------------------------
+
+    # Entradas padrão do agente — compartilhadas por todas as subclasses.
+    _INPUTS: list[TensorSpec] = []  # preenchido logo abaixo da classe
+
+    @staticmethod
+    def output_spec(name: str, shape: list[int] = [1, 1],
+                    dtype: str = "float32",
+                    description: str = "") -> TensorSpec:
+        """Helper para declarar uma porta de saída de forma concisa.
+
+        Parâmetros
+        ----------
+        name : str
+            Nome do tensor — deve corresponder à chave retornada em
+            :meth:`predict`.
+        shape : list[int]
+            Shape do tensor.  ``[1, 1]`` (padrão) é convertido para escalar
+            pelo servidor; qualquer outro shape vira ``Array``.
+        dtype : str
+            Dtype NumPy.  Padrão: ``"float32"``.
+        description : str
+            Descrição livre exibida via ``GetModelInfo``.
+
+        Exemplos
+        --------
+        Saída escalar simples::
+
+            PilotBTModel.output_spec("heading", description="Proa [deg]")
+
+        Vetor de N valores::
+
+            PilotBTModel.output_spec("features", shape=[1, 8])
+        """
+        return TensorSpec(name=name, shape=shape, dtype=dtype,
+                          description=description)
+
+    @abstractmethod
+    def get_schema(self) -> ModelSchema:
+        """Retorna o schema de I/O do modelo.
+
+        As entradas estão fixas em :attr:`_INPUTS` e não precisam ser
+        redeclaradas.  Use :meth:`output_spec` para declarar as saídas e
+        construa o :class:`ModelSchema` com o helper :meth:`_base_schema`.
+        """
+        ...
+
+    def _base_schema(self, outputs: list[TensorSpec],
+                     description: str = "",
+                     author: str = "",
+                     tags: dict[str, str] | None = None) -> ModelSchema:
+        """Constrói um :class:`ModelSchema` com as entradas padrão do agente.
+
+        Parâmetros
+        ----------
+        outputs : list[TensorSpec]
+            Portas de saída declaradas pelo modelo.  Use :meth:`output_spec`
+            para criá-las.
+        description : str
+            Descrição livre do modelo.
+        author : str
+            Autor ou equipe.
+        tags : dict[str, str] | None
+            Metadados arbitrários.  ``{"type": "air_combat"}`` é mesclado
+            automaticamente.
+
+        Retorna
+        -------
+        ModelSchema
+            Schema completo com as 14 entradas fixas + as saídas fornecidas.
+        """
+        merged_tags = {"type": "air_combat", "framework": "AsaMiia"}
+        if tags:
+            merged_tags.update(tags)
+        return ModelSchema(
+            inputs=PilotBTModel._INPUTS,
+            outputs=outputs,
+            description=description,
+            author=author,
+            tags=merged_tags,
         )
+
+    # -------------------------------------------------------------------------
+    # Warmup com input representativo
+    # -------------------------------------------------------------------------
+
+    def warmup(self, n: int = 5) -> WarmupResult:
+        """Executa *n* inferências com o input de exemplo completo.
+
+        Usa :meth:`make_dummy_input` em vez de dicts vazios, garantindo que
+        todos os campos estruturados estejam presentes com valores realistas.
+        """
+        dummy = self.make_dummy_input()
+        times: list[float] = []
+        for _ in range(n):
+            t0 = time.perf_counter()
+            self.predict(dummy)
+            times.append((time.perf_counter() - t0) * 1000.0)
+
+        return WarmupResult(
+            runs_completed=len(times),
+            avg_time_ms=sum(times) / len(times) if times else 0.0,
+            min_time_ms=min(times) if times else 0.0,
+            max_time_ms=max(times) if times else 0.0,
+        )
+
+    # -------------------------------------------------------------------------
+    # Input de exemplo
+    # -------------------------------------------------------------------------
+
+    @staticmethod
+    def make_dummy_input() -> dict[str, Any]:
+        """Carrega o estado de exemplo a partir de ``dummy_input.json``.
+ 
+        O arquivo é procurado na raiz do projeto, definida como o diretório
+        que contém ``pilot_model.py``.  Se o arquivo não for encontrado ou
+        estiver malformado, uma exceção é levantada com mensagem clara.
+ 
+        Para customizar o input de teste, edite ``dummy_input.json``
+        diretamente — não é necessário tocar neste arquivo.
+ 
+        Levanta
+        -------
+        FileNotFoundError
+            Se ``dummy_input.json`` não existir na raiz do projeto.
+        ValueError
+            Se o arquivo existir mas não for JSON válido ou não contiver
+            um objeto no nível raiz.
+        """
+         
+        json_path = Path(__file__).parent / "state_example.json"
+ 
+        if not json_path.exists():
+            raise FileNotFoundError(
+                f"Arquivo de input de exemplo não encontrado: {json_path}\n"
+                f"Certifique-se de que 'state_example.json' está na raiz do projeto."
+            )
+ 
+        try:
+            data = json.loads(json_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                f"'state_example.json' contém JSON inválido: {exc}"
+            ) from exc
+ 
+        if not isinstance(data, dict):
+            raise ValueError(
+                f"'state_example.json' deve conter um objeto JSON no nível raiz, "
+                f"mas encontrou {type(data).__name__}."
+            )
+ 
+        return data
+
+
+
+# =============================================================================
+# Entradas fixas do agente — populadas fora da classe para evitar referência
+# ao nome da classe dentro do próprio corpo da classe.
+# =============================================================================
+
+def _s(name: str, desc: str) -> TensorSpec:
+    return TensorSpec(name=name, shape=[-1], dtype="float32",
+                      structured=True, description=desc)
+
+
+PilotBTModel._INPUTS = [
+    _s("sim",
+       "Dados de simulação: phase, exec_time [s], sim_time [s]"),
+    _s("ownship",
+       "Estado do ownship: latitude [deg], longitude [deg], "
+       "altitude [m], ground_speed [m/s], ground_track [deg], "
+       "heading [deg], pitch [deg], roll [deg], terrain_elev [m], "
+       "damage [0..1], pos_ecef [m], vel_ecef [m/s], vel_body [m/s], "
+       "accel_ecef [m/s²], accel_body [m/s²], "
+       "euler_ned [rad], euler_ecef [rad], "
+       "ang_vel_body [rad/s], ang_vel_ecef [rad/s]"),
+    _s("game_area",
+       "Área de jogo: boundary_dist [m], brg_to_center [deg]"),
+    _s("territory",
+       "Território: boundary_dist [m], brg_to_center [deg]"),
+    _s("faor",
+       "FAOR: boundary_dist [m] (positivo = dentro), "
+       "brg_to_center [deg], active"),
+    _s("inventory",
+       "Inventário: fuel_remaining [lbs], fuel_safe_amount [lbs], "
+       "num_missiles, num_bombs"),
+    _s("shared",
+       "Dados da formação: hold{num_acft, my_idx, ref_exec_time, "
+       "ref_time_length, start_time}, "
+       "cap{active, engagement_marker, start_time, lat, lon, hdg, "
+       "commit_dist, flow_cycle_end}, "
+       "gnd_atk_start_time, abort_gnd_atk, "
+       "formation{leader_fly_to, form_sign, rel_azimuth, rel_dist, "
+       "rel_alt, is_joined, leader_id, "
+       "aircraft[{rank, player_id, lat, lon, alt, hdg, airspeed, "
+       "is_engaged, is_defending, is_joined, wing_id}]}, "
+       "tgt_assign[{own_id, tgt_id, timer, engaged}], "
+       "tgt_assign_enabled_id, "
+       "tgt_shot[{own_id, tgt_id, lock_timer}]"),
+    _s("nav",
+       "Navegação: fly_to_idx, fly_to_lat [deg], fly_to_lon [deg], "
+       "fly_to_elev [m], fly_to_cmd_alt [m], fly_to_cmd_speed [m/s], "
+       "fly_to_bearing [deg], fly_to_distance [m], fly_to_ttg [s], "
+       "auto_seq, "
+       "hold{has_hold, leg_heading [deg], leg_time [s], duration [s], "
+       "counter_clockwise}, "
+       "terrain{tf_leg, height_above_terrain [m]}, "
+       "winding{has_winding, timeout [s], angle [deg], spd_factor}"),
+    _s("terrain_data",
+       "Elevação do terreno: points[11] → {elev [m], valid}; "
+       "índice i corresponde a i segundos à frente da aeronave"),
+    _s("radar",
+       "Estado do radar: mode (enum AsaRadar::RadarMode como double)"),
+    _s("air_tracks",
+       "Tracks do radar/datalink/RWR: iff_code, type, player_id, "
+       "latitude [deg], longitude [deg], altitude [m], "
+       "rel_azimuth [deg], true_azimuth [deg], elevation [deg], "
+       "range [m], gnd_range [m], gnd_track [deg], gnd_speed [m/s], "
+       "age [s], wez_max_o2t_true [m], wez_nez_o2t_true [m], "
+       "wez_max_t2o_true [m], wez_nez_t2o_true [m], "
+       "wez_max_t2o_pred [m], wez_nez_t2o_pred [m], "
+       "wez_pred_dist_corr [m], wez_nez_o2t_pred [m], "
+       "has_spike, emitter_class, emitter_mode, "
+       "pos_ecef [m], vel_ecef [m/s]"),
+    _s("gnd_atk",
+       "Ataque ao solo: assigned_alt [m], miss_dist [m], "
+       "toss_range [m], tgt_ete [s], next_stpt"),
+    _s("events",
+       "Eventos: end_of_rdr_scan, seeker_active, missile_detonated, "
+       "timeout_tgt_id, mission_accomplished, "
+       "outer_msl_warn_taz[] [deg]"),
+    _s("radio",
+       "Rádio: has_msg, voice_time_length [s], "
+       "voice_content, sender_name"),
+    _s("bt_blackboard",
+       "Blackboard interno da BT: "
+       "has_bingo_fuel, "
+       "has_prox_warning, taz_prox_warning [deg], "
+       "rwr_has_rear_spike, taz_rwr_rear_spike [deg], "
+       "rwr_msl_warning, taz_rwr_msl_warning [deg], "
+       "has_wingman, wing_target{valid, ...AirTrackInfo}, "
+       "has_nez_warning, taz_nez_warning [deg], "
+       "has_wez_warning, hp_threat{valid, ...AirTrackInfo}, "
+       "threat_score [0..1], is_defending, "
+       "hp_target{valid, ...AirTrackInfo}, "
+       "hp_tgt_inside_territory, hp_tgt_inside_faor, "
+       "shot_distance [m], crank_side_after_shot, "
+       "has_opportunity_shot, opportunity_shot_dist [m], "
+       "hp_target_engaged, is_uplink_active, "
+       "gnd_atk_accomplished, alt_safety_check")
+]
+
+del _s  # helper de construção — não faz parte da API pública

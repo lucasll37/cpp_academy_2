@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   python_backend.hpp
-/// @brief  Backend de inferência via CPython embutido do AsaMiia.
+/// @brief  Backend de inferência via CPython embutido do Miia.
 ///
 /// @details
 /// Implementa #ModelBackend carregando arquivos `.py` que definem uma

@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   backend_registry.hpp
-/// @brief  Registro singleton de backends de inferência do AsaMiia.
+/// @brief  Registro singleton de backends de inferência do Miia.
 ///
 /// @details
 /// O `BackendRegistry` implementa o padrão *Registry* sobre o padrão

@@ -1,5 +1,5 @@
 # =============================================================================
-# .clang-tidy — AsaMiia / poc-miia
+# .clang-tidy — MIIA
 #
 # Lido automaticamente por clang-tidy, run-clang-tidy e pela integração do
 # VS Code (extensão clangd / clang-tidy). Não duplicar checks no Makefile.

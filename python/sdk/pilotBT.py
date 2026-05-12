@@ -226,16 +226,21 @@ class PilotBT(PilotBTModel):
         sender       = radio.get("sender_name", "")             # nome do remetente
 
         
-        ##########################################################
+        try:
+            
+            ##########################################################
+            # self.log(json.dumps(inputs, default=str, indent=4))
+            self.log(f"Fase: {phase}, Tempo: {sim_time:.1f}s, Altitude: {alt:.1f}m, Velocidade: {spd:.1f}m/s")
+            
+            
+            # TODO: implementar lógica de decisão
+            
         
-        self.log(json.dumps(inputs, default=str, indent=4))
-        
-        # TODO: implementar lógica de decisão
-        
-    
-        
-        ##########################################################
-        
+            
+            ##########################################################
+            
+        except Exception as e:
+            self.log(f"Erro no predict(): {e}")
         
 
         return {

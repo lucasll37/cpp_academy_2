@@ -1,5 +1,5 @@
 // =============================================================================
-// inprocess_backend.cpp — Backend in-process do cliente AsaMiia
+// inprocess_backend.cpp — Backend in-process do cliente Miia
 //
 // Roda o InferenceEngine diretamente no processo do cliente.
 // Nenhuma camada gRPC — Object é repassado ao engine sem conversão.

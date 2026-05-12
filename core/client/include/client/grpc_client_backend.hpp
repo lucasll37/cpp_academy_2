@@ -1,5 +1,5 @@
 // =============================================================================
-// grpc_client_backend.hpp — Backend gRPC do cliente AsaMiia
+// grpc_client_backend.hpp — Backend gRPC do cliente Miia
 //
 // Implementa IClientBackend via chamadas gRPC ao WorkerService.
 // Converte client::Object ↔ google.protobuf.Struct na fronteira.
@@ -33,7 +33,7 @@ namespace client {
 ///
 /// @details
 /// Mantém um `grpc::Channel` e um stub `WorkerService::Stub` e traduz cada
-/// método da interface para uma chamada RPC unária ao servidor `AsaMiia`.
+/// método da interface para uma chamada RPC unária ao servidor `MiiaServer`.
 /// Inputs e outputs são serializados como `google::protobuf::Struct` via
 /// `value_convert.hpp`.
 ///

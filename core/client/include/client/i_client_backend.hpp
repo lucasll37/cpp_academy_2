@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   i_client_backend.hpp
-/// @brief  Interface interna de backend de transporte do cliente AsaMiia.
+/// @brief  Interface interna de backend de transporte do cliente MiiaClient.
 ///
 /// @details
 /// Define o contrato que todos os backends de transporte do #InferenceClient
@@ -34,7 +34,7 @@
 /// @endcode
 ///
 /// @note Este header **não faz parte da API pública** exposta via
-///       `libasa_miia_client`.  É incluído apenas por
+///       `libmiia_client`.  É incluído apenas por
 ///       `grpc_client_backend.cpp`, `inprocess_backend.cpp` e
 ///       `inference_client.cpp`.
 ///

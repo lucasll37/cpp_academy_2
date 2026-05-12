@@ -11,8 +11,7 @@ O sistema fornece uma API C++ unificada que abstrai dois mecanismos de transport
 ### Pré-requisitos
 
 ```bash
-sudo apt install \
-    build-essential python3.12 python3.12-dev \
+sudo apt install build-essential python3.12 python3.12-dev \
     python3.12-venv python3-numpy lcov graphviz clangd clang-format clang-tidy
 ```
 
@@ -74,7 +73,7 @@ Inicia o servidor gRPC:
 make run-server
 
 # Equivalente a:
-./build/core/server/AsaMiia --address 0.0.0.0:50052 --models-dir ./models --threads 8
+./build/core/server/MiiaServer --address 0.0.0.0:50052 --models-dir ./models --threads 8
 ```
 
 
@@ -84,7 +83,7 @@ Executa o cliente de exemplo CLI:
 make run-client
 
 # Equivalente a:
-./build/core/client/AsaMiiaClient --models-dir ./models --address localhost:50052
+./build/core/client/MiiaClient --models-dir ./models --address localhost:50052
 ```
 
 
@@ -165,14 +164,14 @@ Declaração da dependência no `conanfile.py`:
 ```python
 # conanfile.py
 def requirements(self):
-    self.requires("asa-poc-miia/1.0.0")
+    self.requires("miia/1.0.0")
 ```
 
 Declaração da dependência no `meson.build`:
 
 ```meson
 # meson.build
-miia_dep = dependency('asa-poc-miia', method: 'pkg-config')
+miia_dep = dependency('miia', method: 'pkg-config')
 
 executable('meu_simulador',
     'src/main.cpp',
@@ -180,7 +179,7 @@ executable('meu_simulador',
 )
 ```
 
-O pacote exporta a biblioteca `asa_miia_client` e os headers em `include/asa-poc-miia/`.
+O pacote exporta a biblioteca `miia_client` e os headers em `include/miia/`.
 
 ---
 
@@ -756,7 +755,7 @@ Com a extensão **clangd** ou **C/C++** no VS Code e `build/compile_commands.jso
 | `install`            | Instala em `../dist/`                                      |
 | `package`            | Cria pacote Conan (Debug + Release)                        |
 | `clean`              | Remove `build/` e cache de subprojetos                     |
-| `run-server`         | Inicia o servidor AsaMiia localmente                       |
+| `run-server`         | Inicia o servidor MiiaServer localmente                    |
 | `run-client`         | Executa o cliente de exemplo CLI                           |
 | `test`               | Executa todos os testes                                    |
 | `test-unit`          | Executa apenas testes unitários (sem servidor)             |
@@ -788,7 +787,7 @@ Com a extensão **clangd** ou **C/C++** no VS Code e `build/compile_commands.jso
 ## Estrutura do projeto {#estrutura}
 
 ```
-poc-miia/
+miia/
 ├── core/
 │   ├── client/
 │   │   ├── include/client/
@@ -859,7 +858,7 @@ Agente / Simulador
        │               └── OnnxBackend     (.onnx via ONNX Runtime)
        │
        └── GrpcClientBackend  ← chamadas gRPC para servidor remoto
-               └── WorkerServer  (binário AsaMiia)
+               └── WorkerServer  (binário MiiaServer)
                        └── InferenceEngine
                                ├── PythonBackend
                                └── OnnxBackend

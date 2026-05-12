@@ -1,7 +1,7 @@
 # ============================================
 # cpp/server/meson.build
 #
-# Apenas o executável AsaMiia.
+# Apenas o executável MiiaServer.
 # worker_lib_dep, inference_inc e client_inc vêm do escopo raiz/inference.
 # worker_server.hpp inclui inference/inference_engine.hpp e client/value_convert.hpp,
 # por isso ambos os include dirs são necessários aqui.
@@ -9,7 +9,7 @@
 
 worker_server_inc = include_directories('include')
 
-worker_server_lib = static_library('asa_miia_worker_server',
+worker_server_lib = static_library('miia_worker_server',
     files('src/worker_server.cpp'),
     include_directories: [worker_server_inc, inference_inc, client_inc, utils_inc],
     dependencies: [
@@ -26,7 +26,7 @@ worker_server_dep = declare_dependency(
     dependencies:        [worker_lib_dep],
 )
 
-worker = executable('AsaMiia',
+worker = executable('MiiaServer',
     files('src/main.cpp'),
     include_directories: [worker_server_inc, inference_inc, client_inc, utils_inc],
     dependencies:  [worker_server_dep],

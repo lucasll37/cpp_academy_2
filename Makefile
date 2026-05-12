@@ -12,7 +12,7 @@ BUILD_DIR := ./build
 DIST_DIR := $(PWD)/../dist
 
 # Determine number of parallel jobs for Ninja (half of available cores)
-NINJA_JOBS := $(shell expr $$(nproc) / 2)
+NINJA_JOBS := $(shell expr $$(nproc) / 1)
 
 # Build configuration
 BUILD_TYPE := Debug
@@ -103,10 +103,10 @@ package: ## Package the project using conan.
 # ============================================
 
 run-server: ## Run the server.
-	$(BUILD_DIR)/core/server/AsaMiia --address 0.0.0.0:50052 --models-dir ./models --threads 8
+	$(BUILD_DIR)/core/server/MiiaServer --address 0.0.0.0:50052 --models-dir ./models --threads 8
 
 run-client: ## Run the client example. --address localhost:50052
-	$(BUILD_DIR)/core/client/AsaMiiaClient --models-dir ./models --address localhost:50052
+	$(BUILD_DIR)/core/client/MiiaClient --models-dir ./models --address localhost:50052
 
 
 # ============================================

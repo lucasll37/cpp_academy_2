@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   worker_server.hpp
-/// @brief  Servidor gRPC AsaMiia — serviço de inferência e wrapper de ciclo de vida.
+/// @brief  Servidor gRPC MiiaServer — serviço de inferência e wrapper de ciclo de vida.
 ///
 /// @details
 /// Este header define duas classes que compõem a camada de servidor do sistema:
@@ -69,7 +69,7 @@
 namespace mlinference {
 
 /// @namespace mlinference::server
-/// @brief     Servidor gRPC e implementação dos RPCs do AsaMiia.
+/// @brief     Servidor gRPC e implementação dos RPCs do Miia.
 namespace server {
 
 using inference::InferenceEngine;

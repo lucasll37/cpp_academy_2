@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   onnx_backend.hpp
-/// @brief  Backend de inferência ONNX Runtime do AsaMiia.
+/// @brief  Backend de inferência ONNX Runtime do Miia.
 ///
 /// @details
 /// Implementa #ModelBackend carregando arquivos `.onnx` via ONNX Runtime C++

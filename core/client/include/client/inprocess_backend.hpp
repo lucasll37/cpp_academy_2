@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   inprocess_backend.hpp
-/// @brief  Backend de transporte in-process do cliente AsaMiia.
+/// @brief  Backend de transporte in-process do cliente Miia.
 ///
 /// @details
 /// Implementa #IClientBackend executando o #InferenceEngine **diretamente
