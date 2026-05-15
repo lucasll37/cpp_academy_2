@@ -890,8 +890,9 @@ TEST_F(InProcessOnnxTest, ListAvailableModelsExtensaoCorretaParaOnnx) {
     // Arquivos com extensão .onnx devem ter extension == ".onnx".
     for (const auto& m : client->list_available_models(models_dir()))
         if (m.filename.size() > 5 &&
-            m.filename.substr(m.filename.size() - 5) == ".onnx")
-            EXPECT_EQ(m.extension, ".onnx") << "arquivo=" << m.filename;
+            m.filename.substr(m.filename.size() - 5) == ".onnx") {
+                EXPECT_EQ(m.extension, ".onnx") << "arquivo=" << m.filename;
+            }
 }
 
 TEST_F(InProcessOnnxTest, ListAvailableModelsBackendNaoVazio) {
@@ -903,8 +904,9 @@ TEST_F(InProcessOnnxTest, ListAvailableModelsBackendNaoVazio) {
 TEST_F(InProcessOnnxTest, ListAvailableModelsArquivoOnnxTemBackendOnnx) {
     // Arquivos .onnx devem ser mapeados para o backend "onnx".
     for (const auto& m : client->list_available_models(models_dir()))
-        if (m.extension == ".onnx")
+        if (m.extension == ".onnx") {
             EXPECT_EQ(m.backend, "onnx") << "arquivo=" << m.filename;
+        }
 }
 
 TEST_F(InProcessOnnxTest, ListAvailableModelsFileSizePositivo) {

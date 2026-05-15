@@ -611,8 +611,9 @@ TEST_F(ServerIntegrationPythonTest, ListAvailableModels_IsLoaded_RefleteCarga) {
 TEST_F(ServerIntegrationPythonTest, ListAvailableModels_LoadedAs_Correto) {
     auto models = client->list_available_models(models_dir());
     for (const auto& m : models)
-        if (m.is_loaded)
+        if (m.is_loaded) {
             EXPECT_FALSE(m.loaded_as.empty());
+        }
 }
 
 // =============================================================================

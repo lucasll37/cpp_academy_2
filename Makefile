@@ -9,7 +9,7 @@
 # Custom variables
 PWD := $(shell pwd)
 BUILD_DIR := ./build
-DIST_DIR := $(PWD)/../dist
+DEST_DIR := $(PWD)/../dist
 
 # Determine number of parallel jobs for Ninja (half of available cores)
 NINJA_JOBS := $(shell expr $$(nproc) / 2)
@@ -73,10 +73,12 @@ configure: ## Configure the project for building.
 		--buildtype debug \
 		--buildtype $(shell echo $(BUILD_TYPE) | tr '[:upper:]' '[:lower:]') \
 		--native-file $(BUILD_DIR)/conan_meson_native.ini \
-		--prefix=$(DIST_DIR) \
-		--libdir=$(DIST_DIR)/lib \
+		--prefix=$(DEST_DIR) \
+		--libdir=$(DEST_DIR)/lib \
 		-Db_coverage=true \
-		-Dpkg_config_path=$(DIST_DIR)/lib/pkgconfig:$(BUILD_DIR) \
+		-Dbuild_tests=true \
+		-Denable_docs=true \
+		-Dpkg_config_path=$(DEST_DIR)/lib/pkgconfig:$(BUILD_DIR) \
 		$(BUILD_DIR)/ .
 
 build: ## Build all targets in the project.
@@ -84,8 +86,8 @@ build: ## Build all targets in the project.
 
 install: ## Install all targets in the project.
 	meson install -C $(BUILD_DIR)
-	mkdir -p $(DIST_DIR)/models
-	cp -r ./models/. $(DIST_DIR)/models/
+	mkdir -p $(DEST_DIR)/models
+# 	cp -r ./models/. $(DEST_DIR)/models/
 
 package: ## Package the project using conan.
 	conan create ./ \

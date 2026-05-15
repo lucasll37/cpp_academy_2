@@ -10,15 +10,15 @@ class miiaRecipe(ConanFile):
 
     license = "MIT"
     url = "https://gitlab.asa.dcta.mil.br/asa/miia.git"
-    description = "ML Inference System with gRPC and ONNX Runtime"
+    description = "Model inference middleware for constructive simulation agents (ASA/MIXR)"
     settings = "arch", "build_type", "compiler", "os"
     
     options = {"enable_gpu": [True, False], "enable_docs": [True, False], "build_tests": [True, False]}
     
     default_options = {
         "enable_gpu": False,
-        "enable_docs": True,
-        "build_tests": True
+        "enable_docs": False,
+        "build_tests": False
     }
     
     exports_sources = "meson*", "core/*", "tests/*", "proto/*", "docs/*", "python/meson.build", "conanfile.py", "miia.pc.in"

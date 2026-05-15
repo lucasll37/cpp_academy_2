@@ -157,6 +157,91 @@ docker run -d --rm -p 50052:50052 --gpus all -v $(PWD)/models:/app/models:ro ml-
 
 ---
 
+## Build de produção {#build-producao}
+
+O fluxo de desenvolvimento via `make configure` / `make build` habilita instrumentação de cobertura e produz binários de debug. Para gerar binários otimizados sem cobertura, testes ou debug symbols, use os scripts `./scripts/build.sh` e `./scripts/deploy.sh`.
+
+### Build local (`build.sh`)
+
+```bash
+./scripts/build.sh <NUM_JOBS> <BUILD_TYPE>
+```
+
+| Parâmetro    | Descrição                             | Exemplo   |
+|--------------|---------------------------------------|-----------|
+| `NUM_JOBS`   | Número de jobs paralelos para o Ninja | `8`       |
+| `BUILD_TYPE` | Tipo de build (`release` ou `debug`)  | `release` |
+
+O script usa os perfis Conan `asa-release` / `asa-debug` (em vez do perfil default do Makefile) e **não** passa `-Db_coverage=true` ao Meson. O resultado é instalado em `./dist/`.
+
+Exemplo para build release com 8 jobs:
+
+```bash
+./scripts/build.sh 8 release
+```
+
+O que o script executa internamente:
+
+1. Limpa `./dist/` e `./build/`
+2. `conan install` com o perfil `asa-<BUILD_TYPE>`
+3. `meson setup` sem instrumentação de cobertura
+4. `meson compile`
+5. `meson install` em `./dist/`
+
+**Nota:** `make configure` usa `-Db_coverage=true` e o perfil Conan padrão — use `build.sh` para artefatos de produção ou CI/CD.
+
+---
+
+### Registro no cache Conan e upload no registry (`deploy.sh`)
+
+```bash
+./scripts/deploy.sh
+```
+
+Não recebe parâmetros. O script:
+
+1. Executa `conan create` nos perfis `asa-debug` **e** `asa-release`, populando o cache Conan local com o pacote `miia/1.0.0`
+2. Faz upload de ambas as variantes para o remote `asa-libs`:
+
+```bash
+conan upload "miia/1.0.0" --remote=asa-libs --confirm
+```
+
+**Pré-requisito:** o remote `asa-libs` deve estar configurado no Conan antes do deploy:
+```bash
+#conect
+conan remote add asa-libs https://registry.asa.dcta.mil.br/repository/asa-libs/
+
+#login
+conan remote login asa-libs
+```
+Verifique os remotes configurados com `conan remote list`.
+
+---
+
+### Fluxo completo para publicar uma nova versão
+
+```bash
+# 1. Gerar o binário de produção e validar localmente
+./scripts/build.sh 8 release
+
+# 2. Registrar no cache Conan e publicar no registry asa-libs
+./scripts/deploy.sh
+```
+
+---
+
+### Diferenças em relação ao fluxo de desenvolvimento
+
+| Aspecto               | `make configure` / `make build`  | `build.sh` / `deploy.sh`        |
+|-----------------------|----------------------------------|----------------------------------|
+| Perfil Conan          | Default (`conan profile detect`) | `asa-release` / `asa-debug`      |
+| Cobertura (`gcov`)    | Habilitada (`-Db_coverage=true`) | Desabilitada                     |
+| Destino de instalação | `../dist/`                       | `./dist/`                        |
+| Upload registry       | Não                              | Sim (`asa-libs` via `deploy.sh`) |
+
+---
+
 ## Integrando como dependência Conan {#dependencia}
 
 Declaração da dependência no `conanfile.py`:
@@ -216,7 +301,7 @@ O backend de execução é selecionado automaticamente pela extensão do arquivo
 ## API pública do cliente {#api-cliente}
 
 ```cpp
-#include <client/inference_client.hpp>
+#include <miia/client/inference_client.hpp>
 ```
 
 ### Conexão
@@ -343,7 +428,7 @@ double ms        = r.inference_time_ms;
 // ShipAgent.hpp
 #pragma once
 #include <memory>
-#include <client/inference_client.hpp>
+#include <miia/client/inference_client.hpp>
 
 class ShipAgent {
 public:
