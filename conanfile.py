@@ -4,7 +4,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.system.package_manager import Apt
 
 
-class MLInferenceRecipe(ConanFile):
+class miiaRecipe(ConanFile):
     name = "miia"
     version = "1.0.0"
 

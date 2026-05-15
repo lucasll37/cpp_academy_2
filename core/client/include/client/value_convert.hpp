@@ -35,8 +35,8 @@
 /// usam iteradores explícitos (`it->first` / `it->second`) em vez de
 /// *structured bindings* ou construtores de `std::map` por range.
 ///
-/// @see mlinference::client::Value
-/// @see mlinference::client::Object
+/// @see miia::client::Value
+/// @see miia::client::Object
 ///
 /// @author  Lucas
 /// @date    2026
@@ -48,7 +48,7 @@
 #include "client/inference_client.hpp"
 #include <google/protobuf/struct.pb.h>
 
-namespace mlinference {
+namespace miia {
 namespace client {
 
 // =============================================================================
@@ -248,6 +248,6 @@ inline Object from_proto_struct(const google::protobuf::Struct& s) {
 }
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_VALUE_CONVERT_HPP

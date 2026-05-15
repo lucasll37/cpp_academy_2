@@ -17,7 +17,7 @@
 #include <sstream>
 #include <dlfcn.h>
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // ============================================
@@ -986,4 +986,4 @@ void PythonBackend::warmup(uint32_t n) {
 }
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia

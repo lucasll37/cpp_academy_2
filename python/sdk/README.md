@@ -313,9 +313,9 @@ executable('meu_simulador',
 
 ```cpp
 // Método que serializa o estado da simulação para envio ao modelo
-const mlinference::client::Object prepareState(AsaPilotState* const);
+const miia::client::Object prepareState(AsaPilotState* const);
 
-std::unique_ptr<mlinference::client::InferenceClient> client;
+std::unique_ptr<miia::client::InferenceClient> client;
 
 const std::string server{"inprocess"}; // "localhost:50052" | "inprocess"
 const std::string model_id{"pilotBT"};
@@ -329,11 +329,11 @@ para o modo gRPC com inferência separado no processo do servidor.
 ### 4. Implementar `prepareState()` para converter o estado do simulador no formato esperado pelo modelo
 
 ```cpp
-const mlinference::client::Object AsaPilotBT::prepareState(AsaPilotState* const s)
+const miia::client::Object AsaPilotBT::prepareState(AsaPilotState* const s)
 {
-    using mlinference::client::Array;
-    using mlinference::client::Object;
-    using mlinference::client::Value;
+    using miia::client::Array;
+    using miia::client::Object;
+    using miia::client::Value;
 
     // ── helpers locais ────────────────────────────────────────────────────────
 
@@ -737,7 +737,7 @@ const mlinference::client::Object AsaPilotBT::prepareState(AsaPilotState* const 
 
     return root;
 }
-
+```
 
 
 ### 5. Inicializar o cliente no construtor do agente
@@ -747,7 +747,7 @@ AsaPilotBT::AsaPilotBT() : AsaPilot()
 {
     STANDARD_CONSTRUCTOR()
 
-    client = std::make_unique<mlinference::client::InferenceClient>(server);
+    client = std::make_unique<miia::client::InferenceClient>(server);
     client->connect();
 
     if(client->is_connected()) {

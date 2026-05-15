@@ -42,8 +42,8 @@
 #include <string>
 #include <vector>
 
-using namespace mlinference::inference;
-using namespace mlinference;
+using namespace miia::inference;
+using namespace miia;
 
 // =============================================================================
 // Infraestrutura auxiliar

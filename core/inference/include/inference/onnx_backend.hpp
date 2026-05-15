@@ -47,9 +47,9 @@
 /// Em caso de falha (CUDA indisponível), faz fallback silencioso para CPU
 /// com log de aviso.
 ///
-/// @see mlinference::inference::PythonBackend
-/// @see mlinference::inference::ModelBackend
-/// @see mlinference::inference::OnnxBackendFactory
+/// @see miia::inference::PythonBackend
+/// @see miia::inference::ModelBackend
+/// @see miia::inference::OnnxBackendFactory
 ///
 /// @author  Lucas
 /// @date    2026
@@ -66,7 +66,7 @@
 
 #include "model_backend.hpp"
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // =============================================================================
@@ -347,6 +347,6 @@ private:
 };
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_ONNX_BACKEND_HPP

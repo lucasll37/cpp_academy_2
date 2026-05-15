@@ -27,8 +27,8 @@
 /// @endcode
 /// Nenhuma outra alteração no motor ou no cliente é necessária.
 ///
-/// @see mlinference::inference::InferenceEngine
-/// @see mlinference::inference::BackendRegistry
+/// @see miia::inference::InferenceEngine
+/// @see miia::inference::BackendRegistry
 ///
 /// @author  Lucas
 /// @date    2026
@@ -47,7 +47,7 @@
 #include "common.pb.h"
 #include "client/inference_client.hpp"  // client::Object, Value, Array
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // =============================================================================
@@ -63,7 +63,7 @@ namespace inference {
 /// @details
 /// Produzido por `ModelBackend::predict()` e repassado pelo #InferenceEngine
 /// até o #InProcessBackend ou #GrpcClientBackend, onde é convertido para o
-/// tipo público #mlinference::client::PredictionResult.
+/// tipo público #miia::client::PredictionResult.
 struct InferenceResult {
     /// @brief @c true se a inferência foi concluída sem erros.
     bool success = false;
@@ -512,6 +512,6 @@ public:
 };
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_MODEL_BACKEND_HPP

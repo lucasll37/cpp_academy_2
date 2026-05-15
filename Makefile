@@ -12,7 +12,7 @@ BUILD_DIR := ./build
 DIST_DIR := $(PWD)/../dist
 
 # Determine number of parallel jobs for Ninja (half of available cores)
-NINJA_JOBS := $(shell expr $$(nproc) / 1)
+NINJA_JOBS := $(shell expr $$(nproc) / 2)
 
 # Build configuration
 BUILD_TYPE := Debug
@@ -29,7 +29,8 @@ PIP_BIN := $(PYTHON_VENV)/bin/pip
 PYTHON_VERSION := python3.12
 
 # Docker configuration
-DOCKER_WORKER_IMAGE := ml-inference-server
+DOCKERFILE := docker/Dockerfile.server
+IMAGE_NAME := miia-server
 DOCKER_TAG := latest
 
 # Browser configuration for opening documentation
@@ -267,39 +268,74 @@ python-clean: ## Remove Python virtual environment
 # Docker Build Targets
 # ============================================
 
-docker-build-cpu: ## Build worker Docker image (CPU only)
+docker-build-cpu: ## Build Docker image (CPU only)
+	@[[ -f "$(DOCKERFILE)" ]] || { echo "$(RED)✗ Dockerfile não encontrado: $(DOCKERFILE)$(NC)" >&2; exit 1; }
 	@echo "$(BLUE)========================================$(NC)"
-	@echo "$(BLUE)Building Worker Docker Image (CPU)...$(NC)"
+	@echo "$(BLUE)  MiiaServer Docker Build$(NC)"
+	@echo "$(BLUE)  Modo:       CPU$(NC)"
+	@echo "$(BLUE)  Target:     runtime-cpu$(NC)"
+	@echo "$(BLUE)  Imagem:     $(IMAGE_NAME):$(DOCKER_TAG)-cpu$(NC)"
+	@echo "$(BLUE)  Dockerfile: $(DOCKERFILE)$(NC)"
 	@echo "$(BLUE)========================================$(NC)"
-	@chmod +x scripts/worker_docker.sh
-	@./scripts/worker_docker.sh --cpu --tag $(DOCKER_TAG)
+	docker build \
+		--file $(DOCKERFILE) \
+		--target runtime-cpu \
+		--tag $(IMAGE_NAME):$(DOCKER_TAG)-cpu \
+		--build-arg ENABLE_GPU=False \
+		--build-arg CONAN_BUILD_TYPE=Release \
+		--build-arg MESON_BUILDTYPE=release \
+		$(if $(NO_CACHE),--no-cache,) \
+		.
 	@echo ""
-	@echo "$(GREEN)✓ Worker CPU image built!$(NC)"
+	@echo "$(GREEN)✓ Imagem construída: $(IMAGE_NAME):$(DOCKER_TAG)-cpu$(NC)"
 	@echo ""
-	@echo "Image: $(DOCKER_WORKER_IMAGE):$(DOCKER_TAG)-cpu"
+	@echo "Para executar:"
+	@echo "  docker run -d --rm -p 50052:50052 \\"
+	@echo "    -v \$$(pwd)/models:/app/models:ro \\"
+	@echo "    $(IMAGE_NAME):$(DOCKER_TAG)-cpu"
+	@echo ""
 
-docker-build-gpu: ## Build worker Docker image (GPU support)
+docker-build-gpu: ## Build Docker image (GPU support)
+	@[[ -f "$(DOCKERFILE)" ]] || { echo "$(RED)✗ Dockerfile não encontrado: $(DOCKERFILE)$(NC)" >&2; exit 1; }
+	@if ! docker info 2>/dev/null | grep -q "Runtimes.*nvidia\|nvidia.*Runtimes"; then \
+		echo "$(YELLOW)⚠ nvidia runtime não detectado — imagem será construída, mas pode não rodar com GPU.$(NC)"; \
+	fi
 	@echo "$(BLUE)========================================$(NC)"
-	@echo "$(BLUE)Building Worker Docker Image (GPU)...$(NC)"
+	@echo "$(BLUE)  MiiaServer Docker Build$(NC)"
+	@echo "$(BLUE)  Modo:       GPU$(NC)"
+	@echo "$(BLUE)  Target:     runtime-gpu$(NC)"
+	@echo "$(BLUE)  Imagem:     $(IMAGE_NAME):$(DOCKER_TAG)-gpu$(NC)"
+	@echo "$(BLUE)  Dockerfile: $(DOCKERFILE)$(NC)"
 	@echo "$(BLUE)========================================$(NC)"
-	@chmod +x scripts/worker_docker.sh
-	@./scripts/worker_docker.sh --gpu --tag $(DOCKER_TAG)
+	docker build \
+		--file $(DOCKERFILE) \
+		--target runtime-gpu \
+		--tag $(IMAGE_NAME):$(DOCKER_TAG)-gpu \
+		--build-arg ENABLE_GPU=True \
+		--build-arg CONAN_BUILD_TYPE=Release \
+		--build-arg MESON_BUILDTYPE=release \
+		$(if $(NO_CACHE),--no-cache,) \
+		.
 	@echo ""
-	@echo "$(GREEN)✓ Worker GPU image built!$(NC)"
+	@echo "$(GREEN)✓ Imagem construída: $(IMAGE_NAME):$(DOCKER_TAG)-gpu$(NC)"
 	@echo ""
-	@echo "Image: $(DOCKER_WORKER_IMAGE):$(DOCKER_TAG)-gpu"
+	@echo "Para executar:"
+	@echo "  docker run -d --rm -p 50052:50052 --gpus all \\"
+	@echo "    -v \$$(pwd)/models:/app/models:ro \\"
+	@echo "    $(IMAGE_NAME):$(DOCKER_TAG)-gpu"
+	@echo ""
 
 docker-run-cpu: ## Run worker Docker container (CPU)
 	@echo "$(BLUE)========================================$(NC)"
 	@echo "$(BLUE)Running Worker Docker Container (CPU)...$(NC)"
 	@echo "$(BLUE)========================================$(NC)"
-	docker run -d --rm -p 50052:50052 -v $(PWD)/models:/app/models:ro $(DOCKER_WORKER_IMAGE):$(DOCKER_TAG)-cpu
+	docker run -d --rm -p 50052:50052 -v $(PWD)/models:/app/models:ro $(IMAGE_NAME):$(DOCKER_TAG)-cpu
 
 docker-run-gpu: ## Run worker Docker container (GPU)
 	@echo "$(BLUE)========================================$(NC)"
 	@echo "$(BLUE)Running Worker Docker Container (GPU)...$(NC)"
 	@echo "$(BLUE)========================================$(NC)"
-	docker run -d --rm -p 50052:50052 --gpus all -v $(PWD)/models:/app/models:ro $(DOCKER_WORKER_IMAGE):$(DOCKER_TAG)-gpu
+	docker run -d --rm -p 50052:50052 --gpus all -v $(PWD)/models:/app/models:ro $(IMAGE_NAME):$(DOCKER_TAG)-gpu
 
 
 # ============================================

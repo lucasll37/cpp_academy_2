@@ -43,10 +43,10 @@
 
 namespace fs = std::filesystem;
 
-using mlinference::inference::OnnxBackend;
-using mlinference::client::Value;
-using mlinference::client::Array;
-using mlinference::client::Object;
+using miia::inference::OnnxBackend;
+using miia::client::Value;
+using miia::client::Array;
+using miia::client::Object;
 
 // =============================================================================
 // Helpers globais
@@ -281,11 +281,11 @@ TEST_F(LinearFixture, SchemaOutputDim1Is5) {
 
 TEST_F(LinearFixture, SchemaInputDtypeIsFloat32) {
     // common::FLOAT32 == 0
-    EXPECT_EQ(backend.get_schema().inputs[0].dtype, mlinference::common::FLOAT32);
+    EXPECT_EQ(backend.get_schema().inputs[0].dtype, miia::common::FLOAT32);
 }
 
 TEST_F(LinearFixture, SchemaOutputDtypeIsFloat32) {
-    EXPECT_EQ(backend.get_schema().outputs[0].dtype, mlinference::common::FLOAT32);
+    EXPECT_EQ(backend.get_schema().outputs[0].dtype, miia::common::FLOAT32);
 }
 
 TEST_F(LinearFixture, SchemaIsIdempotent) {
@@ -714,7 +714,7 @@ TEST(Memory, ClassifierLargerThanLinear) {
 
 TEST(BackendType, IsOnnx) {
     OnnxBackend b;
-    EXPECT_EQ(b.backend_type(), mlinference::common::BACKEND_ONNX);
+    EXPECT_EQ(b.backend_type(), miia::common::BACKEND_ONNX);
 }
 
 TEST(BackendType, IsOnnxAfterLoad) {
@@ -722,7 +722,7 @@ TEST(BackendType, IsOnnxAfterLoad) {
     if (!fs::exists(p)) GTEST_SKIP() << "Modelo ausente: " << p;
     OnnxBackend b;
     ASSERT_TRUE(b.load(p, {}));
-    EXPECT_EQ(b.backend_type(), mlinference::common::BACKEND_ONNX);
+    EXPECT_EQ(b.backend_type(), miia::common::BACKEND_ONNX);
     b.unload();
 }
 
@@ -732,7 +732,7 @@ TEST(BackendType, IsOnnxAfterUnload) {
     OnnxBackend b;
     ASSERT_TRUE(b.load(p, {}));
     b.unload();
-    EXPECT_EQ(b.backend_type(), mlinference::common::BACKEND_ONNX);
+    EXPECT_EQ(b.backend_type(), miia::common::BACKEND_ONNX);
 }
 
 // =============================================================================

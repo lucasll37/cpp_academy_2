@@ -10,7 +10,7 @@
 #include <cmath>
 #include <string>
 
-using namespace mlinference::client;
+using namespace miia::client;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers

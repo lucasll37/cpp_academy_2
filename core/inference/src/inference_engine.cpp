@@ -15,7 +15,7 @@
 #include <numeric>
 #include <random>
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // =============================================================================
@@ -552,4 +552,4 @@ void InferenceEngine::check_auto_unload() {
 }
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia

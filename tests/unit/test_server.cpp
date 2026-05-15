@@ -73,9 +73,9 @@
 #include "common.pb.h"
 
 namespace fs = std::filesystem;
-using namespace mlinference::server;
-using namespace mlinference::client;
-using namespace mlinference;
+using namespace miia::server;
+using namespace miia::client;
+using namespace miia;
 
 // =============================================================================
 // Helpers globais

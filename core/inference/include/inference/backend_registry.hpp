@@ -39,9 +39,9 @@
 /// é que o registro ocorra uma única vez durante a inicialização do processo
 /// (antes de qualquer uso concorrente).
 ///
-/// @see mlinference::inference::ModelBackend
-/// @see mlinference::inference::BackendFactory
-/// @see mlinference::inference::InferenceEngine
+/// @see miia::inference::ModelBackend
+/// @see miia::inference::BackendFactory
+/// @see miia::inference::InferenceEngine
 ///
 /// @author  Lucas
 /// @date    2026
@@ -59,7 +59,7 @@
 
 #include "model_backend.hpp"
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // =============================================================================
@@ -261,6 +261,6 @@ private:
 };
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_BACKEND_REGISTRY_HPP

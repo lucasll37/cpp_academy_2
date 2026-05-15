@@ -40,8 +40,8 @@
 #include "client/inference_client.hpp"   // Value, Object, Array
 
 namespace fs = std::filesystem;
-using namespace mlinference::inference;
-using namespace mlinference::client;
+using namespace miia::inference;
+using namespace miia::client;
 
 // =============================================================================
 // Caminho para miia_model.py — resolvido em runtime via MODELS_DIR

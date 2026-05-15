@@ -1,6 +1,6 @@
 // =============================================================================
 /// @file   value_printer.hpp
-/// @brief  Serialização de mlinference::client::Value para string legível.
+/// @brief  Serialização de miia::client::Value para string legível.
 ///
 /// @details
 /// Fornece a função utilitária #value_to_str, que converte recursivamente
@@ -25,12 +25,12 @@
 /// // Inspecionar estado serializado antes de enviar ao modelo
 /// auto state = prepareState(pilot_state);
 /// LOG_DEBUG("asa_pilot_bt") << "INPUTS:\n"
-///     << value_to_str(mlinference::client::Value{state});
+///     << value_to_str(miia::client::Value{state});
 ///
 /// // Inspecionar saídas após predição
 /// auto result = client->predict(model_id, state);
 /// LOG_DEBUG("asa_pilot_bt") << "OUTPUTS:\n"
-///     << value_to_str(mlinference::client::Value{result.outputs});
+///     << value_to_str(miia::client::Value{result.outputs});
 /// @endcode
 ///
 /// ### Formato de saída
@@ -65,7 +65,7 @@
 // value_to_str
 // =============================================================================
 
-/// @brief Converte um #mlinference::client::Value em string indentada.
+/// @brief Converte um #miia::client::Value em string indentada.
 ///
 /// @details
 /// A conversão é recursiva: arrays e objects são expandidos com indentação
@@ -74,14 +74,14 @@
 /// A função é definida no escopo global para manter a mesma ergonomia de
 /// uso das macros de logging — sem qualificação adicional:
 /// @code
-/// LOG_DEBUG("asa_pilot_bt") << value_to_str(mlinference::client::Value{state});
+/// LOG_DEBUG("asa_pilot_bt") << value_to_str(miia::client::Value{state});
 /// @endcode
 ///
 /// @param v       Valor a serializar.
 /// @param indent  Nível de indentação inicial (default: 0).
 ///
 /// @return String com a representação textual do valor.
-inline std::string value_to_str(const mlinference::client::Value& v, int indent = 0)
+inline std::string value_to_str(const miia::client::Value& v, int indent = 0)
 {
     const std::string tab(indent * 4, ' ');
     const std::string inner_tab((indent + 1) * 4, ' ');

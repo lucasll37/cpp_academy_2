@@ -24,13 +24,13 @@
 #include <unistd.h>
 #include <sys/select.h>   // para poll_key com select()
 
-using Client     = mlinference::client::InferenceClient;
-using ModelInfo  = mlinference::client::ModelInfo;
-using TensorSpec = mlinference::client::ModelInfo::TensorSpec;
-using Available  = mlinference::client::AvailableModel;
-using Object     = mlinference::client::Object;
-using Array      = mlinference::client::Array;
-using Value      = mlinference::client::Value;
+using Client     = miia::client::InferenceClient;
+using ModelInfo  = miia::client::ModelInfo;
+using TensorSpec = miia::client::ModelInfo::TensorSpec;
+using Available  = miia::client::AvailableModel;
+using Object     = miia::client::Object;
+using Array      = miia::client::Array;
+using Value      = miia::client::Value;
 
 // =============================================================================
 // ANSI & Terminal helpers
@@ -859,7 +859,7 @@ void flow_session_stats() {
 // FLOW: Server Inference Metrics (live, auto-refresh a cada 500 ms)
 // =============================================================================
 
-static void render_server_metrics(const mlinference::client::ServerMetrics& m,
+static void render_server_metrics(const miia::client::ServerMetrics& m,
                                    int refresh_counter) {
     auto fmt_time = [](int64_t unix_ts) -> std::string {
         if (unix_ts <= 0) return "—";

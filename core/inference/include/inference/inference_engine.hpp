@@ -39,7 +39,7 @@
 ///
 /// @code
 /// #include <inference/inference_engine.hpp>
-/// using namespace mlinference::inference;
+/// using namespace miia::inference;
 ///
 /// InferenceEngine engine(/*gpu=*/false, /*device=*/0, /*threads=*/4);
 ///
@@ -53,8 +53,8 @@
 ///     double hdg = r.outputs["heading"].as_number();
 /// @endcode
 ///
-/// @see mlinference::client::InferenceClient
-/// @see mlinference::inference::ModelBackend
+/// @see miia::client::InferenceClient
+/// @see miia::inference::ModelBackend
 ///
 /// @author  Lucas
 /// @date    2026
@@ -74,9 +74,9 @@
 #include "model_backend.hpp"
 #include "client/inference_client.hpp"  // client::Object
 
-namespace mlinference {
+namespace miia {
 
-/// @namespace mlinference::inference
+/// @namespace miia::inference
 /// @brief     Motor de inferência, backends e tipos internos do servidor Miia.
 namespace inference {
 
@@ -399,6 +399,6 @@ private:
 };
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_INFERENCE_ENGINE_HPP

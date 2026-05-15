@@ -38,8 +38,8 @@
 ///   mas não são expostas pelo backend in-process por ora.
 /// - `worker_id` fixo em `"inprocess"`.
 ///
-/// @see mlinference::client::GrpcClientBackend
-/// @see mlinference::inference::InferenceEngine
+/// @see miia::client::GrpcClientBackend
+/// @see miia::inference::InferenceEngine
 ///
 /// @author  Lucas
 /// @date    2026
@@ -56,7 +56,7 @@
 #include <string>
 #include <vector>
 
-namespace mlinference {
+namespace miia {
 namespace client {
 
 using inference::InferenceEngine;
@@ -300,6 +300,6 @@ private:
 };
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_INPROCESS_BACKEND_HPP

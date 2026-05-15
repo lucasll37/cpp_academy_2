@@ -35,17 +35,17 @@
 // Aliases
 // ─────────────────────────────────────────────────────────────────────────────
 
-using mlinference::client::Array;
-using mlinference::client::AvailableModel;
-using mlinference::client::InferenceClient;
-using mlinference::client::ModelInfo;
-using mlinference::client::Object;
-using mlinference::client::PredictionResult;
-using mlinference::client::ServerMetrics;
-using mlinference::client::Value;
-using mlinference::client::ValidationResult;
-using mlinference::client::WarmupResult;
-using mlinference::client::WorkerStatus;
+using miia::client::Array;
+using miia::client::AvailableModel;
+using miia::client::InferenceClient;
+using miia::client::ModelInfo;
+using miia::client::Object;
+using miia::client::PredictionResult;
+using miia::client::ServerMetrics;
+using miia::client::Value;
+using miia::client::ValidationResult;
+using miia::client::WarmupResult;
+using miia::client::WorkerStatus;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers globais

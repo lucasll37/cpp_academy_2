@@ -12,7 +12,7 @@
 #include <string>
 
 namespace fs = std::filesystem;
-using mlinference::server::WorkerServer;
+using miia::server::WorkerServer;
 
 static std::unique_ptr<WorkerServer> g_server;
 

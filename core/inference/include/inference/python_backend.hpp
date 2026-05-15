@@ -59,8 +59,8 @@
 /// contaminação do namespace global em todas as translation units.
 ///
 /// @see python/models/miia_model.py
-/// @see mlinference::inference::OnnxBackend
-/// @see mlinference::inference::ModelBackend
+/// @see miia::inference::OnnxBackend
+/// @see miia::inference::ModelBackend
 ///
 /// @author  Lucas
 /// @date    2026
@@ -82,7 +82,7 @@
 struct _object;
 typedef _object PyObject;
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // =============================================================================
@@ -366,6 +366,6 @@ public:
 };
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_PYTHON_BACKEND_HPP

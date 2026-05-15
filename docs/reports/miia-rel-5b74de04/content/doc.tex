@@ -47,13 +47,13 @@ O cliente é instanciado com um único argumento: o \textit{socket}. Se o valor 
 \vscodefile{inference\_client.hpp}
 \begin{lstlisting}[style=vscode]
 // Modo gRPC - conecta ao servidor local ou remoto
-mlinference::client::InferenceClient client("localhost:50052");
-mlinference::client::InferenceClient client("192.168.1.100:50052");
+miia::client::InferenceClient client("localhost:50052");
+miia::client::InferenceClient client("192.168.1.100:50052");
 
 // Modo in-process - carrega o modelo no proprio processo
-mlinference::client::InferenceClient client("inprocess");
-mlinference::client::InferenceClient client("in_process");
-mlinference::client::InferenceClient client("local");
+miia::client::InferenceClient client("inprocess");
+miia::client::InferenceClient client("in_process");
+miia::client::InferenceClient client("local");
 \end{lstlisting}
 
 Do ponto de vista do código da aplicação, todos os métodos seguintes têm a mesma assinatura e semântica independentemente do modo escolhido.

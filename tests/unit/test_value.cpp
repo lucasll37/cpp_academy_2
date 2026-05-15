@@ -13,10 +13,10 @@
 #include <string>
 #include <stdexcept>
 
-using mlinference::client::Value;
-using mlinference::client::Array;
-using mlinference::client::Object;
-using mlinference::client::Null;
+using miia::client::Value;
+using miia::client::Array;
+using miia::client::Object;
+using miia::client::Null;
 
 // =============================================================================
 // Grupo 1: Construtor default — Null

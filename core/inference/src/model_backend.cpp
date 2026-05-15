@@ -9,7 +9,7 @@
 #include <numeric>
 #include <iostream>
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // ============================================
@@ -70,4 +70,4 @@ void ModelBackend::warmup(uint32_t n) {
 }
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia

@@ -15,7 +15,7 @@
 
 #include <chrono>
 
-namespace mlinference {
+namespace miia {
 namespace client {
 
 // =============================================================================
@@ -719,7 +719,7 @@ ModelInfo GrpcClientBackend::proto_to_model_info(const common::ModelInfo& p) {
 }
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia
 
 // // =============================================================================
 // // grpc_client_backend.cpp — Backend gRPC do cliente Miia
@@ -738,7 +738,7 @@ ModelInfo GrpcClientBackend::proto_to_model_info(const common::ModelInfo& p) {
 
 // #include <chrono>
 
-// namespace mlinference {
+// namespace miia {
 // namespace client {
 
 // // =============================================================================
@@ -1426,4 +1426,4 @@ ModelInfo GrpcClientBackend::proto_to_model_info(const common::ModelInfo& p) {
 // }
 
 // }  // namespace client
-// }  // namespace mlinference
+// }  // namespace miia

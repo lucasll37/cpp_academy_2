@@ -38,9 +38,9 @@
 ///       `grpc_client_backend.cpp`, `inprocess_backend.cpp` e
 ///       `inference_client.cpp`.
 ///
-/// @see mlinference::client::InferenceClient
-/// @see mlinference::client::GrpcClientBackend
-/// @see mlinference::client::InProcessBackend
+/// @see miia::client::InferenceClient
+/// @see miia::client::GrpcClientBackend
+/// @see miia::client::InProcessBackend
 ///
 /// @author  Lucas
 /// @date    2026
@@ -51,7 +51,7 @@
 
 #include "client/inference_client.hpp"
 
-namespace mlinference {
+namespace miia {
 namespace client {
 
 // =============================================================================
@@ -220,6 +220,6 @@ public:
 };
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_I_CLIENT_BACKEND_HPP
