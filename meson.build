@@ -134,7 +134,7 @@ summary({
 }, section: 'Configuration')
 
 summary({
-    'Worker':         worker.full_path(),
+    'Server':         worker.full_path(),
     'Client Library': inference_client_lib.full_path(),
     'Client CLI':     client_example.full_path(),
 }, section: 'Build Artifacts')

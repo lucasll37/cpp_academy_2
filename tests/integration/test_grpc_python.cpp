@@ -932,8 +932,9 @@ TEST_F(GrpcPythonTest, ListAvailableModelsExtensaoCorretaParaPy) {
     // Arquivos com extensão .py devem ter extension == ".py".
     for (const auto& m : client->list_available_models(models_dir()))
         if (m.filename.size() > 3 &&
-            m.filename.substr(m.filename.size() - 3) == ".py")
-            EXPECT_EQ(m.extension, ".py") << "arquivo=" << m.filename;
+            m.filename.substr(m.filename.size() - 3) == ".py") {
+                EXPECT_EQ(m.extension, ".py") << "arquivo=" << m.filename;
+            }
 }
 
 TEST_F(GrpcPythonTest, ListAvailableModelsBackendNaoVazio) {
@@ -945,8 +946,9 @@ TEST_F(GrpcPythonTest, ListAvailableModelsBackendNaoVazio) {
 TEST_F(GrpcPythonTest, ListAvailableModelsArquivoPyTemBackendPython) {
     // Arquivos .py devem ser mapeados para o backend "python".
     for (const auto& m : client->list_available_models(models_dir()))
-        if (m.extension == ".py")
+        if (m.extension == ".py") {
             EXPECT_EQ(m.backend, "python") << "arquivo=" << m.filename;
+        }
 }
 
 TEST_F(GrpcPythonTest, ListAvailableModelsFileSizePositivo) {

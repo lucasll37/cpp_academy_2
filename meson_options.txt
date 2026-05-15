@@ -10,12 +10,12 @@ option('enable_gpu',
 
 option('enable_docs',
     type: 'boolean',
-    value: true,
+    value: false,
     description: 'Build documentation'
 )
 
 option('build_tests',
     type: 'boolean',
-    value: true,
+    value: false,
     description: 'Build tests'
 )

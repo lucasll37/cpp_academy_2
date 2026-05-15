@@ -287,8 +287,9 @@ void print_card(const ModelInfo& m) {
         printf("    %-16s %s\n", "Description:", m.description.c_str());
     if (!m.author.empty())
         printf("    %-16s %s\n", "Author:", m.author.c_str());
-    if (m.memory_usage_bytes > 0)
+    if (m.memory_usage_bytes > 0) {
         printf("    %-16s %.1f MB\n", "Memory:", m.memory_usage_bytes / 1048576.0);
+    }
     printf("    %-16s %s\n", "Warmed up:", m.is_warmed_up ? "yes" : "no");
 
     if (!m.inputs.empty()) {
