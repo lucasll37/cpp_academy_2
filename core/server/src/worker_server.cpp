@@ -15,7 +15,7 @@
 
 namespace fs = std::filesystem;
 
-namespace mlinference {
+namespace miia {
 namespace server {
 
 using inference::InferenceEngine;
@@ -573,4 +573,4 @@ void WorkerServer::stop() {
 }
 
 }  // namespace server
-}  // namespace mlinference
+}  // namespace miia

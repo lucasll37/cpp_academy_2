@@ -267,14 +267,14 @@ O backend de execução é selecionado automaticamente pela extensão do arquivo
 
 ## Sistema de tipos — Value / Object / Array {#tipos}
 
-Todos os inputs e outputs de inferência usam `mlinference::client::Value`, que espelha `google.protobuf.Value` e suporta aninhamento arbitrário.
+Todos os inputs e outputs de inferência usam `miia::client::Value`, que espelha `google.protobuf.Value` e suporta aninhamento arbitrário.
 
 ### Construção
 
 Tipos escalares:
 
 ```cpp
-using namespace mlinference::client;
+using namespace miia::client;
 
 Value v_num  {42.0};
 Value v_bool {true};
@@ -355,10 +355,10 @@ private:
     const std::string modelo_id   = "nav";
     const std::string modelo_path = "/app/models/ship_avoidance.py";
 
-    std::unique_ptr<mlinference::client::InferenceClient> client;
-    mlinference::client::PredictionResult resultado;
+    std::unique_ptr<miia::client::InferenceClient> client;
+    miia::client::PredictionResult resultado;
 
-    mlinference::client::Object prepareState(ShipState* state);
+    miia::client::Object prepareState(ShipState* state);
 };
 ```
 
@@ -367,7 +367,7 @@ private:
 ```cpp
 ShipAgent::ShipAgent()
 {
-    client = std::make_unique<mlinference::client::InferenceClient>(servidor);
+    client = std::make_unique<miia::client::InferenceClient>(servidor);
     client->connect();
     client->load_model(modelo_id, modelo_path);
 
@@ -383,9 +383,9 @@ ShipAgent::ShipAgent()
 ### Montagem do input estruturado
 
 ```cpp
-mlinference::client::Object ShipAgent::prepareState(ShipState* state)
+miia::client::Object ShipAgent::prepareState(ShipState* state)
 {
-    using namespace mlinference::client;
+    using namespace miia::client;
 
     Array hazards;
     for (auto player : *state->getHazardSources()) {

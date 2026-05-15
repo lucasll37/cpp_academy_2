@@ -22,7 +22,7 @@
 #include <memory>
 #include <string>
 
-namespace mlinference {
+namespace miia {
 namespace client {
 
 // =============================================================================
@@ -180,4 +180,4 @@ private:
 };
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia

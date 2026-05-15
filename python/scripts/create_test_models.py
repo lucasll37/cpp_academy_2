@@ -112,7 +112,7 @@ def create_simple_linear_model():
         initializer=[scale_tensor, bias_tensor],
     )
 
-    model = helper.make_model(graph, producer_name='mlinference')
+    model = helper.make_model(graph, producer_name='miia')
     model.opset_import[0].version = 13
     onnx.checker.check_model(model)
     return model
@@ -141,7 +141,7 @@ def create_classification_model():
         initializer=[weights_tensor, bias_tensor],
     )
 
-    model = helper.make_model(graph, producer_name='mlinference')
+    model = helper.make_model(graph, producer_name='miia')
     model.opset_import[0].version = 13
     onnx.checker.check_model(model)
     return model
@@ -548,7 +548,7 @@ if __name__ == '__main__':
 #         [scale_tensor, bias_tensor]
 #     )
     
-#     model = helper.make_model(graph, producer_name='mlinference')
+#     model = helper.make_model(graph, producer_name='miia')
 #     model.opset_import[0].version = 13
 #     onnx.checker.check_model(model)
     
@@ -580,7 +580,7 @@ if __name__ == '__main__':
 #         [weights_tensor, bias_tensor]
 #     )
     
-#     model = helper.make_model(graph, producer_name='mlinference')
+#     model = helper.make_model(graph, producer_name='miia')
 #     model.opset_import[0].version = 13
 #     onnx.checker.check_model(model)
     

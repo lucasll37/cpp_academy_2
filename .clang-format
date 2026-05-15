@@ -14,15 +14,17 @@
 #
 # ESTILO BASE: LLVM, ajustado para corresponder ao código existente do projeto.
 #   - 4 espaços de indentação (não tab)
-#   - Chaves estilo Attach (abertura na mesma linha)
+#   - Chaves estilo Allman (abertura em linha própria — Visual Studio style)
 #   - Alinhamento de membros consecutivos com espaço
-#   - ColumnLimit 100 (linhas longas de log justificam limite maior)
+#   - ColumnLimit 0 (sem limite — linhas longas de log não são quebradas)
 #   - IncludeCategories para ordenar includes no estilo do projeto
 # =============================================================================
 
 # Versão mínima do clang-format compatível com estas opções.
 # Aumentar se opções novas forem adicionadas.
 # clang-format --version  para verificar a versão instalada.
+
+Language: Cpp
 
 # --- Base ---
 # Ponto de partida. Todas as opções abaixo sobrescrevem os defaults do LLVM.
@@ -56,11 +58,6 @@ IndentCaseBlocks: false
 # false → sem indentação extra para namespace (padrão do projeto).
 NamespaceIndentation: None
 
-# Indentação de listas de inicialização de construtores.
-# Cada membro em nova linha recebe IndentWidth de indentação.
-# (Não confundir com ConstructorInitializerIndentWidth abaixo.)
-# ConstructorInitializerIndentWidth: 4  # já coberto pela opção abaixo
-
 # Indentação da lista de inicialização do construtor (: member_(...)).
 ConstructorInitializerIndentWidth: 4
 
@@ -71,29 +68,22 @@ ContinuationIndentWidth: 4
 # Indentação de blocos lambda.
 LambdaBodyIndentation: Signature
 
+# Recuo do modificador de acesso (public/private/protected) em relação à classe.
+# -4 → alinha o modificador com a chave da classe (padrão Visual Studio).
+AccessModifierOffset: -4
+
 
 # =============================================================================
 # LIMITE DE COLUNA E QUEBRA DE LINHA
 # =============================================================================
 
-# Limite de colunas. O projeto tem linhas de log longas justificadas;
-# 100 é um equilíbrio razoável. Aumentar para 120 se necessário.
-ColumnLimit: 100
-
-# Permite linhas longas para strings literais (não quebra strings).
-# Útil para mensagens de log com formato fixo.
-# (Habilitado implicitamente: o clang-format não quebra strings.)
-
-# Permite que linhas de comentário ultrapassem o limite em casos de URLs.
-# false → respeita o limite mesmo em URLs dentro de comentários.
-# true  → não quebra linhas de comentário que contenham URLs longas.
-# Preferência do projeto: true (URLs de referência são comuns no código).
-# Nota: disponível a partir do clang-format 13.
-# ReflowComments: true  # descomente se quiser reformatar comentários
+# Sem limite de colunas — linhas de log e URLs não são quebradas.
+# Alterar para 100 ou 120 se o CI exigir limite explícito.
+ColumnLimit: 0
 
 # Número máximo de parâmetros em uma única linha antes de quebrar.
-# 0 → sem limite (deixa o ColumnLimit decidir).
-# BinPackParameters: false  # descomente para sempre colocar um param por linha
+# false → sempre coloca um parâmetro por linha quando a lista quebra.
+BinPackParameters: false
 
 
 # =============================================================================
@@ -101,29 +91,18 @@ ColumnLimit: 100
 # =============================================================================
 
 # Estilo de colocação de chaves.
-# Attach → chave de abertura na mesma linha (K&R / Java style).
-# Allman → chave em linha própria.
-# O código existente usa Attach para funções e if/else/for.
-BreakBeforeBraces: Attach
-
-# Chaves obrigatórias em blocos de controle de fluxo (if, for, while).
-# Always → sempre exige chaves, mesmo para blocos de uma linha.
-# MultiLine → só exige chaves quando o corpo ocupa múltiplas linhas.
-# O projeto usa chaves para blocos de múltiplas linhas, omite para onliners.
-# InsertBraces: Never  # descomente se quiser remover chaves em onliners
+# Allman → chave de abertura em linha própria (Visual Studio style).
+BreakBeforeBraces: Allman
 
 # Permitir if/for/while em uma única linha (sem chaves).
-# true → clang-format pode colapsar blocos curtos em uma linha.
 # false → nunca colapsa (mantém a quebra de linha).
-AllowShortIfStatementsOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortBlocksOnASingleLine: Never
 
 # Funções inline curtas podem ficar em uma linha.
-# Inline → permite apenas funções definidas dentro de classes.
-# All    → permite qualquer função curta.
-# None   → nunca coloca em uma linha.
-AllowShortFunctionsOnASingleLine: Inline
+# true → permite qualquer função curta em uma linha.
+AllowShortFunctionsOnASingleLine: true
 
 # Lambdas curtas em uma linha.
 AllowShortLambdasOnASingleLine: Inline
@@ -131,14 +110,16 @@ AllowShortLambdasOnASingleLine: Inline
 # Enums curtos em uma linha.
 AllowShortEnumsOnASingleLine: false
 
+# Case labels curtos em uma linha (ex.: case 'x': return true;).
+AllowShortCaseLabelsOnASingleLine: true
+
 
 # =============================================================================
 # ESPAÇOS
 # =============================================================================
 
 # Espaço antes de parêntese de função.
-# false → sem espaço: foo(arg)  (padrão do projeto)
-# true  → com espaço: foo (arg)
+# ControlStatements → espaço apenas em if/for/while: if (cond), foo(arg)
 SpaceBeforeParens: ControlStatements
 
 # Espaço dentro de parênteses de expressões.
@@ -152,7 +133,6 @@ SpacesInSquareBrackets: false
 SpaceBeforeSquareBrackets: false
 
 # Espaço em listas de inicialização: { valor }
-# true → { valor }  (mais legível para inicializações)
 # false → {valor}
 SpacesInContainerLiterals: false
 
@@ -215,7 +195,6 @@ AlignConsecutiveBitFields:
 
 # Alinhamento de operadores binários em quebras de linha.
 # NonAssignment → alinha operadores como +, -, &&, ||
-# None          → sem alinhamento
 AlignOperands: Align
 
 # Alinhamento de comentários de trailing (// ao final de linha).
@@ -230,7 +209,7 @@ AlignTrailingComments:
 # =============================================================================
 
 # Ordenar e agrupar #include automaticamente.
-# true → reorganiza includes segundo as categorias abaixo.
+# CaseSensitive → reorganiza includes segundo as categorias abaixo.
 SortIncludes: CaseSensitive
 
 # Reordenar includes dentro de cada categoria.
@@ -273,14 +252,11 @@ IncludeCategories:
 # =============================================================================
 
 # Quebrar antes de operadores binários em expressões longas.
-# None        → sem quebra especial
 # NonAssignment → quebra antes de +, -, &&, ||, etc.
-# All         → quebra antes de todos os operadores
 BreakBeforeBinaryOperators: NonAssignment
 
 # Quebrar lista de inicialização do construtor.
 # BeforeComma → vírgula vai para o início da próxima linha
-# AfterColon  → quebra após o : inicial
 BreakConstructorInitializers: BeforeComma
 
 # Quebrar herança de classe.
@@ -288,13 +264,11 @@ BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
 
 # Permitir que argumentos de template fiquem em uma linha.
-# false → mantém em uma linha se couber
+# MultiLine → quebra apenas quando a declaração já é multi-linha
 AlwaysBreakTemplateDeclarations: MultiLine
 
 # Forçar quebra após tipo de retorno de função.
-# None       → deixa o clang-format decidir (padrão — respeita ColumnLimit)
-# All        → sempre quebra
-# AllDefinitions → quebra apenas em definições (não em declarações)
+# None → deixa o clang-format decidir (respeita ColumnLimit)
 AlwaysBreakAfterReturnType: None
 
 # Quebrar strings literais longas.
@@ -307,10 +281,7 @@ BreakStringLiterals: false
 # =============================================================================
 
 # Posição de * e & em declarações.
-# Left   → int* p;   (tipo-lado)
-# Right  → int *p;   (nome-lado)
-# Middle → int * p;  (centro)
-# O projeto usa Left: int* ptr, const std::string& ref.
+# Left → int* p;  const std::string& ref  (tipo-lado — padrão do projeto)
 PointerAlignment: Left
 ReferenceAlignment: Left
 
@@ -320,13 +291,11 @@ ReferenceAlignment: Left
 # =============================================================================
 
 # Comentário automático no fechamento de namespace.
-# true → adiciona // namespace mlinference ao fechar
-# false → não adiciona (o projeto já tem esses comentários manualmente)
+# true → adiciona // namespace miia ao fechar
 FixNamespaceComments: true
 
 # Colapsar namespaces aninhados em uma linha.
-# true → namespace a { namespace b { ... } }  →  namespace a::b { ... }
-# Apenas disponível a partir do C++17 (que o projeto usa).
+# false → mantém namespace a { namespace b { ... } } expandido
 CompactNamespaces: false
 
 
@@ -345,7 +314,7 @@ ReflowComments: false
 # =============================================================================
 
 # Número máximo de linhas em branco consecutivas dentro de uma função.
-MaxEmptyLinesToKeep: 1
+MaxEmptyLinesToKeep: 2
 
 # Linhas em branco antes e depois de blocos de acesso (public/private/protected).
 EmptyLineBeforeAccessModifier: LogicalBlock
@@ -360,13 +329,8 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 # =============================================================================
 
 # Inserir vírgula final em listas de argumentos/parâmetros ao quebrar linhas.
-# None         → não insere (padrão — menos invasivo)
-# Wrapped      → insere apenas quando a lista já está quebrada
+# None → não insere (padrão — menos invasivo)
 InsertTrailingCommas: None
-
-# Remover ponto-e-vírgula redundante após definições de classe/função.
-# (Disponível a partir do clang-format 16.)
-# RemoveSemicolon: false
 
 
 # =============================================================================
@@ -378,7 +342,7 @@ InsertTrailingCommas: None
 SortUsingDeclarations: true
 
 # Forçar chaves em inicializações de lista agregada.
-# false → permite tanto Foo{1, 2} quanto Foo({1, 2}).
+# true → Foo{1, 2} em vez de Foo({1, 2})
 Cpp11BracedListStyle: true
 
 # Espaço dentro de chaves de inicialização: {1, 2} vs { 1, 2 }.

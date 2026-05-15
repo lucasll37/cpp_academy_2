@@ -10,12 +10,12 @@
 ///
 /// **Modo gRPC** — comunicação via rede com um servidor remoto:
 /// @code
-/// mlinference::client::InferenceClient client("localhost:50052");
+/// miia::client::InferenceClient client("localhost:50052");
 /// @endcode
 ///
 /// **Modo in-process** — servidor embutido no mesmo processo, sem rede:
 /// @code
-/// mlinference::client::InferenceClient client("inprocess");
+/// miia::client::InferenceClient client("inprocess");
 /// @endcode
 ///
 /// Strings reconhecidas como in-process: `"inprocess"`, `"in_process"`,
@@ -28,7 +28,7 @@
 /// qualquer estrutura arbitrária e aninhada, espelhando `google.protobuf.Value`:
 ///
 /// @code
-/// using namespace mlinference::client;
+/// using namespace miia::client;
 ///
 /// Object inputs;
 /// inputs["speed"]    = Value{12.5};
@@ -57,9 +57,9 @@
 #include <variant>
 #include <vector>
 
-namespace mlinference {
+namespace miia {
 
-/// @namespace mlinference::client
+/// @namespace miia::client
 /// @brief     Contém todos os tipos e classes da API pública do cliente MiiaClient.
 namespace client {
 
@@ -508,7 +508,7 @@ class IClientBackend;
 ///
 /// ### Uso típico (in-process)
 /// @code
-/// using namespace mlinference::client;
+/// using namespace miia::client;
 ///
 /// InferenceClient client("inprocess");
 /// client.connect();
@@ -743,6 +743,6 @@ private:
 };
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_CLIENT_HPP

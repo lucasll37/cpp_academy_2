@@ -67,12 +67,12 @@
 #include "client/inference_client.hpp"
 
 namespace fs = std::filesystem;
-using mlinference::server::WorkerServer;
-using mlinference::client::InferenceClient;
-using mlinference::client::Object;
-using mlinference::client::Array;
-using mlinference::client::Value;
-using mlinference::client::PredictionResult;
+using miia::server::WorkerServer;
+using miia::client::InferenceClient;
+using miia::client::Object;
+using miia::client::Array;
+using miia::client::Value;
+using miia::client::PredictionResult;
 
 // =============================================================================
 // Configuração da porta de teste

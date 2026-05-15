@@ -10,7 +10,7 @@
 #include "client/grpc_client_backend.hpp"
 #include "client/inprocess_backend.hpp"
 
-namespace mlinference {
+namespace miia {
 namespace client {
 
 static bool is_inprocess(const std::string& target) {
@@ -76,4 +76,4 @@ std::vector<AvailableModel> InferenceClient::list_available_models(
 }
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia

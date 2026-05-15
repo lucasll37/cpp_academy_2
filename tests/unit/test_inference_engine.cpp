@@ -67,11 +67,11 @@
 
 namespace fs = std::filesystem;
 
-using mlinference::inference::InferenceEngine;
-using mlinference::inference::InferenceResult;
-using mlinference::client::Value;
-using mlinference::client::Array;
-using mlinference::client::Object;
+using miia::inference::InferenceEngine;
+using miia::inference::InferenceResult;
+using miia::client::Value;
+using miia::client::Array;
+using miia::client::Object;
 
 // =============================================================================
 // Helpers globais
@@ -616,7 +616,7 @@ TEST_F(EngineFixture, GetModelInfoBackendIsOnnx) {
     if (!fs::exists(linear_path())) GTEST_SKIP();
     ASSERT_TRUE(load_linear());
     auto info = engine.get_model_info("linear");
-    EXPECT_EQ(info.backend(), mlinference::common::BACKEND_ONNX);
+    EXPECT_EQ(info.backend(), miia::common::BACKEND_ONNX);
 }
 
 TEST_F(EngineFixture, GetModelInfoHasInputs) {
@@ -815,7 +815,7 @@ TEST_F(EngineFixture, ValidateDetectsBackendOnnx) {
     if (!fs::exists(linear_path())) GTEST_SKIP();
     auto r = engine.validate_model(linear_path());
     ASSERT_TRUE(r.valid);
-    EXPECT_EQ(r.backend, mlinference::common::BACKEND_ONNX);
+    EXPECT_EQ(r.backend, miia::common::BACKEND_ONNX);
 }
 
 TEST_F(EngineFixture, ValidateDoesNotLoadModel) {
@@ -1120,7 +1120,7 @@ TEST_F(EngineFixture, EndToEnd_LinearFullLifecycle) {
     // 4. Introspecção
     auto info = engine.get_model_info("linear");
     EXPECT_EQ(info.model_id(), "linear");
-    EXPECT_EQ(info.backend(), mlinference::common::BACKEND_ONNX);
+    EXPECT_EQ(info.backend(), miia::common::BACKEND_ONNX);
     ASSERT_GT(info.inputs_size(), 0);
     EXPECT_EQ(info.inputs(0).name(), "input");
 

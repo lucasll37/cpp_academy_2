@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package mlinference.server;
+package miia.server;
 
 import "common.proto";
 import "google/protobuf/struct.proto";
@@ -88,7 +88,7 @@ message LoadModelRequest {
     string version    = 3;
 
     // Optional: force a specific backend instead of auto-detection by extension
-    mlinference.common.BackendType force_backend = 4;
+    miia.common.BackendType force_backend = 4;
 
     // Optional: arbitrary config passed to the backend (e.g. Python class name)
     map<string, string> backend_config = 5;
@@ -96,7 +96,7 @@ message LoadModelRequest {
 
 message LoadModelResponse {
     bool success                            = 1;
-    mlinference.common.ModelInfo model_info = 2;
+    miia.common.ModelInfo model_info = 2;
     string error_message                    = 3;
 }
 
@@ -116,7 +116,7 @@ message UnloadModelResponse {
 message ListModelsRequest {}
 
 message ListModelsResponse {
-    repeated mlinference.common.ModelInfo models = 1;
+    repeated miia.common.ModelInfo models = 1;
 }
 
 message GetModelInfoRequest {
@@ -125,7 +125,7 @@ message GetModelInfoRequest {
 
 message GetModelInfoResponse {
     bool success                            = 1;
-    mlinference.common.ModelInfo model_info = 2;
+    miia.common.ModelInfo model_info = 2;
     ModelRuntimeMetrics metrics             = 3;
     string error_message                    = 4;
 }
@@ -134,18 +134,18 @@ message GetModelInfoResponse {
 // actually allocating runtime resources.
 message ValidateModelRequest {
     string model_path                            = 1;
-    mlinference.common.BackendType force_backend = 2;
+    miia.common.BackendType force_backend = 2;
 }
 
 message ValidateModelResponse {
     bool valid                             = 1;
-    mlinference.common.BackendType backend = 2;
+    miia.common.BackendType backend = 2;
     repeated string warnings               = 3;
     string error_message                   = 4;
 
     // Schema preview (if parseable without full load)
-    repeated mlinference.common.TensorSpec inputs  = 5;
-    repeated mlinference.common.TensorSpec outputs = 6;
+    repeated miia.common.TensorSpec inputs  = 5;
+    repeated miia.common.TensorSpec outputs = 6;
 }
 
 // Run N dummy inferences to warm up JIT / caches.
@@ -188,16 +188,16 @@ message GetStatusRequest {}
 
 message GetStatusResponse {
     string worker_id                                   = 1;
-    mlinference.common.WorkerStatus status             = 2;
-    mlinference.common.WorkerCapabilities capabilities = 3;
-    mlinference.common.WorkerMetrics metrics           = 4;
+    miia.common.WorkerStatus status             = 2;
+    miia.common.WorkerCapabilities capabilities = 3;
+    miia.common.WorkerMetrics metrics           = 4;
     repeated string loaded_model_ids                   = 5;
 }
 
 message GetMetricsRequest {}
 
 message GetMetricsResponse {
-    mlinference.common.WorkerMetrics worker_metrics    = 1;
+    miia.common.WorkerMetrics worker_metrics    = 1;
     map<string, ModelRuntimeMetrics> per_model_metrics = 2;
 }
 
@@ -220,7 +220,7 @@ message AvailableModel {
     string filename                        = 1;
     string path                            = 2;
     string extension                       = 3;
-    mlinference.common.BackendType backend = 4;
+    miia.common.BackendType backend = 4;
     int64  file_size_bytes                 = 5;
     bool   is_loaded                       = 6;
     string loaded_as                       = 7;

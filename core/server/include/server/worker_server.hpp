@@ -24,7 +24,7 @@
 /// ### Uso típico (em main.cpp)
 /// @code
 /// #include <server/worker_server.hpp>
-/// using mlinference::server::WorkerServer;
+/// using miia::server::WorkerServer;
 ///
 /// WorkerServer server("worker-1", "0.0.0.0:50052",
 ///                     /*gpu=*/false, /*threads=*/8, "./models");
@@ -41,8 +41,8 @@
 /// - Os contadores de requisição são `std::atomic`.
 /// - O `InferenceEngine` protege seu estado interno com `mutex_`.
 ///
-/// @see mlinference::inference::InferenceEngine
-/// @see mlinference::client::InferenceClient
+/// @see miia::inference::InferenceEngine
+/// @see miia::client::InferenceClient
 ///
 /// @author  Lucas
 /// @date    2026
@@ -66,9 +66,9 @@
 #include "server.grpc.pb.h"
 #include "inference/inference_engine.hpp"
 
-namespace mlinference {
+namespace miia {
 
-/// @namespace mlinference::server
+/// @namespace miia::server
 /// @brief     Servidor gRPC e implementação dos RPCs do Miia.
 namespace server {
 
@@ -97,7 +97,7 @@ using inference::RuntimeMetrics;
 /// contadores são `std::atomic`; o `InferenceEngine` serializa internamente
 /// via `mutex_`.
 class WorkerServiceImpl final
-    : public mlinference::server::WorkerService::Service {
+    : public miia::server::WorkerService::Service {
 public:
     // -------------------------------------------------------------------------
     /// @name Construção e destruição
@@ -443,6 +443,6 @@ private:
 };
 
 }  // namespace server
-}  // namespace mlinference
+}  // namespace miia
 
 #endif  // ML_INFERENCE_WORKER_SERVER_HPP

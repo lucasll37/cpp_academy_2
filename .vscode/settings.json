@@ -1,5 +1,5 @@
 {
-  "C_Cpp.default.compileCommands": "/home/lima/asa/miia/build/compile_commands.json",
+  "C_Cpp.default.compileCommands": "/home/lucas/Projects/asa/miia/build/compile_commands.json",
   "editor.formatOnSave": false,
   "files.associations": {
     "chrono": "cpp",

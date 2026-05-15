@@ -15,7 +15,7 @@
 #include <iostream>
 #include <cstdlib>
 
-namespace mlinference {
+namespace miia {
 namespace client {
 
 using inference::InferenceEngine;
@@ -540,4 +540,4 @@ std::vector<AvailableModel> InProcessBackend::list_available_models(
 }
 
 }  // namespace client
-}  // namespace mlinference
+}  // namespace miia

@@ -10,7 +10,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace mlinference {
+namespace miia {
 namespace inference {
 
 // =============================================================================
@@ -666,4 +666,4 @@ client::Value OnnxBackend::floats_to_value(const float* ptr, size_t count) {
 }
 
 }  // namespace inference
-}  // namespace mlinference
+}  // namespace miia
